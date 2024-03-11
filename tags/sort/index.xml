@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>sort on 雾封的笔</title>
+    <link>https://niluan304.github.io/tags/sort/</link>
+    <description>Recent content in sort on 雾封的笔</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>雾封 本站遵循 CC-BY-NC 4.0 协议</copyright>
+    <lastBuildDate>Mon, 11 Mar 2024 17:15:51 +0800</lastBuildDate>
+    <atom:link href="https://niluan304.github.io/tags/sort/index.xml" rel="self" type="application/rss+xml" />
+    <item>
+      <title>sort.Slice 不适合部分排序</title>
+      <link>https://niluan304.github.io/posts/sort.slice-%E4%B8%8D%E9%80%82%E5%90%88%E9%83%A8%E5%88%86%E6%8E%92%E5%BA%8F/</link>
+      <pubDate>Mon, 11 Mar 2024 17:15:51 +0800</pubDate>
+      <guid>https://niluan304.github.io/posts/sort.slice-%E4%B8%8D%E9%80%82%E5%90%88%E9%83%A8%E5%88%86%E6%8E%92%E5%BA%8F/</guid>
+      <description>使用 slices.Sort 和 slices.SortFunc 避免 sort.Slices 的坑&#xA;sort.Slices 介绍 sort.Slices 是go 于1.18 版本新增的排序函数，签名如下：&#xA;1 func Slice(x any, less func(i, j int) bool) 使用起来非常简单：&#xA;1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 func main() { type Student struct { Name string Age int } students := []Student{ {Name: &amp;#34;Gopher&amp;#34;, Age: 14}, {Name: &amp;#34;Carol&amp;#34;, Age: 10}, {Name: &amp;#34;Alice&amp;#34;, Age: 10}, {Name: &amp;#34;Bob&amp;#34;, Age: 15}, {Name: &amp;#34;Dave&amp;#34;, Age: 12}, } sort.</description>
+    </item>
+  </channel>
+</rss>

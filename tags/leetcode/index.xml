@@ -2,13 +2,13 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>leetcode on 雾封的笔</title>
-    <link>https://niluan304.github.io/categories/leetcode/</link>
+    <link>https://niluan304.github.io/tags/leetcode/</link>
     <description>Recent content in leetcode on 雾封的笔</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>雾封 本站遵循 CC-BY-NC 4.0 协议</copyright>
     <lastBuildDate>Fri, 12 Jan 2024 17:52:09 +0800</lastBuildDate>
-    <atom:link href="https://niluan304.github.io/categories/leetcode/index.xml" rel="self" type="application/rss+xml" />
+    <atom:link href="https://niluan304.github.io/tags/leetcode/index.xml" rel="self" type="application/rss+xml" />
     <item>
       <title>LC2522. 统计上升四元组</title>
       <link>https://niluan304.github.io/posts/lc2522.-%E7%BB%9F%E8%AE%A1%E4%B8%8A%E5%8D%87%E5%9B%9B%E5%85%83%E7%BB%84/</link>

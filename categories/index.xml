@@ -6,20 +6,21 @@
     <description>Recent content in Categories on 雾封的笔</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
-    <lastBuildDate>Mon, 11 Mar 2024 16:54:07 +0800</lastBuildDate>
+    <copyright>雾封 本站遵循 CC-BY-NC 4.0 协议</copyright>
+    <lastBuildDate>Mon, 11 Mar 2024 17:15:51 +0800</lastBuildDate>
     <atom:link href="https://niluan304.github.io/categories/index.xml" rel="self" type="application/rss+xml" />
     <item>
-      <title>LeetCode</title>
-      <link>https://niluan304.github.io/categories/leetcode/</link>
-      <pubDate>Mon, 11 Mar 2024 16:54:07 +0800</pubDate>
-      <guid>https://niluan304.github.io/categories/leetcode/</guid>
+      <title>go</title>
+      <link>https://niluan304.github.io/categories/go/</link>
+      <pubDate>Mon, 11 Mar 2024 17:15:51 +0800</pubDate>
+      <guid>https://niluan304.github.io/categories/go/</guid>
       <description></description>
     </item>
     <item>
-      <title>Chinese</title>
-      <link>https://niluan304.github.io/categories/chinese/</link>
-      <pubDate>Thu, 14 Nov 2019 11:25:05 -0400</pubDate>
-      <guid>https://niluan304.github.io/categories/chinese/</guid>
+      <title>leetcode</title>
+      <link>https://niluan304.github.io/categories/leetcode/</link>
+      <pubDate>Fri, 12 Jan 2024 17:52:09 +0800</pubDate>
+      <guid>https://niluan304.github.io/categories/leetcode/</guid>
       <description></description>
     </item>
   </channel>
