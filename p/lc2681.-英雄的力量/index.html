@@ -74,6 +74,20 @@
             
                 <li>
                     <a 
+                        href='zwei.elen@outlook.com'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#2c3e50" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="icon icon-tabler icon-tabler-mail" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z"/><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="m3 7 9 6 9-6"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
                         href='https://github.com/niluan304'
                         target="_blank"
                         title="GitHub"
@@ -224,11 +238,18 @@
         <div class="widget--toc">
             <nav id="TableOfContents">
   <ol>
-    <li><a href="#再观察">再观察</a></li>
-  </ol>
-
-  <ol>
-    <li><a href="#复杂度分析">复杂度分析</a></li>
+    <li><a href="#读题">读题</a></li>
+    <li><a href="#观察与猜测">观察与猜测</a>
+      <ol>
+        <li><a href="#再观察">再观察</a></li>
+      </ol>
+    </li>
+    <li><a href="#代码实现">代码实现</a>
+      <ol>
+        <li><a href="#复杂度分析">复杂度分析</a></li>
+      </ol>
+    </li>
+    <li><a href="#感想">感想</a></li>
   </ol>
 </nav>
         </div>
@@ -326,7 +347,7 @@
 		data-flex-basis="360px"
 	
 ></p>
-<h1 id="读题">读题</h1>
+<h2 id="读题">读题</h2>
 <p>根据「这组英雄的力量」的定义，得知元素顺序不影响答案，那么可以先排序，然后固定最大值。</p>
 <p>暴力解法：全排列小于当前最大值的数，再遍历最小值，但是这种做法时间复杂度过高，没办法优化。</p>
 <blockquote>
@@ -338,7 +359,7 @@
 <li>由于答案可能非常大，请你将结果对 $10^9 + 7$  <strong>取余。</strong></li>
 </ul>
 <p>根据我以往的做题经验，猜测本题的解法是动态规划。</p>
-<h1 id="观察与猜测">观察与猜测</h1>
+<h2 id="观察与猜测">观察与猜测</h2>
 <p>没什么思路的时，我喜欢在草稿纸上写例子，比如有 $nums = [1,2,3,4,5]$，顺序从小到大。</p>
 <blockquote>
 <p><strong>以下思考过程是有问题的</strong>，因为按子序列个数的划分方式并不方便找到规律。</p>
@@ -355,7 +376,7 @@
 </ul>
 <p>$a_4 = 4, S_4 = [4 + (3+2+1) + (2+1+1) + (1)]$</p>
 <p>$a_5 = 5, S_5 = [5 + (4+3+2+1) + &hellip;]$</p>
-<h2 id="再观察">再观察</h2>
+<h3 id="再观察">再观察</h3>
 <p>为了找到规律，我尝试 <strong>在 $S_n$ 内逐个固定最大值，再分组</strong> ：</p>
 <p>$a_1 = 1, S_1 = 1$</p>
 <p>$a_2=2, S_2 = 2 + (1)$</p>
@@ -370,7 +391,7 @@
 <p>$a_5 = 5, S_5 = a_5 + S_4 + S_3 + S_2 + S_1$</p>
 <p>根据这样的规划，容易猜测出：$S_n = a_n + \sum{S_{i-1}}$</p>
 <p>根据错位相减法或换元法，可以求得：$S_n = a_n - a_{n-1} + 2*S_{n-1}$</p>
-<h1 id="代码实现">代码实现</h1>
+<h2 id="代码实现">代码实现</h2>
 <p>下面就是编码验证环节：</p>
 <div class="highlight"><div class="chroma">
 <table class="lntable"><tr><td class="lntd">
@@ -406,12 +427,12 @@
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span></code></pre></td></tr></table>
 </div>
-</div><h2 id="复杂度分析">复杂度分析</h2>
+</div><h3 id="复杂度分析">复杂度分析</h3>
 <ul>
 <li>时间复杂度：$\mathcal{O}(n\log n)$，其中 $n$ 为 $\textit{nums}$ 的长度。</li>
 <li>空间复杂度：$\mathcal{O}(n)$。</li>
 </ul>
-<h1 id="感想">感想</h1>
+<h2 id="感想">感想</h2>
 <p>虽然过程崎岖，但胜在收获不错，动态规划的题目，如果没有思路，在草稿纸上列出具体的例子，或许能帮助你发现数据的规律，并找到解题方法。</p>
 <p>非常感谢你的阅读，衷心祝愿你不会踩到取模陷阱。</p>
 
@@ -447,13 +468,13 @@
     
         <link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI&#43;WdtXRGWt2kTvGFasHpSy3SV"crossorigin="anonymous"
+                href="https://fastly.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI&#43;WdtXRGWt2kTvGFasHpSy3SV"crossorigin="anonymous"
             ><script 
-                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG&#43;vnGctmUb0ZY0l8"crossorigin="anonymous"
+                src="https://fastly.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG&#43;vnGctmUb0ZY0l8"crossorigin="anonymous"
                 defer
                 >
             </script><script 
-                src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"integrity="sha384-&#43;VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4&#43;/RRE05"crossorigin="anonymous"
+                src="https://fastly.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"integrity="sha384-&#43;VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4&#43;/RRE05"crossorigin="anonymous"
                 defer
                 >
             </script><script>
@@ -637,25 +658,25 @@
     </div>
 
 </div><script 
-                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                src="https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
                 defer
                 >
             </script><script 
-                src="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                src="https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
                 defer
                 >
             </script><link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+                href="https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
             ><link 
                 rel="stylesheet" 
-                href="https://cdn.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+                href="https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
             >
 
             </main>
         </div>
         <script 
-                src="https://cdn.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                src="https://fastly.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
                 
                 >
             </script><script type="text/javascript" src="/ts/main.js" defer></script>

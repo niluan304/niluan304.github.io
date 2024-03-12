@@ -367,10 +367,7 @@
         <pubDate>Fri, 12 Jan 2024 00:00:00 +0000</pubDate>
         
         <guid>https://niluan304.github.io/p/lc2522.-%E7%BB%9F%E8%AE%A1%E4%B8%8A%E5%8D%87%E5%9B%9B%E5%85%83%E7%BB%84/</guid>
-        <description>&lt;p&gt;$$
-x+y=z
-$$&lt;/p&gt;
-&lt;p&gt;$132$ 模式的进阶，求 $1324$ 模式 的个数：枚举 4 ，求 4 左边 132 模式的数量&lt;/p&gt;
+        <description>&lt;p&gt;$132$ 模式的进阶，求 $1324$ 模式 的个数：枚举 4 ，求 4 左边 132 模式的数量&lt;/p&gt;
 &lt;h2 id=&#34;前言&#34;&gt;前言&lt;/h2&gt;
 &lt;p&gt;四元上升组定义：一个组 $(i, j, k, l)$ 满足以下条件：&lt;/p&gt;
 &lt;ul&gt;
@@ -712,7 +709,7 @@ $&lt;/p&gt;
 		data-flex-basis=&#34;360px&#34;
 	
 &gt;&lt;/p&gt;
-&lt;h1 id=&#34;读题&#34;&gt;读题&lt;/h1&gt;
+&lt;h2 id=&#34;读题&#34;&gt;读题&lt;/h2&gt;
 &lt;p&gt;根据「这组英雄的力量」的定义，得知元素顺序不影响答案，那么可以先排序，然后固定最大值。&lt;/p&gt;
 &lt;p&gt;暴力解法：全排列小于当前最大值的数，再遍历最小值，但是这种做法时间复杂度过高，没办法优化。&lt;/p&gt;
 &lt;blockquote&gt;
@@ -724,7 +721,7 @@ $&lt;/p&gt;
 &lt;li&gt;由于答案可能非常大，请你将结果对 $10^9 + 7$  &lt;strong&gt;取余。&lt;/strong&gt;&lt;/li&gt;
 &lt;/ul&gt;
 &lt;p&gt;根据我以往的做题经验，猜测本题的解法是动态规划。&lt;/p&gt;
-&lt;h1 id=&#34;观察与猜测&#34;&gt;观察与猜测&lt;/h1&gt;
+&lt;h2 id=&#34;观察与猜测&#34;&gt;观察与猜测&lt;/h2&gt;
 &lt;p&gt;没什么思路的时，我喜欢在草稿纸上写例子，比如有 $nums = [1,2,3,4,5]$，顺序从小到大。&lt;/p&gt;
 &lt;blockquote&gt;
 &lt;p&gt;&lt;strong&gt;以下思考过程是有问题的&lt;/strong&gt;，因为按子序列个数的划分方式并不方便找到规律。&lt;/p&gt;
@@ -741,7 +738,7 @@ $&lt;/p&gt;
 &lt;/ul&gt;
 &lt;p&gt;$a_4 = 4, S_4 = [4 + (3+2+1) + (2+1+1) + (1)]$&lt;/p&gt;
 &lt;p&gt;$a_5 = 5, S_5 = [5 + (4+3+2+1) + &amp;hellip;]$&lt;/p&gt;
-&lt;h2 id=&#34;再观察&#34;&gt;再观察&lt;/h2&gt;
+&lt;h3 id=&#34;再观察&#34;&gt;再观察&lt;/h3&gt;
 &lt;p&gt;为了找到规律，我尝试 &lt;strong&gt;在 $S_n$ 内逐个固定最大值，再分组&lt;/strong&gt; ：&lt;/p&gt;
 &lt;p&gt;$a_1 = 1, S_1 = 1$&lt;/p&gt;
 &lt;p&gt;$a_2=2, S_2 = 2 + (1)$&lt;/p&gt;
@@ -756,7 +753,7 @@ $&lt;/p&gt;
 &lt;p&gt;$a_5 = 5, S_5 = a_5 + S_4 + S_3 + S_2 + S_1$&lt;/p&gt;
 &lt;p&gt;根据这样的规划，容易猜测出：$S_n = a_n + \sum{S_{i-1}}$&lt;/p&gt;
 &lt;p&gt;根据错位相减法或换元法，可以求得：$S_n = a_n - a_{n-1} + 2*S_{n-1}$&lt;/p&gt;
-&lt;h1 id=&#34;代码实现&#34;&gt;代码实现&lt;/h1&gt;
+&lt;h2 id=&#34;代码实现&#34;&gt;代码实现&lt;/h2&gt;
 &lt;p&gt;下面就是编码验证环节：&lt;/p&gt;
 &lt;div class=&#34;highlight&#34;&gt;&lt;div class=&#34;chroma&#34;&gt;
 &lt;table class=&#34;lntable&#34;&gt;&lt;tr&gt;&lt;td class=&#34;lntd&#34;&gt;
@@ -792,12 +789,12 @@ $&lt;/p&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/table&gt;
 &lt;/div&gt;
-&lt;/div&gt;&lt;h2 id=&#34;复杂度分析&#34;&gt;复杂度分析&lt;/h2&gt;
+&lt;/div&gt;&lt;h3 id=&#34;复杂度分析&#34;&gt;复杂度分析&lt;/h3&gt;
 &lt;ul&gt;
 &lt;li&gt;时间复杂度：$\mathcal{O}(n\log n)$，其中 $n$ 为 $\textit{nums}$ 的长度。&lt;/li&gt;
 &lt;li&gt;空间复杂度：$\mathcal{O}(n)$。&lt;/li&gt;
 &lt;/ul&gt;
-&lt;h1 id=&#34;感想&#34;&gt;感想&lt;/h1&gt;
+&lt;h2 id=&#34;感想&#34;&gt;感想&lt;/h2&gt;
 &lt;p&gt;虽然过程崎岖，但胜在收获不错，动态规划的题目，如果没有思路，在草稿纸上列出具体的例子，或许能帮助你发现数据的规律，并找到解题方法。&lt;/p&gt;
 &lt;p&gt;非常感谢你的阅读，衷心祝愿你不会踩到取模陷阱。&lt;/p&gt;
 </description>
