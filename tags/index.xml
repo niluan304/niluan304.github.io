@@ -1,55 +1,60 @@
 <?xml version="1.0" encoding="utf-8" standalone="yes"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
-  <channel>
-    <title>Tags on 雾封的笔</title>
-    <link>https://niluan304.github.io/tags/</link>
-    <description>Recent content in Tags on 雾封的笔</description>
-    <generator>Hugo -- gohugo.io</generator>
-    <language>en-us</language>
-    <copyright>雾封 本站遵循 CC-BY-NC 4.0 协议</copyright>
-    <lastBuildDate>Mon, 11 Mar 2024 17:15:51 +0800</lastBuildDate>
-    <atom:link href="https://niluan304.github.io/tags/index.xml" rel="self" type="application/rss+xml" />
-    <item>
-      <title>go</title>
-      <link>https://niluan304.github.io/tags/go/</link>
-      <pubDate>Mon, 11 Mar 2024 17:15:51 +0800</pubDate>
-      <guid>https://niluan304.github.io/tags/go/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>slice</title>
-      <link>https://niluan304.github.io/tags/slice/</link>
-      <pubDate>Mon, 11 Mar 2024 17:15:51 +0800</pubDate>
-      <guid>https://niluan304.github.io/tags/slice/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>sort</title>
-      <link>https://niluan304.github.io/tags/sort/</link>
-      <pubDate>Mon, 11 Mar 2024 17:15:51 +0800</pubDate>
-      <guid>https://niluan304.github.io/tags/sort/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>algorithm</title>
-      <link>https://niluan304.github.io/tags/algorithm/</link>
-      <pubDate>Fri, 12 Jan 2024 17:52:09 +0800</pubDate>
-      <guid>https://niluan304.github.io/tags/algorithm/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>leetcode</title>
-      <link>https://niluan304.github.io/tags/leetcode/</link>
-      <pubDate>Fri, 12 Jan 2024 17:52:09 +0800</pubDate>
-      <guid>https://niluan304.github.io/tags/leetcode/</guid>
-      <description></description>
-    </item>
-    <item>
-      <title>dp</title>
-      <link>https://niluan304.github.io/tags/dp/</link>
-      <pubDate>Thu, 21 Sep 2023 16:54:07 +0800</pubDate>
-      <guid>https://niluan304.github.io/tags/dp/</guid>
-      <description></description>
-    </item>
-  </channel>
+    <channel>
+        <title>Tags on 演示站点</title>
+        <link>https://niluan304.github.io/tags/</link>
+        <description>Recent content in Tags on 演示站点</description>
+        <generator>Hugo -- gohugo.io</generator>
+        <language>zh-cn</language>
+        <copyright>雾封</copyright>
+        <lastBuildDate>Mon, 11 Mar 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://niluan304.github.io/tags/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Go</title>
+        <link>https://niluan304.github.io/tags/go/</link>
+        <pubDate>Mon, 11 Mar 2024 00:00:00 +0000</pubDate>
+        
+        <guid>https://niluan304.github.io/tags/go/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Slice</title>
+        <link>https://niluan304.github.io/tags/slice/</link>
+        <pubDate>Mon, 11 Mar 2024 00:00:00 +0000</pubDate>
+        
+        <guid>https://niluan304.github.io/tags/slice/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Sort</title>
+        <link>https://niluan304.github.io/tags/sort/</link>
+        <pubDate>Mon, 11 Mar 2024 00:00:00 +0000</pubDate>
+        
+        <guid>https://niluan304.github.io/tags/sort/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Algorithm</title>
+        <link>https://niluan304.github.io/tags/algorithm/</link>
+        <pubDate>Fri, 12 Jan 2024 00:00:00 +0000</pubDate>
+        
+        <guid>https://niluan304.github.io/tags/algorithm/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Leetcode</title>
+        <link>https://niluan304.github.io/tags/leetcode/</link>
+        <pubDate>Fri, 12 Jan 2024 00:00:00 +0000</pubDate>
+        
+        <guid>https://niluan304.github.io/tags/leetcode/</guid>
+        <description></description>
+        </item>
+        <item>
+        <title>Dp</title>
+        <link>https://niluan304.github.io/tags/dp/</link>
+        <pubDate>Thu, 21 Sep 2023 00:00:00 +0000</pubDate>
+        
+        <guid>https://niluan304.github.io/tags/dp/</guid>
+        <description></description>
+        </item>
+        
+    </channel>
 </rss>
