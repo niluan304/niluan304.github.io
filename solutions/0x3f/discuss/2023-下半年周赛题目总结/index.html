@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='上一期：2023 上半年周赛题目总结
+大家好，又到了半年一度的周赛总结时间！
+我从下半年的 $40$ 场周赛，共计 $160$ 道题目中，整理出了「能学到算法套路」的题目，大家可以针对练习。
+一、技巧类题目 包含滑动窗口、二分答案等比较套路的算法。
+这些技巧相对容易掌握，也是周赛常客，推荐优先训练。
+常见于周赛第二题（约占 $20%$）、第三题（约占 $33%$）和第四题（约占 $20%$）。
+题目 难度 知识点 2799. 统计完全子数组的数目 1398 滑动窗口 2825. 循环增长使字符串子序列等于另一个字符串 1415 双指针 2760. 最长奇偶子数组 1420 分组循环 2909. 元素和最小的山形三元组 II 1479 前后缀分解 2958. 最多 K 个重复元素的最长子数组 1535 滑动窗口 2841. 几乎唯一子数组的最大和 1546 滑动窗口 2874. 有序三元组中的最大值 II 1583 前后缀分解 2779. 数组的最大美丽值 1638 滑动窗口 2943. 最大化网格图中正方形空洞的面积 1677 分组循环 2962. 统计最大元素出现至少 K 次的子数组 1701 滑动窗口 2905. 找出满足差值条件的下标 II 1764 双变量问题 2875. 无限数组的最短子数组 1914 滑动窗口 2762.'>
+<title></title>
+
+<link rel='canonical' href='https://niluan304.github.io/solutions/0x3f/discuss/2023-%E4%B8%8B%E5%8D%8A%E5%B9%B4%E5%91%A8%E8%B5%9B%E9%A2%98%E7%9B%AE%E6%80%BB%E7%BB%93/'>
+
+<link rel="stylesheet" href="/scss/style.min.106edfcf49fb92066554cb350b55c6cb44a6b32d001c53fa8d1f87a450c4e9d6.css"><meta property='og:title' content=''>
+<meta property='og:description' content='上一期：2023 上半年周赛题目总结
+大家好，又到了半年一度的周赛总结时间！
+我从下半年的 $40$ 场周赛，共计 $160$ 道题目中，整理出了「能学到算法套路」的题目，大家可以针对练习。
+一、技巧类题目 包含滑动窗口、二分答案等比较套路的算法。
+这些技巧相对容易掌握，也是周赛常客，推荐优先训练。
+常见于周赛第二题（约占 $20%$）、第三题（约占 $33%$）和第四题（约占 $20%$）。
+题目 难度 知识点 2799. 统计完全子数组的数目 1398 滑动窗口 2825. 循环增长使字符串子序列等于另一个字符串 1415 双指针 2760. 最长奇偶子数组 1420 分组循环 2909. 元素和最小的山形三元组 II 1479 前后缀分解 2958. 最多 K 个重复元素的最长子数组 1535 滑动窗口 2841. 几乎唯一子数组的最大和 1546 滑动窗口 2874. 有序三元组中的最大值 II 1583 前后缀分解 2779. 数组的最大美丽值 1638 滑动窗口 2943. 最大化网格图中正方形空洞的面积 1677 分组循环 2962. 统计最大元素出现至少 K 次的子数组 1701 滑动窗口 2905. 找出满足差值条件的下标 II 1764 双变量问题 2875. 无限数组的最短子数组 1914 滑动窗口 2762.'>
+<meta property='og:url' content='https://niluan304.github.io/solutions/0x3f/discuss/2023-%E4%B8%8B%E5%8D%8A%E5%B9%B4%E5%91%A8%E8%B5%9B%E9%A2%98%E7%9B%AE%E6%80%BB%E7%BB%93/'>
+<meta property='og:site_name' content='雾封的笔'>
+<meta property='og:type' content='article'><meta property='article:section' content='Solutions' />
+<meta name="twitter:title" content="">
+<meta name="twitter:description" content="上一期：2023 上半年周赛题目总结
+大家好，又到了半年一度的周赛总结时间！
+我从下半年的 $40$ 场周赛，共计 $160$ 道题目中，整理出了「能学到算法套路」的题目，大家可以针对练习。
+一、技巧类题目 包含滑动窗口、二分答案等比较套路的算法。
+这些技巧相对容易掌握，也是周赛常客，推荐优先训练。
+常见于周赛第二题（约占 $20%$）、第三题（约占 $33%$）和第四题（约占 $20%$）。
+题目 难度 知识点 2799. 统计完全子数组的数目 1398 滑动窗口 2825. 循环增长使字符串子序列等于另一个字符串 1415 双指针 2760. 最长奇偶子数组 1420 分组循环 2909. 元素和最小的山形三元组 II 1479 前后缀分解 2958. 最多 K 个重复元素的最长子数组 1535 滑动窗口 2841. 几乎唯一子数组的最大和 1546 滑动窗口 2874. 有序三元组中的最大值 II 1583 前后缀分解 2779. 数组的最大美丽值 1638 滑动窗口 2943. 最大化网格图中正方形空洞的面积 1677 分组循环 2962. 统计最大元素出现至少 K 次的子数组 1701 滑动窗口 2905. 找出满足差值条件的下标 II 1764 双变量问题 2875. 无限数组的最短子数组 1914 滑动窗口 2762.">
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+<style>
+   
+  :root {
+    --article-font-family: 'Noto Serif HK', var(--base-font-family);
+  }
+</style>
+
+<script>
+  ;(function () {
+    const customFont = document.createElement('link')
+    customFont.href =
+      'https://fonts.googleapis.com/css2?family=Noto+Serif+HK:wght@300;400;500;600;700&display=swap'
+    customFont.type = 'text/css'
+    customFont.rel = 'stylesheet'
+
+    document.head.appendChild(customFont)
+  })()
+</script>
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hueb4763c82ba1420a58a50c6eccfe357b_472983_300x0_resize_box_3.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">☕</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">雾封的笔</a></h1>
+            <h2 class="site-description">脚步不停，灿若繁星。</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='mailto:zwei.elen@outlook.com'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#2c3e50" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="icon icon-tabler icon-tabler-mail" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z"/><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="m3 7 9 6 9-6"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/niluan304'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li  class='current' >
+            <a href='/solutions/' >
+                
+                
+                
+                    <?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg t="1710685833984" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="19816" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200"><path d="M624.289 816.93c-3.032 0-6.157 0.409-9.288 1.214-72.38 18.637-144.767 37.274-217.147 55.897-19.536 5.03-26.426 21.93-24.586 36.448 1.981 15.646 14.106 31.485 33.446 31.485h0.002c3.029 0 6.15-0.407 9.28-1.212a2055574.5 2055574.5 0 0 1 217.149-55.898c19.536-5.034 26.423-21.938 24.583-36.457-1.985-15.642-14.106-31.476-33.44-31.476zM572.377 934.011c-6.321 0-12.516 2.06-18.413 6.126-14.42 9.939-28.264 15.35-41.153 16.086-0.547 0.032-1.095 0.047-1.644 0.047-6.968 0-14.874-2.326-24.868-7.31-0.743-0.393-3.643-2.292-5.561-3.547-5.306-3.474-6.786-4.443-8.492-4.674-5.036-2.597-10.51-3.946-16.135-3.946-15.808 0-30.932 10.543-35.963 25.07-4.172 12.041-0.206 24.313 10.609 32.827 24.347 19.168 52.743 29.3 82.12 29.3 26.81 0 53.386-8.55 76.855-24.725 13.26-9.139 18.484-24.493 13.637-40.068-4.69-15.065-17.144-25.186-30.992-25.186zM758.2 323.388c-23.674-44.276-59.272-80.43-102.949-104.556-40.902-22.593-88.289-34.536-137.036-34.536-41.49 0-83.246 8.797-120.754 25.442-39.792 17.658-73.83 43.216-101.172 75.963-51.182 61.3-72.758 149.987-57.716 237.237 14.454 83.839 60.433 154.192 126.145 193.017 5.63 3.328 11.493 5.015 17.423 5.015 15.057 0 28.606-11.094 32.946-26.978 4.146-15.17-1.767-29.61-15.431-37.682-87.857-51.928-112.807-177.156-85.54-263.399 26.457-83.656 107.442-139.862 201.52-139.862 39.74 0 78.37 10.246 111.716 29.63 45.121 26.234 77.406 69.951 90.905 123.098 14.556 57.308 5.738 118.382-24.192 167.566-11.93 19.606-27.417 37.625-42.396 55.048-9.603 11.173-19.533 22.724-28.549 34.697-15.429 20.492-20.147 42.395-24.71 63.575-0.8 3.718-1.62 7.528-2.499 11.339l-198.107 52.663c-19.536 5.193-26.361 22.222-24.458 36.791 2.024 15.5 14.071 31.193 33.179 31.196h0.007c3.103 0 6.304-0.433 9.517-1.286 51.509-13.699 103.021-27.39 154.534-41.075 5.775-1.536 11.35-2.909 16.74-4.24 42.26-10.416 75.638-18.644 79.547-79.646 1.383-21.58 19.882-41.685 36.204-59.424 4.189-4.553 8.144-8.853 11.756-13.099 19.584-23.002 44.049-54.132 59.531-90.99 32.646-77.76 26.907-164.947-16.16-245.504zM173.191 470.702c0-19.056-15.448-34.504-34.505-34.504H71.708c-19.057 0-34.505 15.448-34.505 34.504 0 19.057 15.448 34.505 34.505 34.505h66.978c19.057 0 34.505-15.448 34.505-34.505zM954.989 436.198h-66.98c-19.056 0-34.503 15.448-34.503 34.504 0 19.057 15.448 34.505 34.504 34.505h66.979c19.056 0 34.505-15.448 34.505-34.505 0-19.056-15.449-34.504-34.505-34.504zM225.263 230.175c13.475 13.475 35.321 13.475 48.796 0 13.475-13.475 13.475-35.322 0-48.796l-47.362-47.362c-13.474-13.475-35.321-13.475-48.796 0-13.475 13.475-13.475 35.321 0 48.796l47.362 47.362zM803.912 711.23c-13.475-13.475-35.322-13.475-48.797 0-13.474 13.475-13.474 35.322 0 48.797l47.362 47.362c13.475 13.475 35.322 13.475 48.796 0 13.475-13.475 13.475-35.321 0-48.797l-47.361-47.362zM514.587 135.988c19.056 0 34.505-15.449 34.505-34.505v-66.98C549.092 15.449 533.643 0 514.587 0c-19.057 0-34.505 15.449-34.505 34.505v66.979c0 19.056 15.448 34.505 34.505 34.505zM274.06 711.23c-13.475-13.475-35.321-13.475-48.796 0l-47.362 47.362c-13.475 13.475-13.475 35.321 0 48.797 13.475 13.475 35.322 13.475 48.796 0l47.362-47.362c13.475-13.475 13.475-35.322 0-48.797zM755.114 230.175c13.475 13.475 35.322 13.475 48.797 0l47.361-47.362c13.475-13.475 13.475-35.321 0-48.796-13.475-13.475-35.321-13.475-48.796 0l-47.362 47.362c-13.474 13.474-13.474 35.321 0 48.796z" fill="#707070" p-id="19817" data-spm-anchor-id="a313x.search_index.0.i7.774c3a81Q659h0" class="selected"></path></svg>
+                
+                <span>Solutions</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#一技巧类题目">一、技巧类题目</a>
+      <ol>
+        <li>
+          <ol>
+            <li><a href="#相关文章">相关文章</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#二动态规划">二、动态规划</a>
+      <ol>
+        <li>
+          <ol>
+            <li><a href="#相关文章-1">相关文章</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#三图论">三、图论</a>
+      <ol>
+        <li>
+          <ol>
+            <li><a href="#相关文章-2">相关文章</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#四数据结构">四、数据结构</a>
+      <ol>
+        <li>
+          <ol>
+            <li><a href="#相关文章-3">相关文章</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#五数学">五、数学</a></li>
+    <li><a href="#六思维题">六、思维题</a>
+      <ol>
+        <li>
+          <ol>
+            <li><a href="#相关文章-4">相关文章</a></li>
+          </ol>
+        </li>
+      </ol>
+    </li>
+    <li><a href="#总结">总结</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/solutions/0x3f/discuss/2023-%E4%B8%8B%E5%8D%8A%E5%B9%B4%E5%91%A8%E8%B5%9B%E9%A2%98%E7%9B%AE%E6%80%BB%E7%BB%93/"></a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-clock" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <polyline points="12 7 12 12 15 15" />
+</svg>
+
+
+
+                <time class="article-time--reading">
+                    阅读时长: 3 分钟
+                </time>
+            </div>
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p>上一期：<a class="link" href="https://leetcode.cn/circle/discuss/v2RXSN/"  target="_blank" rel="noopener"
+    >2023 上半年周赛题目总结</a></p>
+<p>大家好，又到了半年一度的周赛总结时间！</p>
+<p>我从下半年的 $40$ 场周赛，共计 $160$ 道题目中，整理出了「能学到算法套路」的题目，大家可以针对练习。</p>
+<h2 id="一技巧类题目">一、技巧类题目</h2>
+<p>包含滑动窗口、二分答案等比较套路的算法。</p>
+<p><strong>这些技巧相对容易掌握，也是周赛常客，推荐优先训练。</strong></p>
+<p>常见于周赛第二题（约占 $20%$）、第三题（约占 $33%$）和第四题（约占 $20%$）。</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>题目</th>
+<th>难度</th>
+<th>知识点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/count-complete-subarrays-in-an-array/"  target="_blank" rel="noopener"
+    >2799. 统计完全子数组的数目</a></td>
+<td>1398</td>
+<td><font style="background:white" color="white"> 滑动窗口            </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/make-string-a-subsequence-using-cyclic-increments/"  target="_blank" rel="noopener"
+    >2825. 循环增长使字符串子序列等于另一个字符串</a></td>
+<td>1415</td>
+<td><font style="background:white" color="white"> 双指针             </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/longest-even-odd-subarray-with-threshold/"  target="_blank" rel="noopener"
+    >2760. 最长奇偶子数组</a></td>
+<td>1420</td>
+<td><font style="background:white" color="white"> <font style="background:white" color="white"> 分组循环           </font> </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/minimum-sum-of-mountain-triplets-ii/"  target="_blank" rel="noopener"
+    >2909. 元素和最小的山形三元组 II</a></td>
+<td>1479</td>
+<td><font style="background:white" color="white"> <font style="background:white" color="white"> 前后缀分解         </font> </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/length-of-longest-subarray-with-at-most-k-frequency/"  target="_blank" rel="noopener"
+    >2958. 最多 K 个重复元素的最长子数组</a></td>
+<td>1535</td>
+<td><font style="background:white" color="white"> 滑动窗口           </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/maximum-sum-of-almost-unique-subarray/"  target="_blank" rel="noopener"
+    >2841. 几乎唯一子数组的最大和</a></td>
+<td>1546</td>
+<td><font style="background:white" color="white"> 滑动窗口           </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/maximum-value-of-an-ordered-triplet-ii/"  target="_blank" rel="noopener"
+    >2874. 有序三元组中的最大值 II</a></td>
+<td>1583</td>
+<td><font style="background:white" color="white"> 前后缀分解         </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/maximum-beauty-of-an-array-after-applying-operation/"  target="_blank" rel="noopener"
+    >2779. 数组的最大美丽值</a></td>
+<td>1638</td>
+<td><font style="background:white" color="white"> 滑动窗口           </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/maximize-area-of-square-hole-in-grid/"  target="_blank" rel="noopener"
+    >2943. 最大化网格图中正方形空洞的面积</a></td>
+<td>1677</td>
+<td><font style="background:white" color="white"> 分组循环           </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/count-subarrays-where-max-element-appears-at-least-k-times/"  target="_blank" rel="noopener"
+    >2962. 统计最大元素出现至少 K 次的子数组</a></td>
+<td>1701</td>
+<td><font style="background:white" color="white"> 滑动窗口           </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/find-indices-with-index-and-value-difference-ii/"  target="_blank" rel="noopener"
+    >2905. 找出满足差值条件的下标 II</a></td>
+<td>1764</td>
+<td><font style="background:white" color="white"> 双变量问题         </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/minimum-size-subarray-in-infinite-array/"  target="_blank" rel="noopener"
+    >2875. 无限数组的最短子数组</a></td>
+<td>1914</td>
+<td><font style="background:white" color="white"> 滑动窗口           </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/continuous-subarrays/"  target="_blank" rel="noopener"
+    >2762. 不间断子数组</a></td>
+<td>1940</td>
+<td><font style="background:white" color="white"> 滑动窗口           </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/find-the-longest-equal-subarray/"  target="_blank" rel="noopener"
+    >2831. 找出最长等值子数组</a></td>
+<td>1976</td>
+<td><font style="background:white" color="white"> 滑动窗口           </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/maximum-number-of-alloys/"  target="_blank" rel="noopener"
+    >2861. 最大合金数</a></td>
+<td>1981</td>
+<td><font style="background:white" color="white"> 二分答案           </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/apply-operations-to-make-all-array-elements-equal-to-zero/"  target="_blank" rel="noopener"
+    >2772. 使数组中的所有元素都等于零</a></td>
+<td>2029</td>
+<td><font style="background:white" color="white"> 差分数组           </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/make-lexicographically-smallest-array-by-swapping-elements/"  target="_blank" rel="noopener"
+    >2948. 交换得到字典序最小的数组</a></td>
+<td>2047</td>
+<td><font style="background:white" color="white"> 分组循环           </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/count-of-interesting-subarrays/"  target="_blank" rel="noopener"
+    >2845. 统计趣味子数组的数目</a></td>
+<td>2073</td>
+<td><font style="background:white" color="white"> 哈希表             </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/construct-product-matrix/"  target="_blank" rel="noopener"
+    >2906. 构造乘积矩阵</a></td>
+<td>2075</td>
+<td><font style="background:white" color="white"> 前后缀分解         </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/length-of-the-longest-valid-substring/"  target="_blank" rel="noopener"
+    >2781. 最长合法子字符串的长度</a></td>
+<td>2204</td>
+<td><font style="background:white" color="white"> 滑动窗口           </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/count-beautiful-substrings-ii/"  target="_blank" rel="noopener"
+    >2949. 统计美丽子字符串 II</a></td>
+<td>2445</td>
+<td><font style="background:white" color="white"> 前缀和、哈希表     </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/count-complete-substrings/"  target="_blank" rel="noopener"
+    >2953. 统计完全子字符串</a></td>
+<td>2449</td>
+<td><font style="background:white" color="white"> 分组循环、滑动窗口 </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/count-paths-that-can-form-a-palindrome-in-a-tree/"  target="_blank" rel="noopener"
+    >2791. 树中可以形成回文的路径数</a></td>
+<td>2677</td>
+<td><font style="background:white" color="white"> 哈希表、位运算     </font></td>
+</tr>
+</tbody>
+</table></div>
+<h4 id="相关文章">相关文章</h4>
+<ul>
+<li><a class="link" href="https://leetcode.cn/circle/discuss/0viNMK/"  target="_blank" rel="noopener"
+    >【题单】滑动窗口（定长/不定长/多指针）</a></li>
+<li><a class="link" href="https://leetcode.cn/circle/discuss/SqopEo/"  target="_blank" rel="noopener"
+    >【题单】二分算法（二分答案/最小化最大值/最大化最小值/第K小）</a></li>
+<li><a class="link" href="https://leetcode.cn/problems/longest-even-odd-subarray-with-threshold/solution/jiao-ni-yi-ci-xing-ba-dai-ma-xie-dui-on-zuspx/"  target="_blank" rel="noopener"
+    >分组循环：教你一次性把代码写对</a></li>
+<li><a class="link" href="https://leetcode.cn/circle/discuss/FfMCgb/"  target="_blank" rel="noopener"
+    >差分数组</a></li>
+<li><a class="link" href="https://www.bilibili.com/read/cv22332590/"  target="_blank" rel="noopener"
+    >如何科学上分：利用难度分科学训练</a></li>
+</ul>
+<h2 id="二动态规划">二、动态规划</h2>
+<p>周赛常客。</p>
+<ul>
+<li>上半年有 $14$ 道，几乎只在第四题出现（占比 $24%$），第三题仅占 $8%$。</li>
+<li>下半年有 $26$ 道，第四题占比 $33%$，第三题占比增至 $30%$。</li>
+</ul>
+<blockquote>
+<p>注：线性 DP 是指，从数组前缀（后缀）转移到另一个前缀（后缀）的 DP。像最长递增子序列、最长公共子序列都属于这一类。</p>
+</blockquote>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>题目</th>
+<th>难度</th>
+<th>知识点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/maximum-number-of-jumps-to-reach-the-last-index/"  target="_blank" rel="noopener"
+    >2770. 达到末尾下标所需的最大跳跃次数</a></td>
+<td>1533</td>
+<td><font style="background:white" color="white"> 线性 DP                       </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/length-of-the-longest-subsequence-that-sums-to-target/"  target="_blank" rel="noopener"
+    >2915. 和为目标值的最长子序列的长度</a></td>
+<td>1659</td>
+<td><font style="background:white" color="white"> 0-1 背包                      </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/sorting-three-groups/"  target="_blank" rel="noopener"
+    >2826. 将三个组排序</a></td>
+<td>1721</td>
+<td><font style="background:white" color="white"> 状态机 DP                     </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/visit-array-positions-to-maximize-score/"  target="_blank" rel="noopener"
+    >2786. 访问数组中的位置使分数最大</a></td>
+<td>1733</td>
+<td><font style="background:white" color="white"> 线性 DP                       </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/minimum-number-of-coins-for-fruits/"  target="_blank" rel="noopener"
+    >2944. 购买水果需要的最少金币数</a></td>
+<td>1709</td>
+<td><font style="background:white" color="white"> 线性 DP/单调队列优化 DP       </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/longest-non-decreasing-subarray-from-two-arrays/"  target="_blank" rel="noopener"
+    >2771. 构造最长非递减子数组</a></td>
+<td>1792</td>
+<td><font style="background:white" color="white"> 线性 DP                       </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/ways-to-express-an-integer-as-sum-of-powers/"  target="_blank" rel="noopener"
+    >2787. 将一个数字表示成幂的和的方案数</a></td>
+<td>1818</td>
+<td><font style="background:white" color="white"> 0-1 背包                      </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/maximize-the-profit-as-the-salesman/"  target="_blank" rel="noopener"
+    >2830. 销售利润最大化</a></td>
+<td>1851</td>
+<td><font style="background:white" color="white"> 线性 DP                       </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/partition-string-into-minimum-beautiful-substrings/"  target="_blank" rel="noopener"
+    >2767. 将字符串分割为最少的美丽子字符串</a></td>
+<td>1865</td>
+<td><font style="background:white" color="white"> 划分型 DP                     </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/longest-unequal-adjacent-groups-subsequence-ii/"  target="_blank" rel="noopener"
+    >2901. 最长相邻不相等子序列 II</a></td>
+<td>1899</td>
+<td><font style="background:white" color="white"> 子序列 DP 的思考套路          </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/maximum-score-after-applying-operations-on-a-tree/"  target="_blank" rel="noopener"
+    >2925. 在树上执行操作以后得到的最大分数</a></td>
+<td>1940</td>
+<td><font style="background:white" color="white"> 树形 DP                       </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/minimum-increment-operations-to-make-array-beautiful/"  target="_blank" rel="noopener"
+    >2919. 使数组变美的最小增量运算数</a></td>
+<td>2031</td>
+<td><font style="background:white" color="white"> 线性 DP                       </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/apply-operations-to-make-two-strings-equal/"  target="_blank" rel="noopener"
+    >2896. 执行操作使两个字符串相等</a></td>
+<td>2172</td>
+<td><font style="background:white" color="white"> 线性 DP                       </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/number-of-strings-which-can-be-rearranged-to-contain-substring/"  target="_blank" rel="noopener"
+    >2930. 重新排列后包含指定子字符串的字符串数目</a></td>
+<td>2227</td>
+<td><font style="background:white" color="white"> 背包                          </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/minimum-edge-reversals-so-every-node-is-reachable/"  target="_blank" rel="noopener"
+    >2858. 可以到达每一个节点的最少边反转次数</a></td>
+<td>2295</td>
+<td><font style="background:white" color="white"> 换根 DP                       </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/number-of-beautiful-integers-in-the-range/"  target="_blank" rel="noopener"
+    >2827. 范围中美丽整数的数目</a></td>
+<td>2324</td>
+<td><font style="background:white" color="white"> 数位 DP                       </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/maximum-points-after-collecting-coins-from-all-nodes/"  target="_blank" rel="noopener"
+    >2920. 收集所有金币可获得的最大积分</a></td>
+<td>2351</td>
+<td><font style="background:white" color="white"> 树形 DP                       </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/count-stepping-numbers-in-range/"  target="_blank" rel="noopener"
+    >2801. 统计范围内的步进数字数目</a></td>
+<td>2367</td>
+<td><font style="background:white" color="white"> 数位 DP                       </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/maximum-balanced-subsequence-sum/"  target="_blank" rel="noopener"
+    >2926. 平衡子序列的最大和</a></td>
+<td>2448</td>
+<td><font style="background:white" color="white"> 树状数组优化 DP               </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/minimum-changes-to-make-k-semi-palindromes/"  target="_blank" rel="noopener"
+    >2911. 得到 K 个半回文串的最少修改次数</a></td>
+<td>2608</td>
+<td><font style="background:white" color="white"> 划分型 DP                     </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/count-of-sub-multisets-with-bounded-sum/"  target="_blank" rel="noopener"
+    >2902. 和带限制的子多重集合的数目</a></td>
+<td>2759</td>
+<td><font style="background:white" color="white"> 多重背包方案数、前缀和优化 DP </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/string-transformation/"  target="_blank" rel="noopener"
+    >2851. 字符串转换</a></td>
+<td>2858</td>
+<td><font style="background:white" color="white"> KMP、矩阵快速幂优化 DP        </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/find-maximum-non-decreasing-array-length/"  target="_blank" rel="noopener"
+    >2945. 找到最大非递减数组的长度</a></td>
+<td>2943</td>
+<td><font style="background:white" color="white"> 单调队列优化 DP               </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/minimum-time-to-make-array-sum-at-most-x/"  target="_blank" rel="noopener"
+    >2809. 使数组和小于等于 x 的最少时间</a></td>
+<td>2979</td>
+<td><font style="background:white" color="white"> 贪心+DP                       </font></td>
+</tr>
+</tbody>
+</table></div>
+<h4 id="相关文章-1">相关文章</h4>
+<p>在之前的每日一题中，我写了大量「教你一步步思考 DP」的题解，请看 <a class="link" href="https://github.com/EndlessCheng/codeforces-go/blob/master/leetcode/SOLUTIONS.md"  target="_blank" rel="noopener"
+    >往期题解精选</a> 中的动态规划。</p>
+<h2 id="三图论">三、图论</h2>
+<p>周赛第四题约占 $10%$。</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>题目</th>
+<th>难度</th>
+<th>知识点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/minimum-cost-to-convert-string-i/"  target="_blank" rel="noopener"
+    >2976. 转换字符串的最小成本 I</a></td>
+<td>待定</td>
+<td><font style="background:white" color="white"> Floyd </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/number-of-possible-sets-of-closing-branches/"  target="_blank" rel="noopener"
+    >2959. 关闭分部的可行集合数目</a></td>
+<td>2077</td>
+<td><font style="background:white" color="white"> 二进制枚举、Floyd </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/find-the-safest-path-in-a-grid/"  target="_blank" rel="noopener"
+    >2812. 找出最安全路径</a></td>
+<td>2154</td>
+<td><font style="background:white" color="white"> 多源 BFS          </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/count-visited-nodes-in-a-directed-graph/"  target="_blank" rel="noopener"
+    >2876. 有向图访问计数</a></td>
+<td>2210</td>
+<td><font style="background:white" color="white"> 基环树            </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/minimum-edge-weight-equilibrium-queries-in-a-tree/"  target="_blank" rel="noopener"
+    >2846. 边权重均等查询</a></td>
+<td>2508</td>
+<td><font style="background:white" color="white"> 最近公共祖先      </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/maximize-value-of-function-in-a-ball-passing-game/"  target="_blank" rel="noopener"
+    >2836. 在传球游戏中最大化函数值</a></td>
+<td>2769</td>
+<td><font style="background:white" color="white"> 倍增/基环树       </font></td>
+</tr>
+</tbody>
+</table></div>
+<h4 id="相关文章-2">相关文章</h4>
+<ul>
+<li><a class="link" href="https://leetcode.cn/problems/find-the-city-with-the-smallest-number-of-neighbors-at-a-threshold-distance/solution/dai-ni-fa-ming-floyd-suan-fa-cong-ji-yi-m8s51/"  target="_blank" rel="noopener"
+    >带你发明 Floyd 算法：从记忆化搜索到递推</a></li>
+<li><a class="link" href="https://leetcode.cn/problems/kth-ancestor-of-a-tree-node/solution/mo-ban-jiang-jie-shu-shang-bei-zeng-suan-v3rw/"  target="_blank" rel="noopener"
+    >树上倍增、最近公共祖先 LCA</a></li>
+</ul>
+<h2 id="四数据结构">四、数据结构</h2>
+<p>周赛第四题约占 $10%$。</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>题目</th>
+<th>难度</th>
+<th>知识点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/faulty-keyboard/"  target="_blank" rel="noopener"
+    >2810. 故障键盘</a></td>
+<td>1193</td>
+<td><font style="background:white" color="white"> $\mathcal{O}(n)$ 做法 </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/beautiful-towers-ii/"  target="_blank" rel="noopener"
+    >2866. 美丽塔 II</a></td>
+<td>2072</td>
+<td><font style="background:white" color="white"> 单调栈、前后缀分解    </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/find-building-where-alice-and-bob-can-meet/"  target="_blank" rel="noopener"
+    >2940. 找到 Alice 和 Bob 可以相遇的建筑</a></td>
+<td>2327</td>
+<td><font style="background:white" color="white"> 最小堆/线段树二分     </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/maximum-strong-pair-xor-ii/"  target="_blank" rel="noopener"
+    >2935. 找出强数对的最大异或值 II</a></td>
+<td>2349</td>
+<td><font style="background:white" color="white"> 0-1 字典树/哈希表     </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/apply-operations-to-maximize-score/"  target="_blank" rel="noopener"
+    >2818. 操作使得分最大</a></td>
+<td>2397</td>
+<td><font style="background:white" color="white"> 单调栈、贡献法        </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/subarrays-distinct-element-sum-of-squares-ii/"  target="_blank" rel="noopener"
+    >2916. 子数组不同元素数目的平方和 II</a></td>
+<td>2816</td>
+<td><font style="background:white" color="white"> 线段树                </font></td>
+</tr>
+</tbody>
+</table></div>
+<h4 id="相关文章-3">相关文章</h4>
+<p><a class="link" href="https://leetcode.cn/problems/range-sum-query-mutable/solution/dai-ni-fa-ming-shu-zhuang-shu-zu-fu-shu-lyfll/"  target="_blank" rel="noopener"
+    >带你发明树状数组，用数学证明算法正确性</a></p>
+<h2 id="五数学">五、数学</h2>
+<p>主要考察数论、组合数学相关内容。</p>
+<p>周赛第二题约占 $15%$，第四题约占 $18%$。</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>题目</th>
+<th>难度</th>
+<th>知识点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/prime-pairs-with-target-sum/"  target="_blank" rel="noopener"
+    >2761. 和等于目标值的质数对</a></td>
+<td>1505</td>
+<td><font style="background:white" color="white"> 埃氏筛、线性筛 </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/distribute-candies-among-children-ii/"  target="_blank" rel="noopener"
+    >2929. 给小朋友们分糖果 II</a></td>
+<td>1701</td>
+<td><font style="background:white" color="white"> 容斥原理       </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/count-k-subsequences-of-a-string-with-maximum-beauty/"  target="_blank" rel="noopener"
+    >2842. 统计一个字符串的 k 子序列美丽值最大的数目</a></td>
+<td>2092</td>
+<td><font style="background:white" color="white"> 组合数学       </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/number-of-strings-which-can-be-rearranged-to-contain-substring/"  target="_blank" rel="noopener"
+    >2930. 重新排列后包含指定子字符串的字符串数目</a></td>
+<td>2227</td>
+<td><font style="background:white" color="white"> 容斥原理       </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/maximum-element-sum-of-a-complete-subset-of-indices/"  target="_blank" rel="noopener"
+    >2862. 完全子集的最大元素和</a></td>
+<td>2292</td>
+<td><font style="background:white" color="white"> 因子           </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/count-valid-paths-in-a-tree/"  target="_blank" rel="noopener"
+    >2867. 统计树中的合法路径数目</a></td>
+<td>2428</td>
+<td><font style="background:white" color="white"> 树上计数       </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/count-beautiful-substrings-ii/"  target="_blank" rel="noopener"
+    >2949. 统计美丽子字符串 II</a></td>
+<td>2445</td>
+<td><font style="background:white" color="white"> 因子           </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/count-the-number-of-infection-sequences/"  target="_blank" rel="noopener"
+    >2954. 统计感冒序列的数目</a></td>
+<td>2645</td>
+<td><font style="background:white" color="white"> 组合数学       </font></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="六思维题">六、思维题</h2>
+<p>包含贪心、脑筋急转弯等。</p>
+<p>常见于周赛第二题（约占 $35%$）和第三题（约占 $23%$）。</p>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th>题目</th>
+<th>难度</th>
+<th>知识点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/separate-black-and-white-balls/"  target="_blank" rel="noopener"
+    >2938. 区分黑球与白球</a></td>
+<td>1423</td>
+<td><font style="background:white" color="white"> 贪心                       </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/minimum-number-of-changes-to-make-binary-string-beautiful/"  target="_blank" rel="noopener"
+    >2914. 使二进制字符串变美丽的最少修改次数</a></td>
+<td>1480</td>
+<td><font style="background:white" color="white"> 脑筋急转弯                 </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/largest-element-in-an-array-after-merge-operations/"  target="_blank" rel="noopener"
+    >2789. 合并后数组中的最大元素</a></td>
+<td>1485</td>
+<td><font style="background:white" color="white"> 贪心                       </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/check-if-strings-can-be-made-equal-with-operations-ii/"  target="_blank" rel="noopener"
+    >2840. 判断通过操作能否让字符串相等 II</a></td>
+<td>1486</td>
+<td><font style="background:white" color="white"> 结论                       </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/minimum-equal-sum-of-two-arrays-after-replacing-zeros/"  target="_blank" rel="noopener"
+    >2918. 数组的最小相等和</a></td>
+<td>1526</td>
+<td><font style="background:white" color="white"> 贪心、分类讨论             </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/check-if-it-is-possible-to-split-array/"  target="_blank" rel="noopener"
+    >2811. 判断是否能拆分数组</a></td>
+<td>1543</td>
+<td><font style="background:white" color="white"> 脑筋急转弯                 </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/minimum-array-length-after-pair-removals/"  target="_blank" rel="noopener"
+    >2856. 删除数对后的最小数组长度</a></td>
+<td>1750</td>
+<td><font style="background:white" color="white"> $\mathcal{O}(\log n)$ 做法 </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/split-array-into-maximum-number-of-subarrays/"  target="_blank" rel="noopener"
+    >2871. 将数组分割成最多数目的子数组</a></td>
+<td>1750</td>
+<td><font style="background:white" color="white"> 贪心、位运算               </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/minimum-number-of-coins-to-be-added/"  target="_blank" rel="noopener"
+    >2952. 需要添加的硬币的最小数量</a></td>
+<td>1784</td>
+<td><font style="background:white" color="white"> 贪心                       </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/minimum-operations-to-maximize-last-elements-in-arrays/"  target="_blank" rel="noopener"
+    >2934. 最大化数组末位元素的最少操作次数</a></td>
+<td>1803</td>
+<td><font style="background:white" color="white"> 分类讨论                   </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/maximum-spending-after-buying-items/"  target="_blank" rel="noopener"
+    >2931. 购买物品的最大开销</a></td>
+<td>1822</td>
+<td><font style="background:white" color="white"> 贪心、排序不等式           </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/minimum-seconds-to-equalize-a-circular-array/"  target="_blank" rel="noopener"
+    >2808. 使循环数组所有元素相等的最少秒数</a></td>
+<td>1875</td>
+<td><font style="background:white" color="white"> 贪心                       </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/maximum-xor-product/"  target="_blank" rel="noopener"
+    >2939. 最大异或乘积</a></td>
+<td>2128</td>
+<td><font style="background:white" color="white"> 贪心、位运算               </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/minimum-number-of-groups-to-create-a-valid-assignment/"  target="_blank" rel="noopener"
+    >2910. 合法分组的最少组数</a></td>
+<td>2132</td>
+<td><font style="background:white" color="white"> 贪心                       </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/minimum-operations-to-form-subsequence-with-target-sum/"  target="_blank" rel="noopener"
+    >2835. 使子序列的和等于目标的最少操作次数</a></td>
+<td>2207</td>
+<td><font style="background:white" color="white"> 贪心、位运算               </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/apply-operations-on-array-to-maximize-sum-of-squares/"  target="_blank" rel="noopener"
+    >2897. 对数组执行操作使平方和最大</a></td>
+<td>2301</td>
+<td><font style="background:white" color="white"> 贪心、位运算               </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/maximum-elegance-of-a-k-length-subsequence/"  target="_blank" rel="noopener"
+    >2813. 子序列最大优雅度</a></td>
+<td>2582</td>
+<td><font style="background:white" color="white"> 反悔贪心                   </font></td>
+</tr>
+<tr>
+<td><a class="link" href="https://leetcode.cn/problems/maximum-number-of-groups-with-increasing-length/"  target="_blank" rel="noopener"
+    >2790. 长度递增组的最大数目</a></td>
+<td>2620</td>
+<td><font style="background:white" color="white"> 贪心、构造                 </font></td>
+</tr>
+</tbody>
+</table></div>
+<h4 id="相关文章-4">相关文章</h4>
+<ul>
+<li><a class="link" href="https://leetcode.cn/circle/discuss/CaOJ45/"  target="_blank" rel="noopener"
+    >从集合论到位运算，常见位运算技巧分类总结！</a></li>
+</ul>
+<h2 id="总结">总结</h2>
+<div class="table-wrapper"><table>
+<thead>
+<tr>
+<th></th>
+<th>上半年中位数</th>
+<th>下半年中位数</th>
+<th>变化量</th>
+<th>全年中位数</th>
+<th>全年平均值</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>第一题</td>
+<td>$1259$</td>
+<td>$1248$</td>
+<td>$-11$</td>
+<td>$1256$</td>
+<td>$1265$</td>
+</tr>
+<tr>
+<td>第二题</td>
+<td>$1428$</td>
+<td>$1485$</td>
+<td>$57$</td>
+<td>$1468$</td>
+<td>$1480$</td>
+</tr>
+<tr>
+<td>第三题</td>
+<td>$1791$</td>
+<td>$1899$</td>
+<td>$108$</td>
+<td>$1889$</td>
+<td>$1887$</td>
+</tr>
+<tr>
+<td>第四题</td>
+<td>$2281$</td>
+<td>$2337$</td>
+<td>$56$</td>
+<td>$2327$</td>
+<td>$2318$</td>
+</tr>
+</tbody>
+</table></div>
+<p>欲穷千里目，更上一层楼。最后祝大家新年快乐，在新的一年能实现自己的目标，不断变强！</p>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+        <link 
+                rel="stylesheet" 
+                href="https://fastly.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI&#43;WdtXRGWt2kTvGFasHpSy3SV"crossorigin="anonymous"
+            ><script 
+                src="https://fastly.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG&#43;vnGctmUb0ZY0l8"crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://fastly.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"integrity="sha384-&#43;VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4&#43;/RRE05"crossorigin="anonymous"
+                defer
+                >
+            </script><script>
+    window.addEventListener("DOMContentLoaded", () => {
+        renderMathInElement(document.querySelector(`.article-content`), {
+            delimiters: [
+                { left: "$$", right: "$$", display: true },
+                { left: "$", right: "$", display: false },
+                { left: "\\(", right: "\\)", display: false },
+                { left: "\\[", right: "\\]", display: true }
+            ],
+            ignoredClasses: ["gist"]
+        });})
+</script>
+    
+</article>
+
+    
+
+    
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    
+<section class="totalcount">
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    发表了2篇文章 ·
+    总计4.24k字
+</section>
+
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://fastly.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
