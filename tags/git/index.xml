@@ -7,10 +7,10 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <copyright>雾封</copyright>
-        <lastBuildDate>Thu, 14 Mar 2024 18:08:02 +0800</lastBuildDate><atom:link href="https://niluan304.github.io/tags/git/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Tue, 14 Mar 2023 18:08:02 +0800</lastBuildDate><atom:link href="https://niluan304.github.io/tags/git/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>为 git clone github 设置 HTTP 和 SSH 代理</title>
         <link>https://niluan304.github.io/p/%E4%B8%BA-git-clone-github-%E8%AE%BE%E7%BD%AE-http-%E5%92%8C-ssh-%E4%BB%A3%E7%90%86/</link>
-        <pubDate>Thu, 14 Mar 2024 18:08:02 +0800</pubDate>
+        <pubDate>Tue, 14 Mar 2023 18:08:02 +0800</pubDate>
         
         <guid>https://niluan304.github.io/p/%E4%B8%BA-git-clone-github-%E8%AE%BE%E7%BD%AE-http-%E5%92%8C-ssh-%E4%BB%A3%E7%90%86/</guid>
         <description>&lt;p&gt;在国内执行 &lt;code&gt;git clone https://github.com/golang/go.git&lt;/code&gt; 操作，又慢又不稳定，搜索后发现可以使用代理这个问题。&lt;/p&gt;

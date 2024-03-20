@@ -7,10 +7,10 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <copyright>雾封</copyright>
-        <lastBuildDate>Mon, 11 Mar 2024 00:00:00 +0000</lastBuildDate><atom:link href="https://niluan304.github.io/tags/slice/index.xml" rel="self" type="application/rss+xml" /><item>
+        <lastBuildDate>Sat, 11 Mar 2023 00:00:00 +0000</lastBuildDate><atom:link href="https://niluan304.github.io/tags/slice/index.xml" rel="self" type="application/rss+xml" /><item>
         <title>sort.Slice 不适合部分排序</title>
         <link>https://niluan304.github.io/p/sort.slice-%E4%B8%8D%E9%80%82%E5%90%88%E9%83%A8%E5%88%86%E6%8E%92%E5%BA%8F/</link>
-        <pubDate>Mon, 11 Mar 2024 00:00:00 +0000</pubDate>
+        <pubDate>Sat, 11 Mar 2023 00:00:00 +0000</pubDate>
         
         <guid>https://niluan304.github.io/p/sort.slice-%E4%B8%8D%E9%80%82%E5%90%88%E9%83%A8%E5%88%86%E6%8E%92%E5%BA%8F/</guid>
         <description>&lt;img src="https://niluan304.github.io/p/sort.slice-%E4%B8%8D%E9%80%82%E5%90%88%E9%83%A8%E5%88%86%E6%8E%92%E5%BA%8F/Feng_2024-03-12_10-13-25.png" alt="Featured image of post sort.Slice 不适合部分排序" /&gt;&lt;p&gt;使用 &lt;code&gt;slices.Sort&lt;/code&gt; 和  &lt;code&gt;slices.SortFunc&lt;/code&gt;  避免 &lt;code&gt;sort.Slices&lt;/code&gt; 的坑&lt;/p&gt;
