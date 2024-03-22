@@ -505,18 +505,25 @@
 <li>注意：分层设计也会导致一个问题：新增一个业务接口时，需要改动的文件也会变多，不过这可以通过脚本生成代码缓解。</li>
 </ul>
 <p>最后让我们来看看程序的运行结果：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">curl -X GET <span class="s2">&#34;http://localhost:8080/user?name=Carol&#34;</span>
-</span></span><span class="line"><span class="cl"><span class="c1"># {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;database&#34;:null}</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">client</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">time</span><span class="p">.</span><span class="nf">Sleep</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span> <span class="c1">// 等待路由注册
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">	<span class="nx">resp1</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">http</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="s">&#34;http://localhost:8080/user?name=Carol&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">resp2</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">http</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="s">&#34;http://localhost:8080/user?name=Bob&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">resp3</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">http</span><span class="p">.</span><span class="nf">Post</span><span class="p">(</span><span class="s">&#34;http://localhost:8080/user&#34;</span><span class="p">,</span> <span class="s">&#34;application/json&#34;</span><span class="p">,</span> <span class="nx">bytes</span><span class="p">.</span><span class="nf">NewBufferString</span><span class="p">(</span><span class="s">`{&#34;name&#34;:&#34;Carol&#34;,&#34;age&#34;:44,&#34;job&#34;:&#34;worker&#34;}`</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">resp4</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">http</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="s">&#34;http://localhost:8080/user?name=Carol&#34;</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">curl -X GET <span class="s2">&#34;http://localhost:8080/user?name=Bob&#34;</span>
-</span></span><span class="line"><span class="cl"><span class="c1"># {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;database&#34;:{&#34;Name&#34;:&#34;Bob&#34;,&#34;Age&#34;:30,&#34;Job&#34;:&#34;driver&#34;}}</span>
+</span></span><span class="line"><span class="cl">	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">resp</span> <span class="o">:=</span> <span class="k">range</span> <span class="p">[]</span><span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Response</span><span class="p">{</span><span class="nx">resp1</span><span class="p">,</span> <span class="nx">resp2</span><span class="p">,</span> <span class="nx">resp3</span><span class="p">,</span> <span class="nx">resp4</span><span class="p">}</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">data</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">io</span><span class="p">.</span><span class="nf">ReadAll</span><span class="p">(</span><span class="nx">resp</span><span class="p">.</span><span class="nx">Body</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">data</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">curl -X POST <span class="s2">&#34;http://localhost:8080/user?name=Carol&amp;age=44&amp;job=worker&#34;</span>
-</span></span><span class="line"><span class="cl"><span class="c1"># {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;database&#34;:null}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">curl -X GET <span class="s2">&#34;http://localhost:8080/user?name=Carol&#34;</span>
-</span></span><span class="line"><span class="cl"><span class="c1"># {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;database&#34;:{&#34;Name&#34;:&#34;Carol&#34;,&#34;Age&#34;:44,&#34;Job&#34;:&#34;worker&#34;}}</span>
+</span></span><span class="line"><span class="cl">	<span class="c1">// Output:
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="c1">// {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;data&#34;:null}
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="c1">// {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;data&#34;:{&#34;Name&#34;:&#34;Bob&#34;,&#34;Age&#34;:30,&#34;Job&#34;:&#34;driver&#34;}}
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="c1">// {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;data&#34;:null}
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="c1">// {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;data&#34;:{&#34;Name&#34;:&#34;Carol&#34;,&#34;Age&#34;:44,&#34;Job&#34;:&#34;worker&#34;}}
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
 </span></span></code></pre></div><div class="footnotes" role="doc-endnotes">
 <hr>
 <ol>
@@ -619,6 +626,19 @@
 
         <div class="article-details">
             <h2 class="article-title">gee-web-day7.5 「7天 web框架」读后感</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gee-web-day10-%E9%80%9A%E8%BF%87%E5%8F%8D%E5%B0%84%E6%9E%84%E9%80%A0%E8%A7%84%E8%8C%83%E8%B7%AF%E7%94%B1/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">gee-web-day10 通过反射构造规范路由</h2>
         </div>
     </a>
 </article>
@@ -735,8 +755,10 @@
     
     
     
-    发表了6篇文章 ·
-    总计5.26k字
+    
+    
+    发表了7篇文章 ·
+    总计5.89k字
 </section>
 
 

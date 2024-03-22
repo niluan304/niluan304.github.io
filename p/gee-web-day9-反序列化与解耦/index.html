@@ -414,16 +414,18 @@
 	
 ></p>
 <p>和上面的图片类似，修改后的函数类型已经和框架要求的 <code>gin.HandlerFunc</code> 截然不同，但借鉴适配器模式的思想，通过中间函数转化，就可以了：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// 设置为类型，用于优化参数显示
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">type</span> <span class="nx">binderFunc</span> <span class="kd">func</span><span class="p">(</span>
-</span></span><span class="line"><span class="cl">	<span class="nx">ctx</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span>              <span class="c1">// 第一个参数：ctx
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// ./handle/handle.go
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="c1">// 设置为类型，用于优化参数显示
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">type</span> <span class="nx">BinderFunc</span> <span class="p">=</span> <span class="kd">func</span><span class="p">(</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">ctx</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span>               <span class="c1">// 第一个参数：ctx
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">bind</span> <span class="kd">func</span><span class="p">(</span><span class="nx">point</span> <span class="nx">any</span><span class="p">)</span> <span class="p">(</span><span class="nx">err</span> <span class="kt">error</span><span class="p">),</span> <span class="c1">// 第二个参数：用于反序列化的闭包
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">)</span> <span class="p">(</span>
 </span></span><span class="line"><span class="cl">	<span class="nx">data</span> <span class="nx">any</span><span class="p">,</span>  <span class="c1">// 返回的数据
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">err</span> <span class="kt">error</span><span class="p">,</span> <span class="c1">// 错误处理
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">HandlerFunc</span><span class="p">(</span><span class="nx">binder</span> <span class="nx">binderFunc</span><span class="p">)</span> <span class="nx">gin</span><span class="p">.</span><span class="nx">HandlerFunc</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">Handle</span><span class="p">(</span><span class="nx">binder</span> <span class="nx">BinderFunc</span><span class="p">)</span> <span class="nx">gin</span><span class="p">.</span><span class="nx">HandlerFunc</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="kd">func</span><span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">		<span class="nx">data</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">binder</span><span class="p">(</span><span class="nx">c</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">point</span> <span class="nx">any</span><span class="p">)</span> <span class="p">(</span><span class="nx">err</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">			<span class="c1">// 实现反序列化
@@ -437,18 +439,22 @@
 </span></span><span class="line"><span class="cl">		<span class="nx">c</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="mi">200</span><span class="p">,</span> <span class="s">&#34;&#34;</span><span class="p">,</span> <span class="nx">data</span><span class="p">})</span>
 </span></span><span class="line"><span class="cl">	<span class="p">}</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p>相应的，路由注册也有些变化：</p>
+</span></span></code></pre></div><p>新的函数作为「适配器」，也会被其他路由调用，也不是业务相关的内容，不适合放到 <code>interna</code>l 包，应当放到新的包（文件夹）里，笔者将之保存至 <code>/handle/handle.go</code>。</p>
+<p>相应地，路由注册也有些变化：</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">main</span><span class="p">()</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">	<span class="nx">r</span> <span class="o">:=</span> <span class="nx">gin</span><span class="p">.</span><span class="nf">Default</span><span class="p">()</span>
 </span></span><span class="line"><span class="cl">	<span class="p">{</span>
 </span></span><span class="line"><span class="cl">		<span class="nx">user</span> <span class="o">:=</span> <span class="nx">r</span><span class="p">.</span><span class="nf">Group</span><span class="p">(</span><span class="s">&#34;/user&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">		<span class="nx">user</span><span class="p">.</span><span class="nf">GET</span><span class="p">(</span><span class="s">&#34;/&#34;</span><span class="p">,</span> <span class="nx">handle</span><span class="p">.</span><span class="nf">Handler</span><span class="p">(</span><span class="nx">controller</span><span class="p">.</span><span class="nx">User</span><span class="p">.</span><span class="nx">Get</span><span class="p">))</span>
-</span></span><span class="line"><span class="cl">		<span class="nx">user</span><span class="p">.</span><span class="nf">POST</span><span class="p">(</span><span class="s">&#34;/&#34;</span><span class="p">,</span> <span class="nx">handle</span><span class="p">.</span><span class="nf">Handler</span><span class="p">(</span><span class="nx">controller</span><span class="p">.</span><span class="nx">User</span><span class="p">.</span><span class="nx">Add</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">user</span><span class="p">.</span><span class="nf">GET</span><span class="p">(</span><span class="s">&#34;/&#34;</span><span class="p">,</span> <span class="nx">handle</span><span class="p">.</span><span class="nf">Handle</span><span class="p">(</span><span class="nx">controller</span><span class="p">.</span><span class="nx">User</span><span class="p">.</span><span class="nx">Get</span><span class="p">))</span>  
+</span></span><span class="line"><span class="cl">		<span class="nx">user</span><span class="p">.</span><span class="nf">POST</span><span class="p">(</span><span class="s">&#34;/&#34;</span><span class="p">,</span> <span class="nx">handle</span><span class="p">.</span><span class="nf">Handle</span><span class="p">(</span><span class="nx">controller</span><span class="p">.</span><span class="nx">User</span><span class="p">.</span><span class="nx">Add</span><span class="p">))</span>
 </span></span><span class="line"><span class="cl">	<span class="p">}</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">	<span class="nx">r</span><span class="p">.</span><span class="nf">Run</span><span class="p">()</span> <span class="c1">// listen and serve on 0.0.0.0:8080 (for windows &#34;localhost:8080&#34;)
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
-</span></span></code></pre></div><p>至此，我们就完成了错误处理和数据返回的统一，不需要在其他地方手写 <code>c.JSON(http.StatusOK, Response{Code: 400, Msg: err.Error(), Data: nil})</code> 和 <code>c.JSON(http.StatusOK, Response{200, &quot;&quot;, data})</code> 了。</p>
+</span></span></code></pre></div><p>对比 day8 的注册模式：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">user</span><span class="p">.</span><span class="nf">GET</span><span class="p">(</span><span class="s">&#34;/&#34;</span><span class="p">,</span> <span class="nx">controller</span><span class="p">.</span><span class="nx">User</span><span class="p">.</span><span class="nx">Get</span><span class="p">)</span>  <span class="c1">// 函数签名：func (c *user) Get(ctx *gin.Context)
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="nx">user</span><span class="p">.</span><span class="nf">POST</span><span class="p">(</span><span class="s">&#34;/&#34;</span><span class="p">,</span> <span class="nx">controller</span><span class="p">.</span><span class="nx">User</span><span class="p">.</span><span class="nx">Add</span><span class="p">)</span> <span class="c1">// 函数签名：func (c *user) Add(ctx *gin.Context)
+</span></span></span></code></pre></div><p>虽然注册路由时，必须得借用 <code>handle.Handle</code> 才能转化为 <code>gin.HandlerFunc</code>，但是可以不用在 <code>controller</code>层里写 <code>c.JSON(http.StatusOK, Response{Code: 400, Msg: err.Error(), Data: nil})</code> 和 <code>c.JSON(http.StatusOK, Response{200, &quot;&quot;, data})</code> 了。至此，我们就完成了错误处理和数据返回的统一。</p>
 <h2 id="小结">小结</h2>
 <p>本章节主要做了两件事：</p>
 <ol>
@@ -456,18 +462,25 @@
 <li>借鉴适配器模式，将 <code>binderFunc</code> 函数转化为框架所需要的类型，并实现错误处理和数据返回的统一。</li>
 </ol>
 <p>运行结果也没有变化：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sh" data-lang="sh"><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">curl -X GET <span class="s2">&#34;http://localhost:8080/user?name=Carol&#34;</span>
-</span></span><span class="line"><span class="cl"><span class="c1"># {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;database&#34;:null}</span>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">client</span><span class="p">()</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">time</span><span class="p">.</span><span class="nf">Sleep</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span> <span class="c1">// 等待路由注册
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl">	<span class="nx">resp1</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">http</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="s">&#34;http://localhost:8080/user?name=Carol&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">resp2</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">http</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="s">&#34;http://localhost:8080/user?name=Bob&#34;</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">resp3</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">http</span><span class="p">.</span><span class="nf">Post</span><span class="p">(</span><span class="s">&#34;http://localhost:8080/user&#34;</span><span class="p">,</span> <span class="s">&#34;application/json&#34;</span><span class="p">,</span> <span class="nx">bytes</span><span class="p">.</span><span class="nf">NewBufferString</span><span class="p">(</span><span class="s">`{&#34;name&#34;:&#34;Carol&#34;,&#34;age&#34;:44,&#34;job&#34;:&#34;worker&#34;}`</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">resp4</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">http</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="s">&#34;http://localhost:8080/user?name=Carol&#34;</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">curl -X GET <span class="s2">&#34;http://localhost:8080/user?name=Bob&#34;</span>
-</span></span><span class="line"><span class="cl"><span class="c1"># {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;database&#34;:{&#34;Name&#34;:&#34;Bob&#34;,&#34;Age&#34;:30,&#34;Job&#34;:&#34;driver&#34;}}</span>
+</span></span><span class="line"><span class="cl">	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">resp</span> <span class="o">:=</span> <span class="k">range</span> <span class="p">[]</span><span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Response</span><span class="p">{</span><span class="nx">resp1</span><span class="p">,</span> <span class="nx">resp2</span><span class="p">,</span> <span class="nx">resp3</span><span class="p">,</span> <span class="nx">resp4</span><span class="p">}</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">data</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">io</span><span class="p">.</span><span class="nf">ReadAll</span><span class="p">(</span><span class="nx">resp</span><span class="p">.</span><span class="nx">Body</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">data</span><span class="p">))</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">curl -X POST <span class="s2">&#34;http://localhost:8080/user?name=Carol&amp;age=44&amp;job=worker&#34;</span>
-</span></span><span class="line"><span class="cl"><span class="c1"># {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;database&#34;:null}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">curl -X GET <span class="s2">&#34;http://localhost:8080/user?name=Carol&#34;</span>
-</span></span><span class="line"><span class="cl"><span class="c1"># {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;database&#34;:{&#34;Name&#34;:&#34;Carol&#34;,&#34;Age&#34;:44,&#34;Job&#34;:&#34;worker&#34;}}</span>
+</span></span><span class="line"><span class="cl">	<span class="c1">// Output:
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="c1">// {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;data&#34;:null}
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="c1">// {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;data&#34;:{&#34;Name&#34;:&#34;Bob&#34;,&#34;Age&#34;:30,&#34;Job&#34;:&#34;driver&#34;}}
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="c1">// {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;data&#34;:null}
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="c1">// {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;data&#34;:{&#34;Name&#34;:&#34;Carol&#34;,&#34;Age&#34;:44,&#34;Job&#34;:&#34;worker&#34;}}
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
 </span></span></code></pre></div><div class="footnotes" role="doc-endnotes">
 <hr>
 <ol>
@@ -566,6 +579,19 @@
 
         <div class="article-details">
             <h2 class="article-title">gee-web-day7.5 「7天 web框架」读后感</h2>
+        </div>
+    </a>
+</article>
+
+            
+                
+<article class="">
+    <a href="/p/gee-web-day10-%E9%80%9A%E8%BF%87%E5%8F%8D%E5%B0%84%E6%9E%84%E9%80%A0%E8%A7%84%E8%8C%83%E8%B7%AF%E7%94%B1/">
+        
+        
+
+        <div class="article-details">
+            <h2 class="article-title">gee-web-day10 通过反射构造规范路由</h2>
         </div>
     </a>
 </article>
@@ -682,8 +708,10 @@
     
     
     
-    发表了6篇文章 ·
-    总计5.26k字
+    
+    
+    发表了7篇文章 ·
+    总计5.89k字
 </section>
 
 
