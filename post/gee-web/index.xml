@@ -211,9 +211,15 @@
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;	&lt;span class=&#34;k&#34;&gt;return&lt;/span&gt; &lt;span class=&#34;nx&#34;&gt;handles&lt;/span&gt;
 &lt;/span&gt;&lt;/span&gt;&lt;span class=&#34;line&#34;&gt;&lt;span class=&#34;cl&#34;&gt;&lt;span class=&#34;p&#34;&gt;}&lt;/span&gt;
-&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;通过对象注册路由有个缺点，难以为 &lt;code&gt;HandlerFunc&lt;/code&gt; 绑定 &lt;code&gt;path&lt;/code&gt; 和 &lt;code&gt;method&lt;/code&gt;。&lt;code&gt;GoFrame&lt;/code&gt; 的解决方式是在 &lt;code&gt;Req&lt;/code&gt;（第二个请求参数）里写 &lt;code&gt;go tag&lt;/code&gt;，有兴趣的读者，可以察看&lt;a class=&#34;link&#34; href=&#34;https://goframe.org/pages/viewpage.action?pageId=116004922#id-%e8%a7%84%e8%8c%83%e8%b7%af%e7%94%b1%e5%a6%82%e4%bd%95%e4%bd%bf%e7%94%a8-%e8%a7%84%e8%8c%83%e5%8f%82%e6%95%b0%e7%bb%93%e6%9e%84&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+&lt;/span&gt;&lt;/span&gt;&lt;/code&gt;&lt;/pre&gt;&lt;/div&gt;&lt;p&gt;但是通过对象注册路由有个缺点，难以为 &lt;strong&gt;&lt;code&gt;HandlerFunc&lt;/code&gt;&lt;/strong&gt; 绑定 &lt;code&gt;path&lt;/code&gt; 和 &lt;code&gt;method&lt;/code&gt;。&lt;/p&gt;
+&lt;p&gt;已知的解决方式：&lt;/p&gt;
+&lt;ol&gt;
+&lt;li&gt;&lt;code&gt;GoFrame&lt;/code&gt; 是在 &lt;code&gt;Req&lt;/code&gt;（第二个请求参数）里写 &lt;code&gt;go tag&lt;/code&gt;，有兴趣的读者，可以查看&lt;a class=&#34;link&#34; href=&#34;https://goframe.org/pages/viewpage.action?pageId=116004922#id-%e8%a7%84%e8%8c%83%e8%b7%af%e7%94%b1%e5%a6%82%e4%bd%95%e4%bd%bf%e7%94%a8-%e8%a7%84%e8%8c%83%e5%8f%82%e6%95%b0%e7%bb%93%e6%9e%84&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
     &gt;「文档：规范参数结构」&lt;/a&gt;或自己实现（&lt;a class=&#34;link&#34; href=&#34;https://github.com/gogf/gf/blob/313d9d138f96b0ed460d47684298a7fb26d3fd75/net/ghttp/ghttp_server_service_object.go#L132&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
-    &gt;&lt;code&gt;GoFrame&lt;/code&gt; 源码参考&lt;/a&gt;。&lt;/p&gt;
+    &gt;&lt;code&gt;GoFrame&lt;/code&gt; 源码参考&lt;/a&gt;）。&lt;/li&gt;
+&lt;li&gt;&lt;code&gt;iris&lt;/code&gt; 则要求方法名（函数名）的格式为：请求方法+请求路径，如 &lt;code&gt;GetHelloWorld&lt;/code&gt; 对应 &lt;code&gt;GET: /hello/world&lt;/code&gt;，示例：&lt;a class=&#34;link&#34; href=&#34;https://github.com/iris-contrib/examples/blob/master/mvc/hello-world/main.go&#34;  target=&#34;_blank&#34; rel=&#34;noopener&#34;
+    &gt;examples/mvc/hello-world/main.go&lt;/a&gt;&lt;/li&gt;
+&lt;/ol&gt;
 </description>
         </item>
         <item>

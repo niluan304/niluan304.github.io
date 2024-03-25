@@ -544,9 +544,15 @@
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="nx">handles</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p>通过对象注册路由有个缺点，难以为 <code>HandlerFunc</code> 绑定 <code>path</code> 和 <code>method</code>。<code>GoFrame</code> 的解决方式是在 <code>Req</code>（第二个请求参数）里写 <code>go tag</code>，有兴趣的读者，可以察看<a class="link" href="https://goframe.org/pages/viewpage.action?pageId=116004922#id-%e8%a7%84%e8%8c%83%e8%b7%af%e7%94%b1%e5%a6%82%e4%bd%95%e4%bd%bf%e7%94%a8-%e8%a7%84%e8%8c%83%e5%8f%82%e6%95%b0%e7%bb%93%e6%9e%84"  target="_blank" rel="noopener"
+</span></span></code></pre></div><p>但是通过对象注册路由有个缺点，难以为 <strong><code>HandlerFunc</code></strong> 绑定 <code>path</code> 和 <code>method</code>。</p>
+<p>已知的解决方式：</p>
+<ol>
+<li><code>GoFrame</code> 是在 <code>Req</code>（第二个请求参数）里写 <code>go tag</code>，有兴趣的读者，可以查看<a class="link" href="https://goframe.org/pages/viewpage.action?pageId=116004922#id-%e8%a7%84%e8%8c%83%e8%b7%af%e7%94%b1%e5%a6%82%e4%bd%95%e4%bd%bf%e7%94%a8-%e8%a7%84%e8%8c%83%e5%8f%82%e6%95%b0%e7%bb%93%e6%9e%84"  target="_blank" rel="noopener"
     >「文档：规范参数结构」</a>或自己实现（<a class="link" href="https://github.com/gogf/gf/blob/313d9d138f96b0ed460d47684298a7fb26d3fd75/net/ghttp/ghttp_server_service_object.go#L132"  target="_blank" rel="noopener"
-    ><code>GoFrame</code> 源码参考</a>。</p>
+    ><code>GoFrame</code> 源码参考</a>）。</li>
+<li><code>iris</code> 则要求方法名（函数名）的格式为：请求方法+请求路径，如 <code>GetHelloWorld</code> 对应 <code>GET: /hello/world</code>，示例：<a class="link" href="https://github.com/iris-contrib/examples/blob/master/mvc/hello-world/main.go"  target="_blank" rel="noopener"
+    >examples/mvc/hello-world/main.go</a></li>
+</ol>
 
 </section>
 
@@ -768,7 +774,7 @@
     
     
     发表了7篇文章 ·
-    总计6.13k字
+    总计6.14k字
 </section>
 
 
