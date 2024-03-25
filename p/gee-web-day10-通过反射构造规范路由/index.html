@@ -10,7 +10,7 @@
 <meta property='og:description' content='第二种路由注册方法：func(context.Context, *XXXReq) (*XXXRes, error)'>
 <meta property='og:url' content='https://niluan304.github.io/p/gee-web-day10-%E9%80%9A%E8%BF%87%E5%8F%8D%E5%B0%84%E6%9E%84%E9%80%A0%E8%A7%84%E8%8C%83%E8%B7%AF%E7%94%B1/'>
 <meta property='og:site_name' content='雾封的笔'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='gee' /><meta property='article:tag' content='web' /><meta property='article:tag' content='goframe' /><meta property='article:published_time' content='2023-12-22T15:43:59&#43;08:00'/><meta property='article:modified_time' content='2023-12-22T15:43:59&#43;08:00'/>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='gee' /><meta property='article:tag' content='web' /><meta property='article:published_time' content='2023-12-22T15:43:59&#43;08:00'/><meta property='article:modified_time' content='2023-12-22T15:43:59&#43;08:00'/>
 <meta name="twitter:title" content="gee-web-day10 通过反射构造规范路由">
 <meta name="twitter:description" content="第二种路由注册方法：func(context.Context, *XXXReq) (*XXXRes, error)">
     <link rel="shortcut icon" href="/favicon.ico" />
@@ -536,9 +536,8 @@
 </span></span><span class="line"><span class="cl">		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;v.Kind() must be reflect.Pointer&#34;</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">	<span class="p">}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">	<span class="nx">t</span> <span class="o">:=</span> <span class="nx">v</span><span class="p">.</span><span class="nf">Type</span><span class="p">()</span>
 </span></span><span class="line"><span class="cl">	<span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">t</span><span class="p">.</span><span class="nf">NumMethod</span><span class="p">();</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="nx">fn</span> <span class="o">:=</span> <span class="nx">v</span><span class="p">.</span><span class="nf">MethodByName</span><span class="p">(</span><span class="nx">t</span><span class="p">.</span><span class="nf">Method</span><span class="p">(</span><span class="nx">i</span><span class="p">).</span><span class="nx">Name</span><span class="p">)</span> <span class="c1">// 所有方法都必须为 ReqResFunc 类型
+</span></span><span class="line"><span class="cl">		<span class="nx">fn</span> <span class="o">:=</span> <span class="nx">v</span><span class="p">.</span><span class="nf">Method</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="c1">// 所有方法都必须为 ReqResFunc 类型
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="nx">handles</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">handles</span><span class="p">,</span> <span class="nf">ReqResHandle</span><span class="p">(</span><span class="nx">fn</span><span class="p">.</span><span class="nf">Interface</span><span class="p">()))</span>
 </span></span><span class="line"><span class="cl">	<span class="p">}</span>
 </span></span><span class="line"><span class="cl">
@@ -553,6 +552,8 @@
 <li><code>iris</code> 则要求方法名（函数名）的格式为：请求方法+请求路径，如 <code>GetHelloWorld</code> 对应 <code>GET: /hello/world</code>，示例：<a class="link" href="https://github.com/iris-contrib/examples/blob/master/mvc/hello-world/main.go"  target="_blank" rel="noopener"
     >examples/mvc/hello-world/main.go</a></li>
 </ol>
+<p>笔者也做了简单的实现：<a class="link" href="https://github.com/niluan304/gee/blob/main/web/day10/handle/handle_test.go"  target="_blank" rel="noopener"
+    >gee/web/day10/handle/handle_test.go</a>，这里就不再赘述了。</p>
 
 </section>
 
@@ -564,8 +565,6 @@
             <a href="/tags/gee/">Gee</a>
         
             <a href="/tags/web/">Web</a>
-        
-            <a href="/tags/goframe/">Goframe</a>
         
     </section>
 
