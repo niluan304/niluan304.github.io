@@ -1,844 +1,137 @@
-<!DOCTYPE html>
-<html lang="zh-cn" dir="ltr">
-    <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='132 模式的进阶，求 1324 模式 的个数：枚举 4 ，求 4 左边 132 模式的数量'>
-<title>LC2522. 统计上升四元组</title>
-
-<link rel='canonical' href='https://niluan304.github.io/solutions/lc2522.-%E7%BB%9F%E8%AE%A1%E4%B8%8A%E5%8D%87%E5%9B%9B%E5%85%83%E7%BB%84/'>
-
-<link rel="stylesheet" href="/scss/style.min.3847aef279a7028aef34c6efe3255226a0247c5ccbe1c150ade4d55e2b6d8516.css"><meta property='og:title' content='LC2522. 统计上升四元组'>
-<meta property='og:description' content='132 模式的进阶，求 1324 模式 的个数：枚举 4 ，求 4 左边 132 模式的数量'>
-<meta property='og:url' content='https://niluan304.github.io/solutions/lc2522.-%E7%BB%9F%E8%AE%A1%E4%B8%8A%E5%8D%87%E5%9B%9B%E5%85%83%E7%BB%84/'>
-<meta property='og:site_name' content='雾封的笔'>
-<meta property='og:type' content='article'><meta property='article:section' content='Solutions' /><meta property='article:tag' content='dp' /><meta property='article:published_time' content='2024-01-12T00:00:00&#43;00:00'/><meta property='article:modified_time' content='2024-01-12T00:00:00&#43;00:00'/>
-<meta name="twitter:title" content="LC2522. 统计上升四元组">
-<meta name="twitter:description" content="132 模式的进阶，求 1324 模式 的个数：枚举 4 ，求 4 左边 132 模式的数量">
-    <link rel="shortcut icon" href="/favicon.ico" />
-
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0BX1J3KRG"></script>
-<script>
-var doNotTrack = false;
-if (!doNotTrack) {
-	window.dataLayer = window.dataLayer || [];
-	function gtag(){dataLayer.push(arguments);}
-	gtag('js', new Date());
-	gtag('config', 'G-C0BX1J3KRG', { 'anonymize_ip': false });
-}
-</script>
-
-<style>
-   
-  :root {
-    --article-font-family: 'Noto Serif HK', var(--base-font-family);
-  }
-</style>
-
-<script>
-  ; (function () {
-    const customFont = document.createElement('link')
-    customFont.href =
-      'https://fonts.googleapis.com/css2?family=Noto+Serif+HK:wght@300;400;500;600;700&display=swap'
-    customFont.type = 'text/css'
-    customFont.rel = 'stylesheet'
-
-    document.head.appendChild(customFont)
-  })()
-</script>
-
-
-    </head>
-    <body class="
-    article-page
-    ">
-    <script>
-        (function() {
-            const colorSchemeKey = 'StackColorScheme';
-            if(!localStorage.getItem(colorSchemeKey)){
-                localStorage.setItem(colorSchemeKey, "auto");
-            }
-        })();
-    </script><script>
-    (function() {
-        const colorSchemeKey = 'StackColorScheme';
-        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
-        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
-
-        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
-            
-
-            document.documentElement.dataset.scheme = 'dark';
-        } else {
-            document.documentElement.dataset.scheme = 'light';
-        }
-    })();
-</script>
-<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
-    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
-        <span class="hamburger-box">
-            <span class="hamburger-inner"></span>
-        </span>
-    </button>
-
-    <header>
-        
-            
-            <figure class="site-avatar">
-                <a href="/">
-                
-                    
-                    
-                    
-                        
-                        <img src="/img/avatar_hueb4763c82ba1420a58a50c6eccfe357b_472983_300x0_resize_box_3.png" width="300"
-                            height="300" class="site-logo" loading="lazy" alt="Avatar">
-                    
-                
-                </a>
-                
-                    <span class="emoji">☕</span>
-                
-            </figure>
-            
-        
-        
-        <div class="site-meta">
-            <h1 class="site-name"><a href="/">雾封的笔</a></h1>
-            <h2 class="site-description">脚步不停，灿若繁星。</h2>
-        </div>
-    </header><ol class="social-menu">
-            
-                <li>
-                    <a 
-                        href='mailto:zwei.elen@outlook.com'
-                        target="_blank"
-                        title="Email"
-                        rel="me"
-                    >
-                        
-                        
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#2c3e50" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="icon icon-tabler icon-tabler-mail" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z"/><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="m3 7 9 6 9-6"/></svg>
-                        
-                    </a>
-                </li>
-            
-                <li>
-                    <a 
-                        href='https://github.com/niluan304'
-                        target="_blank"
-                        title="GitHub"
-                        rel="me"
-                    >
-                        
-                        
-                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
-</svg>
-
-
-
-                        
-                    </a>
-                </li>
-            
-        </ol><ol class="menu" id="main-menu">
-        
-        
-        
-        <li >
-            <a href='/' >
-                
-                
-                
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <polyline points="5 12 3 12 12 3 21 12 19 12" />
-  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
-  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
-</svg>
-
-
-
-                
-                <span>Home</span>
-            </a>
-        </li>
-        
-        
-        <li  class='current' >
-            <a href='/solutions/' >
-                
-                
-                
-                    <?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg t="1710685833984" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="19816" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200"><path d="M624.289 816.93c-3.032 0-6.157 0.409-9.288 1.214-72.38 18.637-144.767 37.274-217.147 55.897-19.536 5.03-26.426 21.93-24.586 36.448 1.981 15.646 14.106 31.485 33.446 31.485h0.002c3.029 0 6.15-0.407 9.28-1.212a2055574.5 2055574.5 0 0 1 217.149-55.898c19.536-5.034 26.423-21.938 24.583-36.457-1.985-15.642-14.106-31.476-33.44-31.476zM572.377 934.011c-6.321 0-12.516 2.06-18.413 6.126-14.42 9.939-28.264 15.35-41.153 16.086-0.547 0.032-1.095 0.047-1.644 0.047-6.968 0-14.874-2.326-24.868-7.31-0.743-0.393-3.643-2.292-5.561-3.547-5.306-3.474-6.786-4.443-8.492-4.674-5.036-2.597-10.51-3.946-16.135-3.946-15.808 0-30.932 10.543-35.963 25.07-4.172 12.041-0.206 24.313 10.609 32.827 24.347 19.168 52.743 29.3 82.12 29.3 26.81 0 53.386-8.55 76.855-24.725 13.26-9.139 18.484-24.493 13.637-40.068-4.69-15.065-17.144-25.186-30.992-25.186zM758.2 323.388c-23.674-44.276-59.272-80.43-102.949-104.556-40.902-22.593-88.289-34.536-137.036-34.536-41.49 0-83.246 8.797-120.754 25.442-39.792 17.658-73.83 43.216-101.172 75.963-51.182 61.3-72.758 149.987-57.716 237.237 14.454 83.839 60.433 154.192 126.145 193.017 5.63 3.328 11.493 5.015 17.423 5.015 15.057 0 28.606-11.094 32.946-26.978 4.146-15.17-1.767-29.61-15.431-37.682-87.857-51.928-112.807-177.156-85.54-263.399 26.457-83.656 107.442-139.862 201.52-139.862 39.74 0 78.37 10.246 111.716 29.63 45.121 26.234 77.406 69.951 90.905 123.098 14.556 57.308 5.738 118.382-24.192 167.566-11.93 19.606-27.417 37.625-42.396 55.048-9.603 11.173-19.533 22.724-28.549 34.697-15.429 20.492-20.147 42.395-24.71 63.575-0.8 3.718-1.62 7.528-2.499 11.339l-198.107 52.663c-19.536 5.193-26.361 22.222-24.458 36.791 2.024 15.5 14.071 31.193 33.179 31.196h0.007c3.103 0 6.304-0.433 9.517-1.286 51.509-13.699 103.021-27.39 154.534-41.075 5.775-1.536 11.35-2.909 16.74-4.24 42.26-10.416 75.638-18.644 79.547-79.646 1.383-21.58 19.882-41.685 36.204-59.424 4.189-4.553 8.144-8.853 11.756-13.099 19.584-23.002 44.049-54.132 59.531-90.99 32.646-77.76 26.907-164.947-16.16-245.504zM173.191 470.702c0-19.056-15.448-34.504-34.505-34.504H71.708c-19.057 0-34.505 15.448-34.505 34.504 0 19.057 15.448 34.505 34.505 34.505h66.978c19.057 0 34.505-15.448 34.505-34.505zM954.989 436.198h-66.98c-19.056 0-34.503 15.448-34.503 34.504 0 19.057 15.448 34.505 34.504 34.505h66.979c19.056 0 34.505-15.448 34.505-34.505 0-19.056-15.449-34.504-34.505-34.504zM225.263 230.175c13.475 13.475 35.321 13.475 48.796 0 13.475-13.475 13.475-35.322 0-48.796l-47.362-47.362c-13.474-13.475-35.321-13.475-48.796 0-13.475 13.475-13.475 35.321 0 48.796l47.362 47.362zM803.912 711.23c-13.475-13.475-35.322-13.475-48.797 0-13.474 13.475-13.474 35.322 0 48.797l47.362 47.362c13.475 13.475 35.322 13.475 48.796 0 13.475-13.475 13.475-35.321 0-48.797l-47.361-47.362zM514.587 135.988c19.056 0 34.505-15.449 34.505-34.505v-66.98C549.092 15.449 533.643 0 514.587 0c-19.057 0-34.505 15.449-34.505 34.505v66.979c0 19.056 15.448 34.505 34.505 34.505zM274.06 711.23c-13.475-13.475-35.321-13.475-48.796 0l-47.362 47.362c-13.475 13.475-13.475 35.321 0 48.797 13.475 13.475 35.322 13.475 48.796 0l47.362-47.362c13.475-13.475 13.475-35.322 0-48.797zM755.114 230.175c13.475 13.475 35.322 13.475 48.797 0l47.361-47.362c13.475-13.475 13.475-35.321 0-48.796-13.475-13.475-35.321-13.475-48.796 0l-47.362 47.362c-13.474 13.474-13.474 35.321 0 48.796z" fill="#707070" p-id="19817" data-spm-anchor-id="a313x.search_index.0.i7.774c3a81Q659h0" class="selected"></path></svg>
-                
-                <span>Solutions</span>
-            </a>
-        </li>
-        
-        
-        <li >
-            <a href='/archives/' >
-                
-                
-                
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <rect x="3" y="4" width="18" height="4" rx="2" />
-  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
-  <line x1="10" y1="12" x2="14" y2="12" />
-</svg>
-
-
-
-                
-                <span>Archives</span>
-            </a>
-        </li>
-        
-        
-        <li >
-            <a href='/search/' >
-                
-                
-                
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="10" cy="10" r="7" />
-  <line x1="21" y1="21" x2="15" y2="15" />
-</svg>
-
-
-
-                
-                <span>Search</span>
-            </a>
-        </li>
-        
-        
-        <li >
-            <a href='/links/' >
-                
-                
-                
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
-  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
-</svg>
-
-
-
-                
-                <span>Links</span>
-            </a>
-        </li>
-        
-        <li class="menu-bottom-section">
-            <ol class="menu">
-
-                
-                    <li id="dark-mode-toggle">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="8" cy="12" r="2" />
-  <rect x="2" y="6" width="20" height="12" rx="6" />
-</svg>
-
-
-
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="16" cy="12" r="2" />
-  <rect x="2" y="6" width="20" height="12" rx="6" />
-</svg>
-
-
-
-                        <span>暗色模式</span>
-                    </li>
-                
-            </ol>
-        </li>
-    </ol>
-</aside>
-
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">目录</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li><a href="#前言">前言</a></li>
-    <li><a href="#思路">思路</a>
-      <ol>
-        <li><a href="#枚举-j-和-l">枚举 j 和 l</a></li>
-        <li><a href="#预处理-countlj">预处理 count[l][j]</a></li>
-      </ol>
-    </li>
-    <li><a href="#代码">代码</a>
-      <ol>
-        <li><a href="#组合代码">组合代码</a></li>
-        <li><a href="#空间优化">空间优化</a></li>
-      </ol>
-    </li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
-            <main class="main full-width">
-    <article class="main-article">
-    <header class="article-header">
-
-    <div class="article-details">
-    
-    <header class="article-category">
-        
-            <a href="/categories/leetcode/" style="background-color: #2a9d8f; color: #fff;">
-                LeetCode
-            </a>
-        
-    </header>
-    
-
-    <div class="article-title-wrapper">
-        <h2 class="article-title">
-            <a href="/solutions/lc2522.-%E7%BB%9F%E8%AE%A1%E4%B8%8A%E5%8D%87%E5%9B%9B%E5%85%83%E7%BB%84/">LC2522. 统计上升四元组</a>
-        </h2>
-    
-        
-        <h3 class="article-subtitle">
-            132 模式的进阶，求 1324 模式 的个数：枚举 4 ，求 4 左边 132 模式的数量
-        </h3>
-        
-    </div>
-
-    
-    
-    
-    
-    <footer class="article-time">
-        
-            <div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
-  <circle cx="18" cy="18" r="4" />
-  <path d="M15 3v4" />
-  <path d="M7 3v4" />
-  <path d="M3 11h16" />
-  <path d="M18 16.496v1.504l1 1" />
-</svg>
-                <time class="article-time--published">2024-01-12</time>
-            </div>
-        
-
-        
-    </footer>
-    
-
-    
-</div>
-
-</header>
-
-    <section class="article-content">
-    
-    
-    <p>$132$ 模式的进阶，求 $1324$ 模式 的个数：枚举 4 ，求 4 左边 132 模式的数量</p>
-<h2 id="前言">前言</h2>
-<p>四元上升组定义：一个组 $(i, j, k, l)$ 满足以下条件：</p>
-<ul>
-<li>$0 &lt;= i &lt; j &lt; k &lt; l &lt; n $ 且</li>
-<li>$nums[i] &lt; nums[k] &lt; nums[j] &lt; nums[l] $。</li>
-</ul>
-<p>在数组中是这样的：</p>
-<p><img src="https://pic.leetcode.cn/1705071082-bzZhLS-image-20240112201924903.png"
-	
-	
-	
-	loading="lazy"
-	
-		alt="image-20240112201924903.png"
-	
-	
-></p>
-<p>这里称之为 $1324$ 模式，如果有疑惑，请先AC：<a class="link" href="https://leetcode.cn/problems/132-pattern/description/"  target="_blank" rel="noopener"
-    >456. 132 模式</a></p>
-<p>AC后，可以先思考下：返回长度 $n-2$ 的数组，记录每个 $j$ 下有多少个 $132$ 模式。</p>
-<p>$
-nums[i] &lt; nums[k] &lt; nums[j] \quad   \quad i&lt;j&lt;k
-$</p>
-<blockquote>
-<p>解法的时间复杂度应当不超过 $\mathcal{O}(n^2)$</p>
-</blockquote>
-<p>比如 <strong>示例3：$nums = [-1,3,2,0]$</strong></p>
-<p>$j=1$ 下有 $2$ 个 $132$ 模式的的子序列：$[-1, 3, 2]$、$[-1, 3, 0]$</p>
-<p>$j=2$ 下有 $1$ 个 $132$ 模式的的子序列：$[-1, 2, 0]$</p>
-<p>那么答案为：$ans = [2,1]$</p>
-<p><strong>注意：</strong></p>
-<p>本篇内容是尝试去拆分 佬<a class="link" href="/u/destiny-god" >@DestinyGod</a> 题解<a class="link" href="https://leetcode.cn/problems/count-increasing-quadruplets/solutions/2080664/by-destiny-god-4qc6"  target="_blank" rel="noopener"
-    >最简洁代码</a>，从而得到的个人理解。</p>
-<h2 id="思路">思路</h2>
-<p>题目要求统计数组中有多少个 $1324$ 模式。</p>
-<p>题目数据范围：$4 &lt;= nums.length &lt;= 4000$，意味着代码的时间复杂度应为 $\mathcal{O}(n^2)$，部分语言 $\mathcal{O}(n^2 \log n)$ 也可以AC。</p>
-<h3 id="枚举-j-和-l">枚举 j 和 l</h3>
-<p>时间复杂度度 $\mathcal{O}(n^2)$ 可以过，可以枚举最大的 $3$ 和 $4$ ，设索引分别为 $j$ 和 $l$。</p>
-<p>如果知道在区间 $[0, l]$ 内，以 $j$ 为 $3$ 的 $132$ 模式的数量，记为 $count[l][j]$，并在双重循环中累加起来，那就是答案了。</p>
-<p>伪代码：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// 从小到大枚举 l 统计答案
-</span></span></span><span class="line"><span class="cl"><span class="c1">// 如果 nums[j] &lt; nums[l]，那么有 `j为3, l为4` 的 `1324模式`
-</span></span></span><span class="line"><span class="cl"><span class="c1">// 答案应当加上以 `j为3` 的 `132模式` 的数量
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">for</span> <span class="nx">l</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">l</span> <span class="p">&lt;</span> <span class="nx">n</span><span class="p">;</span> <span class="nx">l</span><span class="o">++</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">	<span class="k">for</span> <span class="nx">j</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">j</span> <span class="p">&lt;</span> <span class="nx">l</span><span class="p">;</span> <span class="nx">j</span><span class="o">++</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="k">if</span> <span class="nx">nums</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="p">&lt;</span> <span class="nx">nums</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span> <span class="p">{</span> <span class="c1">// 符合 1324 模式
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="nx">ans</span> <span class="o">+=</span> <span class="nx">count</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">j</span><span class="p">]</span> <span class="c1">// count[l][j] 表示 在区间 [0, l] 内，以 `j为3` 的 `132模式` 的数量
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="p">}</span>
-</span></span><span class="line"><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p>可以看出，这部分代码的时间复杂度是 $\mathcal{O}(n^2)$，如果能在时间复杂度 $\mathcal{O}(n^2)$ 以内预处理好 $count[l][j]$，那么就可以完成此题。</p>
-<h3 id="预处理-countlj">预处理 count[l][j]</h3>
-<p>需要注意在区间 $[0, l]$ 内，以 $j$ 为 $3$ 的 $132$ 模式的所有数量，等于 所有能满足</p>
-<p>$
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content='132 模式的进阶，求 1324 模式 的个数：枚举 4 ，求 4 左边 132 模式的数量'><title>LC2522. 统计上升四元组</title>
+<link rel=canonical href=https://niluan304.github.io/solutions/lc2522.-%E7%BB%9F%E8%AE%A1%E4%B8%8A%E5%8D%87%E5%9B%9B%E5%85%83%E7%BB%84/><link rel=stylesheet href=/scss/style.min.3847aef279a7028aef34c6efe3255226a0247c5ccbe1c150ade4d55e2b6d8516.css><meta property='og:title' content='LC2522. 统计上升四元组'><meta property='og:description' content='132 模式的进阶，求 1324 模式 的个数：枚举 4 ，求 4 左边 132 模式的数量'><meta property='og:url' content='https://niluan304.github.io/solutions/lc2522.-%E7%BB%9F%E8%AE%A1%E4%B8%8A%E5%8D%87%E5%9B%9B%E5%85%83%E7%BB%84/'><meta property='og:site_name' content='雾封的笔'><meta property='og:type' content='article'><meta property='article:section' content='Solutions'><meta property='article:tag' content='dp'><meta property='article:published_time' content='2024-01-12T00:00:00+00:00'><meta property='article:modified_time' content='2024-01-12T00:00:00+00:00'><meta name=twitter:title content="LC2522. 统计上升四元组"><meta name=twitter:description content="132 模式的进阶，求 1324 模式 的个数：枚举 4 ，求 4 左边 132 模式的数量"><link rel="shortcut icon" href=/favicon.ico><script async src="https://www.googletagmanager.com/gtag/js?id=G-C0BX1J3KRG"></script><script>var doNotTrack=!1;if(!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-C0BX1J3KRG",{anonymize_ip:!1})}</script><style>:root{--article-font-family:'Noto Serif HK', var(--base-font-family)}</style><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Noto+Serif+HK:wght@300;400;500;600;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hueb4763c82ba1420a58a50c6eccfe357b_472983_300x0_resize_box_3.png width=300 height=300 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>☕</span></figure><div class=site-meta><h1 class=site-name><a href=/>雾封的笔</a></h1><h2 class=site-description>脚步不停，灿若繁星。</h2></div></header><ol class=social-menu><li><a href=mailto:zwei.elen@outlook.com target=_blank title=Email rel=me><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#2c3e50" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="icon icon-tabler icon-tabler-mail" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z"/><path d="M3 7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/><path d="m3 7 9 6 9-6"/></svg></a></li><li><a href=https://github.com/niluan304 target=_blank title=GitHub rel=me><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>Home</span></a></li><li class=current><a href=/solutions/><!doctype html><svg t="1710685833984" class="icon" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" p-id="19816" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200"><path d="M624.289 816.93c-3.032.0-6.157.409-9.288 1.214-72.38 18.637-144.767 37.274-217.147 55.897-19.536 5.03-26.426 21.93-24.586 36.448 1.981 15.646 14.106 31.485 33.446 31.485h.002c3.029.0 6.15-.407 9.28-1.212a2055574.5 2055574.5.0 01217.149-55.898c19.536-5.034 26.423-21.938 24.583-36.457-1.985-15.642-14.106-31.476-33.44-31.476zM572.377 934.011c-6.321.0-12.516 2.06-18.413 6.126-14.42 9.939-28.264 15.35-41.153 16.086-.547.032-1.095.047-1.644.047-6.968.0-14.874-2.326-24.868-7.31-.743-.393-3.643-2.292-5.561-3.547-5.306-3.474-6.786-4.443-8.492-4.674-5.036-2.597-10.51-3.946-16.135-3.946-15.808.0-30.932 10.543-35.963 25.07-4.172 12.041-.206 24.313 10.609 32.827 24.347 19.168 52.743 29.3 82.12 29.3 26.81.0 53.386-8.55 76.855-24.725 13.26-9.139 18.484-24.493 13.637-40.068-4.69-15.065-17.144-25.186-30.992-25.186zM758.2 323.388c-23.674-44.276-59.272-80.43-102.949-104.556-40.902-22.593-88.289-34.536-137.036-34.536-41.49.0-83.246 8.797-120.754 25.442-39.792 17.658-73.83 43.216-101.172 75.963-51.182 61.3-72.758 149.987-57.716 237.237 14.454 83.839 60.433 154.192 126.145 193.017 5.63 3.328 11.493 5.015 17.423 5.015 15.057.0 28.606-11.094 32.946-26.978 4.146-15.17-1.767-29.61-15.431-37.682-87.857-51.928-112.807-177.156-85.54-263.399 26.457-83.656 107.442-139.862 201.52-139.862 39.74.0 78.37 10.246 111.716 29.63 45.121 26.234 77.406 69.951 90.905 123.098 14.556 57.308 5.738 118.382-24.192 167.566-11.93 19.606-27.417 37.625-42.396 55.048-9.603 11.173-19.533 22.724-28.549 34.697-15.429 20.492-20.147 42.395-24.71 63.575-.8 3.718-1.62 7.528-2.499 11.339l-198.107 52.663c-19.536 5.193-26.361 22.222-24.458 36.791 2.024 15.5 14.071 31.193 33.179 31.196h.007c3.103.0 6.304-.433 9.517-1.286 51.509-13.699 103.021-27.39 154.534-41.075 5.775-1.536 11.35-2.909 16.74-4.24 42.26-10.416 75.638-18.644 79.547-79.646 1.383-21.58 19.882-41.685 36.204-59.424 4.189-4.553 8.144-8.853 11.756-13.099 19.584-23.002 44.049-54.132 59.531-90.99 32.646-77.76 26.907-164.947-16.16-245.504zM173.191 470.702c0-19.056-15.448-34.504-34.505-34.504H71.708c-19.057.0-34.505 15.448-34.505 34.504.0 19.057 15.448 34.505 34.505 34.505h66.978c19.057.0 34.505-15.448 34.505-34.505zm781.798-34.504h-66.98c-19.056.0-34.503 15.448-34.503 34.504.0 19.057 15.448 34.505 34.504 34.505h66.979c19.056.0 34.505-15.448 34.505-34.505.0-19.056-15.449-34.504-34.505-34.504zM225.263 230.175c13.475 13.475 35.321 13.475 48.796.0s13.475-35.322.0-48.796l-47.362-47.362c-13.474-13.475-35.321-13.475-48.796.0s-13.475 35.321.0 48.796l47.362 47.362zM803.912 711.23c-13.475-13.475-35.322-13.475-48.797.0-13.474 13.475-13.474 35.322.0 48.797l47.362 47.362c13.475 13.475 35.322 13.475 48.796.0 13.475-13.475 13.475-35.321.0-48.797l-47.361-47.362zM514.587 135.988c19.056.0 34.505-15.449 34.505-34.505v-66.98C549.092 15.449 533.643.0 514.587.0c-19.057.0-34.505 15.449-34.505 34.505v66.979c0 19.056 15.448 34.505 34.505 34.505zM274.06 711.23c-13.475-13.475-35.321-13.475-48.796.0l-47.362 47.362c-13.475 13.475-13.475 35.321.0 48.797 13.475 13.475 35.322 13.475 48.796.0l47.362-47.362c13.475-13.475 13.475-35.322.0-48.797zM755.114 230.175c13.475 13.475 35.322 13.475 48.797.0l47.361-47.362c13.475-13.475 13.475-35.321.0-48.796s-35.321-13.475-48.796.0l-47.362 47.362c-13.474 13.474-13.474 35.321.0 48.796z" fill="#707070" p-id="19817" data-spm-anchor-id="a313x.search_index.0.i7.774c3a81Q659h0" class="selected"/></svg>
+<span>Solutions</span></a></li><li><a href=/archives/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>Archives</span></a></li><li><a href=/search/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>Search</span></a></li><li><a href=/links/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M10 14a3.5 3.5.0 005 0l4-4a3.5 3.5.0 00-5-5l-.5.5"/><path d="M14 10a3.5 3.5.0 00-5 0l-4 4a3.5 3.5.0 005 5l.5-.5"/></svg>
+<span>Links</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav id=TableOfContents><ol><li><a href=#前言>前言</a></li><li><a href=#思路>思路</a><ol><li><a href=#枚举-j-和-l>枚举 j 和 l</a></li><li><a href=#预处理-countlj>预处理 count[l][j]</a></li></ol></li><li><a href=#代码>代码</a><ol><li><a href=#组合代码>组合代码</a></li><li><a href=#空间优化>空间优化</a></li></ol></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/leetcode/ style=background-color:#2a9d8f;color:#fff>LeetCode</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/solutions/lc2522.-%E7%BB%9F%E8%AE%A1%E4%B8%8A%E5%8D%87%E5%9B%9B%E5%85%83%E7%BB%84/>LC2522. 统计上升四元组</a></h2><h3 class=article-subtitle>132 模式的进阶，求 1324 模式 的个数：枚举 4 ，求 4 左边 132 模式的数量</h3></div><footer class=article-time><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published>2024-01-12</time></div></footer></div></header><section class=article-content><p>$132$ 模式的进阶，求 $1324$ 模式 的个数：枚举 4 ，求 4 左边 132 模式的数量</p><h2 id=前言>前言</h2><p>四元上升组定义：一个组 $(i, j, k, l)$ 满足以下条件：</p><ul><li>$0 &lt;= i &lt; j &lt; k &lt; l &lt; n $ 且</li><li>$nums[i] &lt; nums[k] &lt; nums[j] &lt; nums[l] $。</li></ul><p>在数组中是这样的：</p><p><img src=https://pic.leetcode.cn/1705071082-bzZhLS-image-20240112201924903.png loading=lazy alt=image-20240112201924903.png></p><p>这里称之为 $1324$ 模式，如果有疑惑，请先AC：<a class=link href=https://leetcode.cn/problems/132-pattern/description/ target=_blank rel=noopener>456. 132 模式</a></p><p>AC后，可以先思考下：返回长度 $n-2$ 的数组，记录每个 $j$ 下有多少个 $132$ 模式。</p><p>$
+nums[i] &lt; nums[k] &lt; nums[j] \quad \quad i&lt;j&lt;k
+$</p><blockquote><p>解法的时间复杂度应当不超过 $\mathcal{O}(n^2)$</p></blockquote><p>比如 <strong>示例3：$nums = [-1,3,2,0]$</strong></p><p>$j=1$ 下有 $2$ 个 $132$ 模式的的子序列：$[-1, 3, 2]$、$[-1, 3, 0]$</p><p>$j=2$ 下有 $1$ 个 $132$ 模式的的子序列：$[-1, 2, 0]$</p><p>那么答案为：$ans = [2,1]$</p><p><strong>注意：</strong></p><p>本篇内容是尝试去拆分 佬<a class=link href=/u/destiny-god>@DestinyGod</a> 题解<a class=link href=https://leetcode.cn/problems/count-increasing-quadruplets/solutions/2080664/by-destiny-god-4qc6 target=_blank rel=noopener>最简洁代码</a>，从而得到的个人理解。</p><h2 id=思路>思路</h2><p>题目要求统计数组中有多少个 $1324$ 模式。</p><p>题目数据范围：$4 &lt;= nums.length &lt;= 4000$，意味着代码的时间复杂度应为 $\mathcal{O}(n^2)$，部分语言 $\mathcal{O}(n^2 \log n)$ 也可以AC。</p><h3 id=枚举-j-和-l>枚举 j 和 l</h3><p>时间复杂度度 $\mathcal{O}(n^2)$ 可以过，可以枚举最大的 $3$ 和 $4$ ，设索引分别为 $j$ 和 $l$。</p><p>如果知道在区间 $[0, l]$ 内，以 $j$ 为 $3$ 的 $132$ 模式的数量，记为 $count[l][j]$，并在双重循环中累加起来，那就是答案了。</p><p>伪代码：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=cl><span class=c1>// 从小到大枚举 l 统计答案
+</span></span></span><span class=line><span class=cl><span class=c1>// 如果 nums[j] &lt; nums[l]，那么有 `j为3, l为4` 的 `1324模式`
+</span></span></span><span class=line><span class=cl><span class=c1>// 答案应当加上以 `j为3` 的 `132模式` 的数量
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>for</span> <span class=nx>l</span> <span class=o>:=</span> <span class=mi>0</span><span class=p>;</span> <span class=nx>l</span> <span class=p>&lt;</span> <span class=nx>n</span><span class=p>;</span> <span class=nx>l</span><span class=o>++</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=k>for</span> <span class=nx>j</span> <span class=o>:=</span> <span class=mi>0</span><span class=p>;</span> <span class=nx>j</span> <span class=p>&lt;</span> <span class=nx>l</span><span class=p>;</span> <span class=nx>j</span><span class=o>++</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=k>if</span> <span class=nx>nums</span><span class=p>[</span><span class=nx>j</span><span class=p>]</span> <span class=p>&lt;</span> <span class=nx>nums</span><span class=p>[</span><span class=nx>l</span><span class=p>]</span> <span class=p>{</span> <span class=c1>// 符合 1324 模式
+</span></span></span><span class=line><span class=cl><span class=c1></span>			<span class=nx>ans</span> <span class=o>+=</span> <span class=nx>count</span><span class=p>[</span><span class=nx>l</span><span class=p>][</span><span class=nx>j</span><span class=p>]</span> <span class=c1>// count[l][j] 表示 在区间 [0, l] 内，以 `j为3` 的 `132模式` 的数量
+</span></span></span><span class=line><span class=cl><span class=c1></span>		<span class=p>}</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>可以看出，这部分代码的时间复杂度是 $\mathcal{O}(n^2)$，如果能在时间复杂度 $\mathcal{O}(n^2)$ 以内预处理好 $count[l][j]$，那么就可以完成此题。</p><h3 id=预处理-countlj>预处理 count[l][j]</h3><p>需要注意在区间 $[0, l]$ 内，以 $j$ 为 $3$ 的 $132$ 模式的所有数量，等于 所有能满足</p><p>$
 nums[i] &lt; nums[k] &lt; nums[j] \quad \quad \quad i \in [0, j-1],\ k \in [j+1, l-1]
-$</p>
-<p>$(i, k)$ 的对数</p>
-<hr>
-<p>计算 $count[l][j]$，可以借助动态规划的思想。</p>
-<p>在区间 $[0, l]$ 内，以 $j$ 为 $3$ 的 $132$ 模式的所有数量 等于 在区间 $[0, l-1]$ 内的数量加上以 $j$ 为 $3$，以 $l$ 为 $2$ 的 $132$ 的数量，记为 $x$，即：</p>
-<p>$
+$</p><p>$(i, k)$ 的对数</p><hr><p>计算 $count[l][j]$，可以借助动态规划的思想。</p><p>在区间 $[0, l]$ 内，以 $j$ 为 $3$ 的 $132$ 模式的所有数量 等于 在区间 $[0, l-1]$ 内的数量加上以 $j$ 为 $3$，以 $l$ 为 $2$ 的 $132$ 的数量，记为 $x$，即：</p><p>$
 count[l][j] = count[l-1][j] + x
-$</p>
-<p>而 $x$ 就是 在 $[0,j-1]$ 区间内，小于 $nums[l]$ 的数量，那如何计算 $x$ 呢？暴力枚举：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="nx">x</span> <span class="o">:=</span> <span class="mi">0</span>
-</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="nx">j</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">j</span> <span class="p">&lt;</span> <span class="nx">l</span><span class="p">;</span> <span class="nx">j</span><span class="o">++</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">nums</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="p">&lt;</span> <span class="nx">nums</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="nx">x</span><span class="o">++</span>
-</span></span><span class="line"><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p>在加上枚举 $l$ 的实现，就得到 预处理 $count[l][j]$的代码：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// count[l][j] 表示 在 [0, l] 这段区间内，以 `j为3` 的 `132模式` 数量
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">var</span> <span class="nx">count</span> <span class="p">=</span> <span class="nb">make</span><span class="p">([][]</span><span class="kt">int</span><span class="p">,</span> <span class="nx">n</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="k">for</span> <span class="nx">l</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">l</span> <span class="p">&lt;</span> <span class="nx">n</span><span class="p">;</span> <span class="nx">l</span><span class="o">++</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">	<span class="nx">count</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span> <span class="p">=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">int</span><span class="p">,</span> <span class="nx">l</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">	<span class="nx">x</span> <span class="o">:=</span> <span class="mi">0</span> <span class="c1">// x 记录 [0, j] 这段区间，有多少个数小于 nums[l]
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="c1">// 动态规划的思想
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">for</span> <span class="nx">j</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">j</span> <span class="p">&lt;</span> <span class="nx">l</span><span class="p">;</span> <span class="nx">j</span><span class="o">++</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="c1">// 在 [0, l] 区间，以 `j为3` 的 `132模式` 数量等于在 [0, l-1] 区间内的数量 + 以 `j为3`，以 `l为2` 的 `132模式` 的数量
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="nx">count</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">j</span><span class="p">]</span> <span class="p">=</span> <span class="nx">count</span><span class="p">[</span><span class="nx">l</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="nx">j</span><span class="p">]</span>
-</span></span><span class="line"><span class="cl">	
-</span></span><span class="line"><span class="cl">		<span class="c1">// 如果 nums[j] &gt; nums[l]，说明 nums[l] 可以作为新的 2，新增的数量：在 [0, j] 区间中小于 nums[l] 的个数，
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="c1">// 也就是以 `j为3, l为2` 的 `132模式` 中，x 就为 1 的数量。
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="k">if</span> <span class="nx">nums</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="p">&gt;</span> <span class="nx">nums</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">			<span class="nx">count</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">j</span><span class="p">]</span> <span class="o">+=</span> <span class="nx">x</span>
-</span></span><span class="line"><span class="cl">		<span class="p">}</span> <span class="k">else</span>
-</span></span><span class="line"><span class="cl">		<span class="c1">// 如果 nums[j] &lt; nums[l]，说明不满足 `132模式`。但是小于 nums[l] 的数量 +1
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="k">if</span> <span class="nx">nums</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="p">&lt;</span> <span class="nx">nums</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">			<span class="nx">x</span><span class="o">++</span>
-</span></span><span class="line"><span class="cl">		<span class="p">}</span>
-</span></span><span class="line"><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><h2 id="代码">代码</h2>
-<h3 id="组合代码">组合代码</h3>
-<p>组合 <strong>枚举 $j$ 和 $l$</strong> 和 <strong>预处理 $count[l][j]$</strong> 的代码即可解决本题：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">countQuadruplets</span><span class="p">(</span><span class="nx">nums</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="kt">int64</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">	<span class="c1">// 1324 模式
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="c1">// i &lt; j &lt; k &lt; l
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="c1">// nums[i] &lt; nums[k] &lt; nums[j] &lt; nums[l]
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
-</span></span><span class="line"><span class="cl">	<span class="kd">var</span> <span class="nx">n</span><span class="p">,</span> <span class="nx">ans</span> <span class="p">=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">nums</span><span class="p">),</span> <span class="mi">0</span>
-</span></span><span class="line"><span class="cl">	<span class="c1">// count[l][j] 表示 在 [0, l] 这段区间内，以 `j为3` 的 `132模式` 数量
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="kd">var</span> <span class="nx">count</span> <span class="p">=</span> <span class="nb">make</span><span class="p">([][]</span><span class="kt">int</span><span class="p">,</span> <span class="nx">n</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">	<span class="k">for</span> <span class="nx">l</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">l</span> <span class="p">&lt;</span> <span class="nx">n</span><span class="p">;</span> <span class="nx">l</span><span class="o">++</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="nx">count</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span> <span class="p">=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">int</span><span class="p">,</span> <span class="nx">l</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">		<span class="nx">x</span> <span class="o">:=</span> <span class="mi">0</span> <span class="c1">// x 记录 [0, j] 这段区间，有多少个数小于 nums[l]
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="c1">// 动态规划的思想
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="k">for</span> <span class="nx">j</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">j</span> <span class="p">&lt;</span> <span class="nx">l</span><span class="p">;</span> <span class="nx">j</span><span class="o">++</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">			<span class="c1">// 在 [0, l] 区间，以 `j为3` 的 `132模式` 数量等于在 [0, l-1] 区间内的数量加上以 `j为3`，以 `l为2` 的 `132模式` 的数量
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="nx">count</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">j</span><span class="p">]</span> <span class="p">=</span> <span class="nx">count</span><span class="p">[</span><span class="nx">l</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="nx">j</span><span class="p">]</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">			<span class="c1">// 如果 nums[j] &gt; nums[l]，说明 nums[l] 可以作为新的 2，新增的数量：在 [0, j] 区间中小于 nums[l] 的个数，
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="c1">// 也就是以 `j为3, l为2` 的 `132模式` 中，x 就为 1 的数量。
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="k">if</span> <span class="nx">nums</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="p">&gt;</span> <span class="nx">nums</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">				<span class="nx">count</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">j</span><span class="p">]</span> <span class="o">+=</span> <span class="nx">x</span>
-</span></span><span class="line"><span class="cl">			<span class="p">}</span> <span class="k">else</span>
-</span></span><span class="line"><span class="cl">			<span class="c1">// 如果 nums[j] &lt; nums[l]，说明不满足 `132模式`。但是小于 nums[l] 的数量 +1
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="k">if</span> <span class="nx">nums</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="p">&lt;</span> <span class="nx">nums</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">				<span class="nx">x</span><span class="o">++</span>
-</span></span><span class="line"><span class="cl">			<span class="p">}</span>
-</span></span><span class="line"><span class="cl">		<span class="p">}</span>
-</span></span><span class="line"><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">	<span class="c1">// 从小到大枚举 l 统计答案
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="c1">// 如果 nums[j] &lt; nums[l]，那么有 `j为3, l为4` 的 `1324模式`
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="c1">// 答案应当加上以 `j为3` 的 `132模式` 的数量
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">for</span> <span class="nx">l</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">l</span> <span class="p">&lt;</span> <span class="nx">n</span><span class="p">;</span> <span class="nx">l</span><span class="o">++</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="k">for</span> <span class="nx">j</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">j</span> <span class="p">&lt;</span> <span class="nx">l</span><span class="p">;</span> <span class="nx">j</span><span class="o">++</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">			<span class="k">if</span> <span class="nx">nums</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="p">&lt;</span> <span class="nx">nums</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span> <span class="p">{</span> <span class="c1">// 符合 1324 模式
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>				<span class="nx">ans</span> <span class="o">+=</span> <span class="nx">count</span><span class="p">[</span><span class="nx">l</span><span class="p">][</span><span class="nx">j</span><span class="p">]</span> <span class="c1">// count[l][j] 表示 在区间 [0, l] 内，以 `j为3` 的 `132模式` 的数量
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="p">}</span>
-</span></span><span class="line"><span class="cl">		<span class="p">}</span>
-</span></span><span class="line"><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="nb">int64</span><span class="p">(</span><span class="nx">ans</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><h3 id="空间优化">空间优化</h3>
-<p>可以发现， <strong>枚举 $j$ 和 $l$</strong> 和 <strong>预处理 $count[l][j]$</strong> 的遍历的顺序都是一样的：<strong>外层遍历 $l$, 内层遍历 $j$</strong></p>
-<p>那么可以一边统计答案，一边预处理$count[l][j]$，同时也可以把 $count[l][j]$ 压缩到一维数组。</p>
-<ul>
-<li>这就是 题解<a class="link" href="https://leetcode.cn/problems/count-increasing-quadruplets/solutions/2080664/by-destiny-god-4qc6"  target="_blank" rel="noopener"
-    >最简洁代码</a> 的解法</li>
-</ul>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">countQuadruplets</span><span class="p">(</span><span class="nx">nums</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="kt">int64</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">	<span class="c1">// 1324 模式
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="c1">// i &lt; j &lt; k &lt; l
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="c1">// nums[i] &lt; nums[k] &lt; nums[j] &lt; nums[l]
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
-</span></span><span class="line"><span class="cl">	<span class="kd">var</span> <span class="nx">n</span><span class="p">,</span> <span class="nx">ans</span> <span class="p">=</span> <span class="nb">len</span><span class="p">(</span><span class="nx">nums</span><span class="p">),</span> <span class="mi">0</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">	<span class="c1">// count[l][j] 表示 在 [0, l] 这段区间内，以 `j为3` 的 `132模式` 数量
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="c1">// 一边统计答案，一边预处理 count[l][j]，并将 count[l][j] 为 一维数组
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="kd">var</span> <span class="nx">count</span> <span class="p">=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">int</span><span class="p">,</span> <span class="nx">n</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">	<span class="k">for</span> <span class="nx">l</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">l</span> <span class="p">&lt;</span> <span class="nx">n</span><span class="p">;</span> <span class="nx">l</span><span class="o">++</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="nx">x</span> <span class="o">:=</span> <span class="mi">0</span> <span class="c1">// x 记录 [0, j] 这段区间，有多少个数小于 nums[l]
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
-</span></span><span class="line"><span class="cl">		<span class="k">for</span> <span class="nx">j</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">j</span> <span class="p">&lt;</span> <span class="nx">l</span><span class="p">;</span> <span class="nx">j</span><span class="o">++</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">			<span class="c1">// 动态规划的思想
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="c1">// 在 [0, l] 区间，以 `j为3` 的 `132模式` 数量等于在 [0, l-1] 区间内的数量 + 以 `j为3`，以 `k为2` 的 `132模式` 的数量
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="c1">// 如果 nums[j] &gt; nums[l]，说明 nums[l] 可以作为新的 2，而新增的数量为：在 [0, j] 区间中小于 nums[l] 的个数，
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="c1">// 也就是以 `j为3, k为2` 的 `132模式` 中，1 的数量。
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="k">if</span> <span class="nx">nums</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="p">&gt;</span> <span class="nx">nums</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">				<span class="nx">count</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="o">+=</span> <span class="nx">x</span>
-</span></span><span class="line"><span class="cl">			<span class="p">}</span> <span class="k">else</span>
-</span></span><span class="line"><span class="cl">			<span class="c1">// 如果 nums[j] &lt; nums[l]，说明有 `j为3, l为4` 的 `1324` 模式
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="c1">// 并且 在 [0,j] 区间内 小于 nums[l] 的数量 +1
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>			<span class="k">if</span> <span class="nx">nums</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="p">&lt;</span> <span class="nx">nums</span><span class="p">[</span><span class="nx">l</span><span class="p">]</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">				<span class="nx">ans</span> <span class="o">+=</span> <span class="nx">count</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span>
-</span></span><span class="line"><span class="cl">				<span class="nx">x</span><span class="o">++</span>
-</span></span><span class="line"><span class="cl">			<span class="p">}</span>
-</span></span><span class="line"><span class="cl">		<span class="p">}</span>
-</span></span><span class="line"><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="nb">int64</span><span class="p">(</span><span class="nx">ans</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div>
-</section>
-
-
-    <footer class="article-footer">
-    
-    <section class="article-tags">
-        
-            <a href="/tags/dp/">Dp</a>
-        
-    </section>
-
-
-    
-    <section class="article-copyright">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="12" cy="12" r="9" />
-  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
-</svg>
-
-
-
-        <span>Licensed under CC BY-NC-SA 4.0</span>
-    </section>
-    </footer>
-
-
-    
-        <link 
-                rel="stylesheet" 
-                href="https://fastly.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI&#43;WdtXRGWt2kTvGFasHpSy3SV"crossorigin="anonymous"
-            ><script 
-                src="https://fastly.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG&#43;vnGctmUb0ZY0l8"crossorigin="anonymous"
-                defer
-                >
-            </script><script 
-                src="https://fastly.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"integrity="sha384-&#43;VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4&#43;/RRE05"crossorigin="anonymous"
-                defer
-                >
-            </script><script>
-    window.addEventListener("DOMContentLoaded", () => {
-        renderMathInElement(document.querySelector(`.article-content`), {
-            delimiters: [
-                { left: "$$", right: "$$", display: true },
-                { left: "$", right: "$", display: false },
-                { left: "\\(", right: "\\)", display: false },
-                { left: "\\[", right: "\\]", display: true }
-            ],
-            ignoredClasses: ["gist"]
-        });})
-</script>
-    
-</article>
-
-    
-
-    
-
-<aside class="related-content--wrapper">
-    <h2 class="section-title">相关文章</h2>
-    <div class="related-content">
-        <div class="flex article-list--tile">
-            
-                
-<article class="">
-    <a href="/solutions/lc2681.-%E8%8B%B1%E9%9B%84%E7%9A%84%E5%8A%9B%E9%87%8F/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">LC2681. 英雄的力量</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="">
-    <a href="/solutions/lc70.-%E7%88%AC%E6%A5%BC%E6%A2%AF/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">LC70. 从爬楼梯上手动态规划</h2>
-        </div>
-    </a>
-</article>
-
-            
-        </div>
-    </div>
-</aside>
-
-     
-    
-        
-    <div class="disqus-container">
-    <div id="disqus_thread"></div>
-<script>
-    window.disqus_config = function () {
-    
-    
-    
-    };
-    (function() {
-        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
-            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
-            return;
-        }
-        var d = document, s = d.createElement('script'); s.async = true;
-        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
-        s.setAttribute('data-timestamp', +new Date());
-        (d.head || d.body).appendChild(s);
-    })();
-</script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-</div>
-
-<style>
-    .disqus-container {
-        background-color: var(--card-background);
-        border-radius: var(--card-border-radius);
-        box-shadow: var(--shadow-l1);
-        padding: var(--card-padding);
-    }
-</style>
-
-<script>
-    window.addEventListener('onColorSchemeChange', (e) => {
-        if (typeof DISQUS == 'object') {
-            DISQUS.reset({
-                reload: true
-            });
-        }
-    })
-</script>
-
-    
-
-    
-<section class="totalcount">
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  发表了8篇文章 ·
-  总计6.82k字
-</section>
-
-
-
-
-
-<script>
-  
-  Array.from(document.getElementsByClassName("language-mermaid")).forEach(
-    (el) => {
-      el.parentElement.outerHTML = `<div class="mermaid">${el.innerText}</div>`;
-    }
-  );
-</script>
-
-    
-<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
-
-    
-    <div class="pswp__bg"></div>
-
-    
-    <div class="pswp__scroll-wrap">
-
-        
-        <div class="pswp__container">
-            <div class="pswp__item"></div>
-            <div class="pswp__item"></div>
-            <div class="pswp__item"></div>
-        </div>
-
-        
-        <div class="pswp__ui pswp__ui--hidden">
-
-            <div class="pswp__top-bar">
-
-                
-
-                <div class="pswp__counter"></div>
-
-                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
-
-                <button class="pswp__button pswp__button--share" title="Share"></button>
-
-                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
-
-                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
-
-                
-                
-                <div class="pswp__preloader">
-                    <div class="pswp__preloader__icn">
-                        <div class="pswp__preloader__cut">
-                            <div class="pswp__preloader__donut"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
-                <div class="pswp__share-tooltip"></div>
-            </div>
-
-            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
-            </button>
-
-            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
-            </button>
-
-            <div class="pswp__caption">
-                <div class="pswp__caption__center"></div>
-            </div>
-
-        </div>
-
-    </div>
-
-</div><script 
-                src="https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
-                defer
-                >
-            </script><script 
-                src="https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
-                defer
-                >
-            </script><link 
-                rel="stylesheet" 
-                href="https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
-            ><link 
-                rel="stylesheet" 
-                href="https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
-            >
-
-            </main>
-        </div>
-        <script 
-                src="https://fastly.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
-                
-                >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
-<script>
-    (function () {
-        const customFont = document.createElement('link');
-        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
-
-        customFont.type = "text/css";
-        customFont.rel = "stylesheet";
-
-        document.head.appendChild(customFont);
-    }());
-</script>
-
-    </body>
-</html>
+$</p><p>而 $x$ 就是 在 $[0,j-1]$ 区间内，小于 $nums[l]$ 的数量，那如何计算 $x$ 呢？暴力枚举：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=cl><span class=nx>x</span> <span class=o>:=</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl><span class=k>for</span> <span class=nx>j</span> <span class=o>:=</span> <span class=mi>0</span><span class=p>;</span> <span class=nx>j</span> <span class=p>&lt;</span> <span class=nx>l</span><span class=p>;</span> <span class=nx>j</span><span class=o>++</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=k>if</span> <span class=nx>nums</span><span class=p>[</span><span class=nx>j</span><span class=p>]</span> <span class=p>&lt;</span> <span class=nx>nums</span><span class=p>[</span><span class=nx>l</span><span class=p>]</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=nx>x</span><span class=o>++</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>在加上枚举 $l$ 的实现，就得到 预处理 $count[l][j]$的代码：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=cl><span class=c1>// count[l][j] 表示 在 [0, l] 这段区间内，以 `j为3` 的 `132模式` 数量
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kd>var</span> <span class=nx>count</span> <span class=p>=</span> <span class=nb>make</span><span class=p>([][]</span><span class=kt>int</span><span class=p>,</span> <span class=nx>n</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=k>for</span> <span class=nx>l</span> <span class=o>:=</span> <span class=mi>0</span><span class=p>;</span> <span class=nx>l</span> <span class=p>&lt;</span> <span class=nx>n</span><span class=p>;</span> <span class=nx>l</span><span class=o>++</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=nx>count</span><span class=p>[</span><span class=nx>l</span><span class=p>]</span> <span class=p>=</span> <span class=nb>make</span><span class=p>([]</span><span class=kt>int</span><span class=p>,</span> <span class=nx>l</span><span class=o>+</span><span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=nx>x</span> <span class=o>:=</span> <span class=mi>0</span> <span class=c1>// x 记录 [0, j] 这段区间，有多少个数小于 nums[l]
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=c1>// 动态规划的思想
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=k>for</span> <span class=nx>j</span> <span class=o>:=</span> <span class=mi>0</span><span class=p>;</span> <span class=nx>j</span> <span class=p>&lt;</span> <span class=nx>l</span><span class=p>;</span> <span class=nx>j</span><span class=o>++</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=c1>// 在 [0, l] 区间，以 `j为3` 的 `132模式` 数量等于在 [0, l-1] 区间内的数量 + 以 `j为3`，以 `l为2` 的 `132模式` 的数量
+</span></span></span><span class=line><span class=cl><span class=c1></span>		<span class=nx>count</span><span class=p>[</span><span class=nx>l</span><span class=p>][</span><span class=nx>j</span><span class=p>]</span> <span class=p>=</span> <span class=nx>count</span><span class=p>[</span><span class=nx>l</span><span class=o>-</span><span class=mi>1</span><span class=p>][</span><span class=nx>j</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>	
+</span></span><span class=line><span class=cl>		<span class=c1>// 如果 nums[j] &gt; nums[l]，说明 nums[l] 可以作为新的 2，新增的数量：在 [0, j] 区间中小于 nums[l] 的个数，
+</span></span></span><span class=line><span class=cl><span class=c1></span>		<span class=c1>// 也就是以 `j为3, l为2` 的 `132模式` 中，x 就为 1 的数量。
+</span></span></span><span class=line><span class=cl><span class=c1></span>		<span class=k>if</span> <span class=nx>nums</span><span class=p>[</span><span class=nx>j</span><span class=p>]</span> <span class=p>&gt;</span> <span class=nx>nums</span><span class=p>[</span><span class=nx>l</span><span class=p>]</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>			<span class=nx>count</span><span class=p>[</span><span class=nx>l</span><span class=p>][</span><span class=nx>j</span><span class=p>]</span> <span class=o>+=</span> <span class=nx>x</span>
+</span></span><span class=line><span class=cl>		<span class=p>}</span> <span class=k>else</span>
+</span></span><span class=line><span class=cl>		<span class=c1>// 如果 nums[j] &lt; nums[l]，说明不满足 `132模式`。但是小于 nums[l] 的数量 +1
+</span></span></span><span class=line><span class=cl><span class=c1></span>		<span class=k>if</span> <span class=nx>nums</span><span class=p>[</span><span class=nx>j</span><span class=p>]</span> <span class=p>&lt;</span> <span class=nx>nums</span><span class=p>[</span><span class=nx>l</span><span class=p>]</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>			<span class=nx>x</span><span class=o>++</span>
+</span></span><span class=line><span class=cl>		<span class=p>}</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><h2 id=代码>代码</h2><h3 id=组合代码>组合代码</h3><p>组合 <strong>枚举 $j$ 和 $l$</strong> 和 <strong>预处理 $count[l][j]$</strong> 的代码即可解决本题：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=cl><span class=kd>func</span> <span class=nf>countQuadruplets</span><span class=p>(</span><span class=nx>nums</span> <span class=p>[]</span><span class=kt>int</span><span class=p>)</span> <span class=kt>int64</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=c1>// 1324 模式
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=c1>// i &lt; j &lt; k &lt; l
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=c1>// nums[i] &lt; nums[k] &lt; nums[j] &lt; nums[l]
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl>	<span class=kd>var</span> <span class=nx>n</span><span class=p>,</span> <span class=nx>ans</span> <span class=p>=</span> <span class=nb>len</span><span class=p>(</span><span class=nx>nums</span><span class=p>),</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>	<span class=c1>// count[l][j] 表示 在 [0, l] 这段区间内，以 `j为3` 的 `132模式` 数量
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=kd>var</span> <span class=nx>count</span> <span class=p>=</span> <span class=nb>make</span><span class=p>([][]</span><span class=kt>int</span><span class=p>,</span> <span class=nx>n</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=k>for</span> <span class=nx>l</span> <span class=o>:=</span> <span class=mi>0</span><span class=p>;</span> <span class=nx>l</span> <span class=p>&lt;</span> <span class=nx>n</span><span class=p>;</span> <span class=nx>l</span><span class=o>++</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=nx>count</span><span class=p>[</span><span class=nx>l</span><span class=p>]</span> <span class=p>=</span> <span class=nb>make</span><span class=p>([]</span><span class=kt>int</span><span class=p>,</span> <span class=nx>l</span><span class=o>+</span><span class=mi>1</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>		<span class=nx>x</span> <span class=o>:=</span> <span class=mi>0</span> <span class=c1>// x 记录 [0, j] 这段区间，有多少个数小于 nums[l]
+</span></span></span><span class=line><span class=cl><span class=c1></span>		<span class=c1>// 动态规划的思想
+</span></span></span><span class=line><span class=cl><span class=c1></span>		<span class=k>for</span> <span class=nx>j</span> <span class=o>:=</span> <span class=mi>0</span><span class=p>;</span> <span class=nx>j</span> <span class=p>&lt;</span> <span class=nx>l</span><span class=p>;</span> <span class=nx>j</span><span class=o>++</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>			<span class=c1>// 在 [0, l] 区间，以 `j为3` 的 `132模式` 数量等于在 [0, l-1] 区间内的数量加上以 `j为3`，以 `l为2` 的 `132模式` 的数量
+</span></span></span><span class=line><span class=cl><span class=c1></span>			<span class=nx>count</span><span class=p>[</span><span class=nx>l</span><span class=p>][</span><span class=nx>j</span><span class=p>]</span> <span class=p>=</span> <span class=nx>count</span><span class=p>[</span><span class=nx>l</span><span class=o>-</span><span class=mi>1</span><span class=p>][</span><span class=nx>j</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>			<span class=c1>// 如果 nums[j] &gt; nums[l]，说明 nums[l] 可以作为新的 2，新增的数量：在 [0, j] 区间中小于 nums[l] 的个数，
+</span></span></span><span class=line><span class=cl><span class=c1></span>			<span class=c1>// 也就是以 `j为3, l为2` 的 `132模式` 中，x 就为 1 的数量。
+</span></span></span><span class=line><span class=cl><span class=c1></span>			<span class=k>if</span> <span class=nx>nums</span><span class=p>[</span><span class=nx>j</span><span class=p>]</span> <span class=p>&gt;</span> <span class=nx>nums</span><span class=p>[</span><span class=nx>l</span><span class=p>]</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>				<span class=nx>count</span><span class=p>[</span><span class=nx>l</span><span class=p>][</span><span class=nx>j</span><span class=p>]</span> <span class=o>+=</span> <span class=nx>x</span>
+</span></span><span class=line><span class=cl>			<span class=p>}</span> <span class=k>else</span>
+</span></span><span class=line><span class=cl>			<span class=c1>// 如果 nums[j] &lt; nums[l]，说明不满足 `132模式`。但是小于 nums[l] 的数量 +1
+</span></span></span><span class=line><span class=cl><span class=c1></span>			<span class=k>if</span> <span class=nx>nums</span><span class=p>[</span><span class=nx>j</span><span class=p>]</span> <span class=p>&lt;</span> <span class=nx>nums</span><span class=p>[</span><span class=nx>l</span><span class=p>]</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>				<span class=nx>x</span><span class=o>++</span>
+</span></span><span class=line><span class=cl>			<span class=p>}</span>
+</span></span><span class=line><span class=cl>		<span class=p>}</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=c1>// 从小到大枚举 l 统计答案
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=c1>// 如果 nums[j] &lt; nums[l]，那么有 `j为3, l为4` 的 `1324模式`
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=c1>// 答案应当加上以 `j为3` 的 `132模式` 的数量
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=k>for</span> <span class=nx>l</span> <span class=o>:=</span> <span class=mi>0</span><span class=p>;</span> <span class=nx>l</span> <span class=p>&lt;</span> <span class=nx>n</span><span class=p>;</span> <span class=nx>l</span><span class=o>++</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=k>for</span> <span class=nx>j</span> <span class=o>:=</span> <span class=mi>0</span><span class=p>;</span> <span class=nx>j</span> <span class=p>&lt;</span> <span class=nx>l</span><span class=p>;</span> <span class=nx>j</span><span class=o>++</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>			<span class=k>if</span> <span class=nx>nums</span><span class=p>[</span><span class=nx>j</span><span class=p>]</span> <span class=p>&lt;</span> <span class=nx>nums</span><span class=p>[</span><span class=nx>l</span><span class=p>]</span> <span class=p>{</span> <span class=c1>// 符合 1324 模式
+</span></span></span><span class=line><span class=cl><span class=c1></span>				<span class=nx>ans</span> <span class=o>+=</span> <span class=nx>count</span><span class=p>[</span><span class=nx>l</span><span class=p>][</span><span class=nx>j</span><span class=p>]</span> <span class=c1>// count[l][j] 表示 在区间 [0, l] 内，以 `j为3` 的 `132模式` 的数量
+</span></span></span><span class=line><span class=cl><span class=c1></span>			<span class=p>}</span>
+</span></span><span class=line><span class=cl>		<span class=p>}</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=nb>int64</span><span class=p>(</span><span class=nx>ans</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><h3 id=空间优化>空间优化</h3><p>可以发现， <strong>枚举 $j$ 和 $l$</strong> 和 <strong>预处理 $count[l][j]$</strong> 的遍历的顺序都是一样的：<strong>外层遍历 $l$, 内层遍历 $j$</strong></p><p>那么可以一边统计答案，一边预处理$count[l][j]$，同时也可以把 $count[l][j]$ 压缩到一维数组。</p><ul><li>这就是 题解<a class=link href=https://leetcode.cn/problems/count-increasing-quadruplets/solutions/2080664/by-destiny-god-4qc6 target=_blank rel=noopener>最简洁代码</a> 的解法</li></ul><div class=highlight><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=cl><span class=kd>func</span> <span class=nf>countQuadruplets</span><span class=p>(</span><span class=nx>nums</span> <span class=p>[]</span><span class=kt>int</span><span class=p>)</span> <span class=kt>int64</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=c1>// 1324 模式
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=c1>// i &lt; j &lt; k &lt; l
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=c1>// nums[i] &lt; nums[k] &lt; nums[j] &lt; nums[l]
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl>	<span class=kd>var</span> <span class=nx>n</span><span class=p>,</span> <span class=nx>ans</span> <span class=p>=</span> <span class=nb>len</span><span class=p>(</span><span class=nx>nums</span><span class=p>),</span> <span class=mi>0</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=c1>// count[l][j] 表示 在 [0, l] 这段区间内，以 `j为3` 的 `132模式` 数量
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=c1>// 一边统计答案，一边预处理 count[l][j]，并将 count[l][j] 为 一维数组
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=kd>var</span> <span class=nx>count</span> <span class=p>=</span> <span class=nb>make</span><span class=p>([]</span><span class=kt>int</span><span class=p>,</span> <span class=nx>n</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=k>for</span> <span class=nx>l</span> <span class=o>:=</span> <span class=mi>0</span><span class=p>;</span> <span class=nx>l</span> <span class=p>&lt;</span> <span class=nx>n</span><span class=p>;</span> <span class=nx>l</span><span class=o>++</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=nx>x</span> <span class=o>:=</span> <span class=mi>0</span> <span class=c1>// x 记录 [0, j] 这段区间，有多少个数小于 nums[l]
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl>		<span class=k>for</span> <span class=nx>j</span> <span class=o>:=</span> <span class=mi>0</span><span class=p>;</span> <span class=nx>j</span> <span class=p>&lt;</span> <span class=nx>l</span><span class=p>;</span> <span class=nx>j</span><span class=o>++</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>			<span class=c1>// 动态规划的思想
+</span></span></span><span class=line><span class=cl><span class=c1></span>			<span class=c1>// 在 [0, l] 区间，以 `j为3` 的 `132模式` 数量等于在 [0, l-1] 区间内的数量 + 以 `j为3`，以 `k为2` 的 `132模式` 的数量
+</span></span></span><span class=line><span class=cl><span class=c1></span>			<span class=c1>// 如果 nums[j] &gt; nums[l]，说明 nums[l] 可以作为新的 2，而新增的数量为：在 [0, j] 区间中小于 nums[l] 的个数，
+</span></span></span><span class=line><span class=cl><span class=c1></span>			<span class=c1>// 也就是以 `j为3, k为2` 的 `132模式` 中，1 的数量。
+</span></span></span><span class=line><span class=cl><span class=c1></span>			<span class=k>if</span> <span class=nx>nums</span><span class=p>[</span><span class=nx>j</span><span class=p>]</span> <span class=p>&gt;</span> <span class=nx>nums</span><span class=p>[</span><span class=nx>l</span><span class=p>]</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>				<span class=nx>count</span><span class=p>[</span><span class=nx>j</span><span class=p>]</span> <span class=o>+=</span> <span class=nx>x</span>
+</span></span><span class=line><span class=cl>			<span class=p>}</span> <span class=k>else</span>
+</span></span><span class=line><span class=cl>			<span class=c1>// 如果 nums[j] &lt; nums[l]，说明有 `j为3, l为4` 的 `1324` 模式
+</span></span></span><span class=line><span class=cl><span class=c1></span>			<span class=c1>// 并且 在 [0,j] 区间内 小于 nums[l] 的数量 +1
+</span></span></span><span class=line><span class=cl><span class=c1></span>			<span class=k>if</span> <span class=nx>nums</span><span class=p>[</span><span class=nx>j</span><span class=p>]</span> <span class=p>&lt;</span> <span class=nx>nums</span><span class=p>[</span><span class=nx>l</span><span class=p>]</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>				<span class=nx>ans</span> <span class=o>+=</span> <span class=nx>count</span><span class=p>[</span><span class=nx>j</span><span class=p>]</span>
+</span></span><span class=line><span class=cl>				<span class=nx>x</span><span class=o>++</span>
+</span></span><span class=line><span class=cl>			<span class=p>}</span>
+</span></span><span class=line><span class=cl>		<span class=p>}</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=nb>int64</span><span class=p>(</span><span class=nx>ans</span><span class=p>)</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div></section><footer class=article-footer><section class=article-tags><a href=/tags/dp/>Dp</a></section><section class=article-copyright><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css integrity=sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV crossorigin=anonymous><script src=https://fastly.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js integrity=sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8 crossorigin=anonymous defer></script><script src=https://fastly.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js integrity=sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05 crossorigin=anonymous defer></script><script>window.addEventListener("DOMContentLoaded",()=>{renderMathInElement(document.querySelector(`.article-content`),{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1},{left:"\\(",right:"\\)",display:!1},{left:"\\[",right:"\\]",display:!0}],ignoredClasses:["gist"]})})</script></article><aside class=related-content--wrapper><h2 class=section-title>相关文章</h2><div class=related-content><div class="flex article-list--tile"><article><a href=/solutions/lc2681.-%E8%8B%B1%E9%9B%84%E7%9A%84%E5%8A%9B%E9%87%8F/><div class=article-details><h2 class=article-title>LC2681. 英雄的力量</h2></div></a></article><article><a href=/solutions/lc70.-%E7%88%AC%E6%A5%BC%E6%A2%AF/><div class=article-details><h2 class=article-title>LC70. 从爬楼梯上手动态规划</h2></div></a></article></div></div></aside><script src=//unpkg.com/@waline/client@v2/dist/waline.js></script><link href=//unpkg.com/@waline/client@v2/dist/waline.css rel=stylesheet><div id=waline class=waline-container></div><style>.waline-container{background-color:var(--card-background);border-radius:var(--card-border-radius);box-shadow:var(--shadow-l1);padding:var(--card-padding);--waline-font-size:var(--article-font-size)}.waline-container .wl-count{color:var(--card-text-color-main)}</style><script>Waline.init({dark:'html[data-scheme="dark"]',el:"#waline",emoji:["https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/tw-emoji"],lang:"zh-CN",locale:{admin:"雾封",placeholder:null},placeholder:"waline 支持匿名发言，当然你也可以通过 GitHub、QQ、Weibo 快速登录",serverURL:"https://blog-talk-waline-8c2vwstb5-zweis-projects-59bcfde2.vercel.app",visitor:!1})</script><section class=totalcount>发表了7篇文章 ·
+总计6.71k字</section><script>Array.from(document.getElementsByClassName("language-mermaid")).forEach(e=>{e.parentElement.outerHTML=`<div class="mermaid">${e.innerText}</div>`})</script><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css crossorigin=anonymous><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css crossorigin=anonymous></main></div><script src=https://fastly.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z+KMkF24hUW8WePSA9HM=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>

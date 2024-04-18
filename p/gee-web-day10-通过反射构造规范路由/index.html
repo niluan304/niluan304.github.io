@@ -1,890 +1,168 @@
-<!DOCTYPE html>
-<html lang="zh-cn" dir="ltr">
-    <head><meta charset='utf-8'>
-<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='第二种路由注册方法：func(context.Context, *XXXReq) (*XXXRes, error)'>
-<title>gee-web-day10 通过反射构造规范路由</title>
-
-<link rel='canonical' href='https://niluan304.github.io/p/gee-web-day10-%E9%80%9A%E8%BF%87%E5%8F%8D%E5%B0%84%E6%9E%84%E9%80%A0%E8%A7%84%E8%8C%83%E8%B7%AF%E7%94%B1/'>
-
-<link rel="stylesheet" href="/scss/style.min.3847aef279a7028aef34c6efe3255226a0247c5ccbe1c150ade4d55e2b6d8516.css"><meta property='og:title' content='gee-web-day10 通过反射构造规范路由'>
-<meta property='og:description' content='第二种路由注册方法：func(context.Context, *XXXReq) (*XXXRes, error)'>
-<meta property='og:url' content='https://niluan304.github.io/p/gee-web-day10-%E9%80%9A%E8%BF%87%E5%8F%8D%E5%B0%84%E6%9E%84%E9%80%A0%E8%A7%84%E8%8C%83%E8%B7%AF%E7%94%B1/'>
-<meta property='og:site_name' content='雾封的笔'>
-<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='gee' /><meta property='article:tag' content='web' /><meta property='article:published_time' content='2023-12-22T15:43:59&#43;08:00'/><meta property='article:modified_time' content='2023-12-22T15:43:59&#43;08:00'/>
-<meta name="twitter:title" content="gee-web-day10 通过反射构造规范路由">
-<meta name="twitter:description" content="第二种路由注册方法：func(context.Context, *XXXReq) (*XXXRes, error)">
-    <link rel="shortcut icon" href="/favicon.ico" />
-
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0BX1J3KRG"></script>
-<script>
-var doNotTrack = false;
-if (!doNotTrack) {
-	window.dataLayer = window.dataLayer || [];
-	function gtag(){dataLayer.push(arguments);}
-	gtag('js', new Date());
-	gtag('config', 'G-C0BX1J3KRG', { 'anonymize_ip': false });
-}
-</script>
-
-<style>
-   
-  :root {
-    --article-font-family: 'Noto Serif HK', var(--base-font-family);
-  }
-</style>
-
-<script>
-  ; (function () {
-    const customFont = document.createElement('link')
-    customFont.href =
-      'https://fonts.googleapis.com/css2?family=Noto+Serif+HK:wght@300;400;500;600;700&display=swap'
-    customFont.type = 'text/css'
-    customFont.rel = 'stylesheet'
-
-    document.head.appendChild(customFont)
-  })()
-</script>
-
-
-    </head>
-    <body class="
-    article-page
-    ">
-    <script>
-        (function() {
-            const colorSchemeKey = 'StackColorScheme';
-            if(!localStorage.getItem(colorSchemeKey)){
-                localStorage.setItem(colorSchemeKey, "auto");
-            }
-        })();
-    </script><script>
-    (function() {
-        const colorSchemeKey = 'StackColorScheme';
-        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
-        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
-
-        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
-            
-
-            document.documentElement.dataset.scheme = 'dark';
-        } else {
-            document.documentElement.dataset.scheme = 'light';
-        }
-    })();
-</script>
-<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
-    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
-        <span class="hamburger-box">
-            <span class="hamburger-inner"></span>
-        </span>
-    </button>
-
-    <header>
-        
-            
-            <figure class="site-avatar">
-                <a href="/">
-                
-                    
-                    
-                    
-                        
-                        <img src="/img/avatar_hueb4763c82ba1420a58a50c6eccfe357b_472983_300x0_resize_box_3.png" width="300"
-                            height="300" class="site-logo" loading="lazy" alt="Avatar">
-                    
-                
-                </a>
-                
-                    <span class="emoji">☕</span>
-                
-            </figure>
-            
-        
-        
-        <div class="site-meta">
-            <h1 class="site-name"><a href="/">雾封的笔</a></h1>
-            <h2 class="site-description">脚步不停，灿若繁星。</h2>
-        </div>
-    </header><ol class="social-menu">
-            
-                <li>
-                    <a 
-                        href='mailto:zwei.elen@outlook.com'
-                        target="_blank"
-                        title="Email"
-                        rel="me"
-                    >
-                        
-                        
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#2c3e50" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="icon icon-tabler icon-tabler-mail" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z"/><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="m3 7 9 6 9-6"/></svg>
-                        
-                    </a>
-                </li>
-            
-                <li>
-                    <a 
-                        href='https://github.com/niluan304'
-                        target="_blank"
-                        title="GitHub"
-                        rel="me"
-                    >
-                        
-                        
-                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
-  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
-</svg>
-
-
-
-                        
-                    </a>
-                </li>
-            
-        </ol><ol class="menu" id="main-menu">
-        
-        
-        
-        <li >
-            <a href='/' >
-                
-                
-                
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <polyline points="5 12 3 12 12 3 21 12 19 12" />
-  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
-  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
-</svg>
-
-
-
-                
-                <span>Home</span>
-            </a>
-        </li>
-        
-        
-        <li >
-            <a href='/solutions/' >
-                
-                
-                
-                    <?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg t="1710685833984" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="19816" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200"><path d="M624.289 816.93c-3.032 0-6.157 0.409-9.288 1.214-72.38 18.637-144.767 37.274-217.147 55.897-19.536 5.03-26.426 21.93-24.586 36.448 1.981 15.646 14.106 31.485 33.446 31.485h0.002c3.029 0 6.15-0.407 9.28-1.212a2055574.5 2055574.5 0 0 1 217.149-55.898c19.536-5.034 26.423-21.938 24.583-36.457-1.985-15.642-14.106-31.476-33.44-31.476zM572.377 934.011c-6.321 0-12.516 2.06-18.413 6.126-14.42 9.939-28.264 15.35-41.153 16.086-0.547 0.032-1.095 0.047-1.644 0.047-6.968 0-14.874-2.326-24.868-7.31-0.743-0.393-3.643-2.292-5.561-3.547-5.306-3.474-6.786-4.443-8.492-4.674-5.036-2.597-10.51-3.946-16.135-3.946-15.808 0-30.932 10.543-35.963 25.07-4.172 12.041-0.206 24.313 10.609 32.827 24.347 19.168 52.743 29.3 82.12 29.3 26.81 0 53.386-8.55 76.855-24.725 13.26-9.139 18.484-24.493 13.637-40.068-4.69-15.065-17.144-25.186-30.992-25.186zM758.2 323.388c-23.674-44.276-59.272-80.43-102.949-104.556-40.902-22.593-88.289-34.536-137.036-34.536-41.49 0-83.246 8.797-120.754 25.442-39.792 17.658-73.83 43.216-101.172 75.963-51.182 61.3-72.758 149.987-57.716 237.237 14.454 83.839 60.433 154.192 126.145 193.017 5.63 3.328 11.493 5.015 17.423 5.015 15.057 0 28.606-11.094 32.946-26.978 4.146-15.17-1.767-29.61-15.431-37.682-87.857-51.928-112.807-177.156-85.54-263.399 26.457-83.656 107.442-139.862 201.52-139.862 39.74 0 78.37 10.246 111.716 29.63 45.121 26.234 77.406 69.951 90.905 123.098 14.556 57.308 5.738 118.382-24.192 167.566-11.93 19.606-27.417 37.625-42.396 55.048-9.603 11.173-19.533 22.724-28.549 34.697-15.429 20.492-20.147 42.395-24.71 63.575-0.8 3.718-1.62 7.528-2.499 11.339l-198.107 52.663c-19.536 5.193-26.361 22.222-24.458 36.791 2.024 15.5 14.071 31.193 33.179 31.196h0.007c3.103 0 6.304-0.433 9.517-1.286 51.509-13.699 103.021-27.39 154.534-41.075 5.775-1.536 11.35-2.909 16.74-4.24 42.26-10.416 75.638-18.644 79.547-79.646 1.383-21.58 19.882-41.685 36.204-59.424 4.189-4.553 8.144-8.853 11.756-13.099 19.584-23.002 44.049-54.132 59.531-90.99 32.646-77.76 26.907-164.947-16.16-245.504zM173.191 470.702c0-19.056-15.448-34.504-34.505-34.504H71.708c-19.057 0-34.505 15.448-34.505 34.504 0 19.057 15.448 34.505 34.505 34.505h66.978c19.057 0 34.505-15.448 34.505-34.505zM954.989 436.198h-66.98c-19.056 0-34.503 15.448-34.503 34.504 0 19.057 15.448 34.505 34.504 34.505h66.979c19.056 0 34.505-15.448 34.505-34.505 0-19.056-15.449-34.504-34.505-34.504zM225.263 230.175c13.475 13.475 35.321 13.475 48.796 0 13.475-13.475 13.475-35.322 0-48.796l-47.362-47.362c-13.474-13.475-35.321-13.475-48.796 0-13.475 13.475-13.475 35.321 0 48.796l47.362 47.362zM803.912 711.23c-13.475-13.475-35.322-13.475-48.797 0-13.474 13.475-13.474 35.322 0 48.797l47.362 47.362c13.475 13.475 35.322 13.475 48.796 0 13.475-13.475 13.475-35.321 0-48.797l-47.361-47.362zM514.587 135.988c19.056 0 34.505-15.449 34.505-34.505v-66.98C549.092 15.449 533.643 0 514.587 0c-19.057 0-34.505 15.449-34.505 34.505v66.979c0 19.056 15.448 34.505 34.505 34.505zM274.06 711.23c-13.475-13.475-35.321-13.475-48.796 0l-47.362 47.362c-13.475 13.475-13.475 35.321 0 48.797 13.475 13.475 35.322 13.475 48.796 0l47.362-47.362c13.475-13.475 13.475-35.322 0-48.797zM755.114 230.175c13.475 13.475 35.322 13.475 48.797 0l47.361-47.362c13.475-13.475 13.475-35.321 0-48.796-13.475-13.475-35.321-13.475-48.796 0l-47.362 47.362c-13.474 13.474-13.474 35.321 0 48.796z" fill="#707070" p-id="19817" data-spm-anchor-id="a313x.search_index.0.i7.774c3a81Q659h0" class="selected"></path></svg>
-                
-                <span>Solutions</span>
-            </a>
-        </li>
-        
-        
-        <li >
-            <a href='/archives/' >
-                
-                
-                
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <rect x="3" y="4" width="18" height="4" rx="2" />
-  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
-  <line x1="10" y1="12" x2="14" y2="12" />
-</svg>
-
-
-
-                
-                <span>Archives</span>
-            </a>
-        </li>
-        
-        
-        <li >
-            <a href='/search/' >
-                
-                
-                
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="10" cy="10" r="7" />
-  <line x1="21" y1="21" x2="15" y2="15" />
-</svg>
-
-
-
-                
-                <span>Search</span>
-            </a>
-        </li>
-        
-        
-        <li >
-            <a href='/links/' >
-                
-                
-                
-                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
-  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
-</svg>
-
-
-
-                
-                <span>Links</span>
-            </a>
-        </li>
-        
-        <li class="menu-bottom-section">
-            <ol class="menu">
-
-                
-                    <li id="dark-mode-toggle">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="8" cy="12" r="2" />
-  <rect x="2" y="6" width="20" height="12" rx="6" />
-</svg>
-
-
-
-                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="16" cy="12" r="2" />
-  <rect x="2" y="6" width="20" height="12" rx="6" />
-</svg>
-
-
-
-                        <span>暗色模式</span>
-                    </li>
-                
-            </ol>
-        </li>
-    </ol>
-</aside>
-
-    <aside class="sidebar right-sidebar sticky">
-        
-            
-                
-    <section class="widget archives">
-        <div class="widget-icon">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <line x1="5" y1="9" x2="19" y2="9" />
-  <line x1="5" y1="15" x2="19" y2="15" />
-  <line x1="11" y1="4" x2="7" y2="20" />
-  <line x1="17" y1="4" x2="13" y2="20" />
-</svg>
-
-
-
-        </div>
-        <h2 class="widget-title section-title">目录</h2>
-        
-        <div class="widget--toc">
-            <nav id="TableOfContents">
-  <ol>
-    <li><a href="#goframe-的-reqresfunc-类型"><code>GoFrame</code> 的 <code>ReqResFunc</code> 类型</a></li>
-    <li><a href="#实现-reqresfunc-类型的约束">实现 <code>ReqResFunc</code> 类型的约束</a></li>
-    <li><a href="#验证-reqresfunc-类型">验证 <code>ReqResFunc</code> 类型</a></li>
-    <li><a href="#通过对象注册路由">通过对象注册路由</a></li>
-  </ol>
-</nav>
-        </div>
-    </section>
-
-            
-        
-    </aside>
-
-
-            <main class="main full-width">
-    <article class="main-article">
-    <header class="article-header">
-
-    <div class="article-details">
-    
-    <header class="article-category">
-        
-            <a href="/categories/go/" style="background-color: #2a9d8f; color: #fff;">
-                Go
-            </a>
-        
-    </header>
-    
-
-    <div class="article-title-wrapper">
-        <h2 class="article-title">
-            <a href="/p/gee-web-day10-%E9%80%9A%E8%BF%87%E5%8F%8D%E5%B0%84%E6%9E%84%E9%80%A0%E8%A7%84%E8%8C%83%E8%B7%AF%E7%94%B1/">gee-web-day10 通过反射构造规范路由</a>
-        </h2>
-    
-        
-        <h3 class="article-subtitle">
-            第二种路由注册方法：func(context.Context, *XXXReq) (*XXXRes, error)
-        </h3>
-        
-    </div>
-
-    
-    
-    
-    
-    <footer class="article-time">
-        
-            <div>
-                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
-  <circle cx="18" cy="18" r="4" />
-  <path d="M15 3v4" />
-  <path d="M7 3v4" />
-  <path d="M3 11h16" />
-  <path d="M18 16.496v1.504l1 1" />
-</svg>
-                <time class="article-time--published">2023-12-22</time>
-            </div>
-        
-
-        
-    </footer>
-    
-
-    
-</div>
-
-</header>
-
-    <section class="article-content">
-    
-    
-    <blockquote>
-<p>源代码/数据集已上传到：<a class="link" href="https://github.com/niluan304/gee"  target="_blank" rel="noopener"
-    >GitHub - follow gee to learn go</a></p>
-</blockquote>
-<h2 id="goframe-的-reqresfunc-类型"><code>GoFrame</code> 的 <code>ReqResFunc</code> 类型</h2>
-<p>在 day7.5 开篇的时候，笔者提到 <code>GoFrame</code> 支持第二种路由注册方法，这里笔者称之为 <code>ReqResFunc</code> 类型（下文同）：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// 写法二
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">ctx</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span> <span class="nx">req</span> <span class="o">*</span><span class="p">{</span><span class="nx">Prefix</span><span class="p">}</span><span class="nx">Req</span><span class="p">)</span> <span class="p">(</span><span class="nx">res</span> <span class="o">*</span><span class="p">{</span><span class="nx">Prefix</span><span class="p">}</span><span class="nx">Res</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">){</span>
-</span></span><span class="line"><span class="cl">    <span class="c1">// 业务代码逻辑
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
-</span></span></code></pre></div><p>但是 day9 实现的函数签名：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">user</span><span class="p">)</span> <span class="nf">Get</span><span class="p">(</span><span class="nx">ctx</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span> <span class="nx">decode</span> <span class="kd">func</span><span class="p">(</span><span class="nx">point</span> <span class="nx">any</span><span class="p">)</span> <span class="p">(</span><span class="nx">err</span> <span class="kt">error</span><span class="p">))</span> <span class="p">(</span><span class="nx">data</span> <span class="nx">any</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">)</span>
-</span></span></code></pre></div><p>对比可以发现，和 <code>ReqResFunc</code> 类型有明显不同，我们可以在 <code>GoFrame</code> 的源码里一探究竟。</p>
-<p>从 <code>GoFrame</code> 的 <a class="link" href="https://goframe.org/pages/viewpage.action?pageId=1114240"  target="_blank" rel="noopener"
-    >文档「路由注册-函数注册」中</a>，可以找到 <a class="link" href="https://github.com/gogf/gf/blob/313d9d138f96b0ed460d47684298a7fb26d3fd75/net/ghttp/ghttp_server_service_handler.go#L21-L39"  target="_blank" rel="noopener"
-    >入口函数</a>：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// https://github.com/gogf/gf/blob/313d9d138f96b0ed460d47684298a7fb26d3fd75/net/ghttp/ghttp_server_service_handler.go#L21-L39
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
-</span></span><span class="line"><span class="cl"><span class="c1">// BindHandler registers a handler function to server with a given pattern.
-</span></span></span><span class="line"><span class="cl"><span class="c1">//
-</span></span></span><span class="line"><span class="cl"><span class="c1">// Note that the parameter `handler` can be type of:
-</span></span></span><span class="line"><span class="cl"><span class="c1">// 1. func(*ghttp.Request)
-</span></span></span><span class="line"><span class="cl"><span class="c1">// 2. func(context.Context, BizRequest)(BizResponse, error)
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">Server</span><span class="p">)</span> <span class="nf">BindHandler</span><span class="p">(</span><span class="nx">pattern</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">handler</span> <span class="kd">interface</span><span class="p">{})</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">	<span class="kd">var</span> <span class="nx">ctx</span> <span class="p">=</span> <span class="nx">context</span><span class="p">.</span><span class="nf">TODO</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">	<span class="nx">funcInfo</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">s</span><span class="p">.</span><span class="nf">checkAndCreateFuncInfo</span><span class="p">(</span><span class="nx">handler</span><span class="p">,</span> <span class="s">&#34;&#34;</span><span class="p">,</span> <span class="s">&#34;&#34;</span><span class="p">,</span> <span class="s">&#34;&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="nx">s</span><span class="p">.</span><span class="nf">Logger</span><span class="p">().</span><span class="nf">Fatalf</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="s">`%+v`</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="cl">	<span class="nx">s</span><span class="p">.</span><span class="nf">doBindHandler</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">doBindHandlerInput</span><span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="nx">Prefix</span><span class="p">:</span>     <span class="s">&#34;&#34;</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">		<span class="nx">Pattern</span><span class="p">:</span>    <span class="nx">pattern</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">		<span class="nx">FuncInfo</span><span class="p">:</span>   <span class="nx">funcInfo</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">		<span class="nx">Middleware</span><span class="p">:</span> <span class="kc">nil</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">		<span class="nx">Source</span><span class="p">:</span>     <span class="s">&#34;&#34;</span><span class="p">,</span>
-</span></span><span class="line"><span class="cl">	<span class="p">})</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p>在源码里，可以发现关键代码在 <a class="link" href="https://github.com/gogf/gf/blob/313d9d138f96b0ed460d47684298a7fb26d3fd75/net/ghttp/ghttp_server_service_handler.go#L148"  target="_blank" rel="noopener"
-    ><code>checkAndCreateFuncInfo</code> 方法</a>，继续前行，就能够发现端倪：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// https://github.com/gogf/gf/blob/313d9d138f96b0ed460d47684298a7fb26d3fd75/net/ghttp/ghttp_server_service_handler.go#L148
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
-</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">Server</span><span class="p">)</span> <span class="nf">checkAndCreateFuncInfo</span><span class="p">(</span><span class="nx">f</span> <span class="kd">interface</span><span class="p">{},</span> <span class="nx">pkgPath</span><span class="p">,</span> <span class="nx">structName</span><span class="p">,</span><span class="nx">methodName</span> <span class="kt">string</span><span class="p">,)</span> <span class="p">(</span><span class="nx">funcInfo</span> <span class="nx">handlerFuncInfo</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">	<span class="nx">funcInfo</span> <span class="p">=</span> <span class="nx">handlerFuncInfo</span><span class="p">{</span> <span class="c1">// 根据传入的 f，初始化返回值
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="nx">Type</span><span class="p">:</span>  <span class="nx">reflect</span><span class="p">.</span><span class="nf">TypeOf</span><span class="p">(</span><span class="nx">f</span><span class="p">),</span>
-</span></span><span class="line"><span class="cl">		<span class="nx">Value</span><span class="p">:</span> <span class="nx">reflect</span><span class="p">.</span><span class="nf">ValueOf</span><span class="p">(</span><span class="nx">f</span><span class="p">),</span>
-</span></span><span class="line"><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p><code>GoFrame</code> 通过反射 <code>reflect</code>，获取了传入的函数的参数信息，并做了相应的校验，关键代码有 5 行：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// 校验请求和返回的参数数量
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">if</span> <span class="nx">reflectType</span><span class="p">.</span><span class="nf">NumIn</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">2</span> <span class="o">||</span> <span class="nx">reflectType</span><span class="p">.</span><span class="nf">NumOut</span><span class="p">()</span> <span class="o">!=</span> <span class="mi">2</span> 
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">// 第一个请求参数必须为 context.Context 类型
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">if</span> <span class="p">!</span><span class="nx">reflectType</span><span class="p">.</span><span class="nf">In</span><span class="p">(</span><span class="mi">0</span><span class="p">).</span><span class="nf">Implements</span><span class="p">(</span><span class="nx">reflect</span><span class="p">.</span><span class="nf">TypeOf</span><span class="p">((</span><span class="o">*</span><span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">)(</span><span class="kc">nil</span><span class="p">)).</span><span class="nf">Elem</span><span class="p">())</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">// 第二个返回参数必须为 error 类型
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">if</span> <span class="p">!</span><span class="nx">reflectType</span><span class="p">.</span><span class="nf">Out</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="nf">Implements</span><span class="p">(</span><span class="nx">reflect</span><span class="p">.</span><span class="nf">TypeOf</span><span class="p">((</span><span class="o">*</span><span class="kt">error</span><span class="p">)(</span><span class="kc">nil</span><span class="p">)).</span><span class="nf">Elem</span><span class="p">())</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">// 第二个请求参数必须为以 `Req` 结尾
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">if</span> <span class="p">!</span><span class="nx">strings</span><span class="p">.</span><span class="nf">HasSuffix</span><span class="p">(</span><span class="nx">reflectType</span><span class="p">.</span><span class="nf">In</span><span class="p">(</span><span class="mi">1</span><span class="p">).</span><span class="nf">String</span><span class="p">(),</span> <span class="s">`Req`</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">// 第一个返回参数必须为以 `Res` 结尾
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="k">if</span> <span class="p">!</span><span class="nx">strings</span><span class="p">.</span><span class="nf">HasSuffix</span><span class="p">(</span><span class="nx">reflectType</span><span class="p">.</span><span class="nf">Out</span><span class="p">(</span><span class="mi">0</span><span class="p">).</span><span class="nf">String</span><span class="p">(),</span> <span class="s">`Res`</span><span class="p">)</span> 
-</span></span></code></pre></div><p>通过这些校验，<code>GoFrame</code> 就实现了规范路由函数必须是 <code>ResReqFunc</code> 类型的约束。校验过程中，有一些细节：</p>
-<ol>
-<li><code>ctx</code> 和 <code>error</code> 是接口类型，只能调用 <code>func (Type) Implements(u Type) bool</code> 确认是否实现了对应的接口，<code>(*error)(nil)</code> 和 <code>(*context.Context)(nil)</code> 则是声明了对应接口的空值 <code>nil</code>。</li>
-<li><code>req</code> 和 <code>res</code> 的初始类型是结构体，可以直接获取结构体的类型名。</li>
-</ol>
-<h2 id="实现-reqresfunc-类型的约束">实现 <code>ReqResFunc</code> 类型的约束</h2>
-<p>接下来，我们就可以仿照 <code>GoFrame</code>，实现 <code>ResReqFunc</code> 类型的约束。首先需要创建一个结构体，用于保存反射解析出来的值：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">type</span> <span class="nx">ReqResFunc</span> <span class="kd">struct</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">	<span class="nx">fn</span> <span class="nx">reflect</span><span class="p">.</span><span class="nx">Value</span> <span class="c1">// 函数调用入口
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
-</span></span><span class="line"><span class="cl">	<span class="nx">ctx</span> <span class="nx">reflect</span><span class="p">.</span><span class="nx">Type</span> <span class="c1">// 第一个请求参数：context.Context
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">req</span> <span class="nx">reflect</span><span class="p">.</span><span class="nx">Type</span> <span class="c1">// 第二个请求参数：XXXReq
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
-</span></span><span class="line"><span class="cl">	<span class="nx">res</span> <span class="nx">reflect</span><span class="p">.</span><span class="nx">Type</span> <span class="c1">// 第一个返回参数：XXXRes
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">err</span> <span class="nx">reflect</span><span class="p">.</span><span class="nx">Type</span> <span class="c1">// 第二个返回参数：error
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
-</span></span></code></pre></div><p>具体的解析代码，可以全部仿照 <code>GoFrame</code> 的流程，获取入参 <code>reqRes</code> 的反射对象，然后逐个校验，最后再构造 <code>ReqResFunc</code>。</p>
-<p>那么还剩最后一个问题， <code>ReqResFunc</code> 要注册到 <code>Gin</code>框架里呢？这里和 day9 遇到的情况一样，还是那句名言：</p>
-<blockquote>
-<p>All problems in computer science can be solved by another level of indirection.</p>
-<p>计算机科学领域的任何问题都可以通过增加一个中间层来解决。</p>
-</blockquote>
-<p>倘若解决不了，那就再加一个中间层，因此完全可以把 <code>ReqResFunc</code> 转换为 <code>DecodeFunc</code>，实现也不复杂：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">f</span> <span class="o">*</span><span class="nx">ReqResFunc</span><span class="p">)</span> <span class="nf">Call</span><span class="p">(</span><span class="nx">ctx</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span> <span class="nx">decode</span> <span class="kd">func</span><span class="p">(</span><span class="nx">point</span> <span class="nx">any</span><span class="p">)</span> <span class="kt">error</span><span class="p">)</span> <span class="p">(</span><span class="nx">any</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">	<span class="nx">req</span> <span class="o">:=</span> <span class="nx">reflect</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="nx">f</span><span class="p">.</span><span class="nx">req</span><span class="p">.</span><span class="nf">Elem</span><span class="p">())</span>
-</span></span><span class="line"><span class="cl">	<span class="nx">point</span> <span class="o">:=</span> <span class="nx">req</span><span class="p">.</span><span class="nf">Interface</span><span class="p">()</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nf">decode</span><span class="p">(</span><span class="nx">point</span><span class="p">);</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">err</span>
-</span></span><span class="line"><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">	<span class="nx">result</span> <span class="o">:=</span> <span class="nx">f</span><span class="p">.</span><span class="nx">fn</span><span class="p">.</span><span class="nf">Call</span><span class="p">([]</span><span class="nx">reflect</span><span class="p">.</span><span class="nx">Value</span><span class="p">{</span><span class="nx">reflect</span><span class="p">.</span><span class="nf">ValueOf</span><span class="p">(</span><span class="nx">ctx</span><span class="p">),</span> <span class="nx">req</span><span class="p">})</span>
-</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">result</span><span class="p">[</span><span class="mi">1</span><span class="p">];</span> <span class="p">!</span><span class="nx">err</span><span class="p">.</span><span class="nf">IsNil</span><span class="p">()</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">err</span><span class="p">.</span><span class="nf">Interface</span><span class="p">().(</span><span class="kt">error</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="nx">result</span><span class="p">[</span><span class="mi">0</span><span class="p">].</span><span class="nf">Interface</span><span class="p">(),</span> <span class="kc">nil</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">f</span> <span class="o">*</span><span class="nx">ReqResFunc</span><span class="p">)</span> <span class="nf">DecodeFunc</span><span class="p">()</span> <span class="nx">DecodeFunc</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="nx">f</span><span class="p">.</span><span class="nx">Call</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p>而 <code>GoFrame</code> 也是这样转化的，相关源码： <a class="link" href="https://github.com/gogf/gf/blob/313d9d138f96b0ed460d47684298a7fb26d3fd75/net/ghttp/ghttp_server_service_handler.go#L264-L306"  target="_blank" rel="noopener"
-    ><code>func createRouterFunc(funcInfo handlerFuncInfo) func(r *Request)</code></a></p>
-<h2 id="验证-reqresfunc-类型">验证 <code>ReqResFunc</code> 类型</h2>
-<p>增加了一个新特性，做个简单测试，通过 <code>teamId</code> 获取团队成员：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// internal/controller/controller.go
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">team</span><span class="p">)</span> <span class="nf">GetUsers</span><span class="p">(</span><span class="nx">ctx</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span> <span class="nx">req</span> <span class="o">*</span><span class="nx">TeamGetUsersReq</span><span class="p">)</span> <span class="p">(</span><span class="nx">res</span> <span class="o">*</span><span class="nx">TeamGetUsersRes</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">	<span class="nx">out</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">service</span><span class="p">.</span><span class="nx">Team</span><span class="p">.</span><span class="nf">GetUsers</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">service</span><span class="p">.</span><span class="nx">TeamGetUsersReq</span><span class="p">{</span><span class="nx">Id</span><span class="p">:</span> <span class="nx">req</span><span class="p">.</span><span class="nx">Id</span><span class="p">})</span>
-</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">err</span>
-</span></span><span class="line"><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">TeamGetUsersRes</span><span class="p">{</span><span class="nx">TeamGetUsersRes</span><span class="p">:</span> <span class="nx">out</span><span class="p">},</span> <span class="kc">nil</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">// internal/service/service.go
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">team</span><span class="p">)</span> <span class="nf">GetUsers</span><span class="p">(</span><span class="nx">ctx</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span> <span class="nx">req</span> <span class="o">*</span><span class="nx">TeamGetUsersReq</span><span class="p">)</span> <span class="p">(</span><span class="nx">res</span> <span class="o">*</span><span class="nx">TeamGetUsersRes</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">	<span class="kd">var</span> <span class="nx">users</span> <span class="p">[]</span><span class="nx">UserGetRes</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">	<span class="c1">// 查询数据
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="c1">// Users 只是一个切片 []User，用于充当数据库
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">row</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">db</span><span class="p">.</span><span class="nx">Users</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="k">if</span> <span class="nx">row</span><span class="p">.</span><span class="nx">TeamId</span> <span class="o">==</span> <span class="nx">req</span><span class="p">.</span><span class="nx">Id</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">			<span class="nx">users</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">users</span><span class="p">,</span> <span class="nx">UserGetRes</span><span class="p">{</span><span class="nx">Id</span><span class="p">:</span> <span class="nx">row</span><span class="p">.</span><span class="nx">Id</span><span class="p">,</span> <span class="nx">Name</span><span class="p">:</span> <span class="nx">row</span><span class="p">.</span><span class="nx">Name</span><span class="p">,</span> <span class="nx">TeamId</span><span class="p">:</span> <span class="nx">row</span><span class="p">.</span><span class="nx">TeamId</span><span class="p">})</span>
-</span></span><span class="line"><span class="cl">		<span class="p">}</span>
-</span></span><span class="line"><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">TeamGetUsersRes</span><span class="p">{</span><span class="nx">Users</span><span class="p">:</span> <span class="nx">users</span><span class="p">},</span> <span class="kc">nil</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p>测试接口：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">Test_Client</span><span class="p">(</span><span class="nx">t</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">	<span class="nx">time</span><span class="p">.</span><span class="nf">Sleep</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span> <span class="c1">// 等待服务端启动
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
-</span></span><span class="line"><span class="cl">	<span class="nx">paths</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">string</span><span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="s">&#34;/user/1&#34;</span><span class="p">,</span>       <span class="c1">// {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;data&#34;:{&#34;id&#34;:1,&#34;name&#34;:&#34;Alice&#34;,&#34;teamId&#34;:1}}
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="s">&#34;/user/3&#34;</span><span class="p">,</span>       <span class="c1">// {&#34;code&#34;:400,&#34;msg&#34;:&#34;user not found: 3&#34;,&#34;data&#34;:null}
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="s">&#34;/user/1/team&#34;</span><span class="p">,</span>  <span class="c1">// {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;data&#34;:{&#34;id&#34;:1,&#34;name&#34;:&#34;Alice&#34;,&#34;team&#34;:{&#34;id&#34;:3,&#34;name&#34;:&#34;Apple&#34;}}}
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="s">&#34;/team/3&#34;</span><span class="p">,</span>       <span class="c1">// {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;data&#34;:{&#34;id&#34;:3,&#34;name&#34;:&#34;Apple&#34;}}
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="s">&#34;/team/5&#34;</span><span class="p">,</span>       <span class="c1">// {&#34;code&#34;:400,&#34;msg&#34;:&#34;team not found: 5&#34;,&#34;data&#34;:null}
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="s">&#34;/team/3/users&#34;</span><span class="p">,</span> <span class="c1">// {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;data&#34;:{&#34;users&#34;:[{&#34;id&#34;:1,&#34;name&#34;:&#34;Alice&#34;,&#34;teamId&#34;:3}]}}
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="s">&#34;/team/5/users&#34;</span><span class="p">,</span> <span class="c1">// {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;data&#34;:{&#34;Users&#34;:null}}
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">	<span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">path</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">paths</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="nx">resp</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">http</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="s">&#34;http://localhost:8080&#34;</span> <span class="o">+</span> <span class="nx">path</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">		<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">			<span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;req err&#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">			<span class="k">continue</span>
-</span></span><span class="line"><span class="cl">		<span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">		<span class="nx">data</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">io</span><span class="p">.</span><span class="nf">ReadAll</span><span class="p">(</span><span class="nx">resp</span><span class="p">.</span><span class="nx">Body</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">		<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">			<span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="s">&#34;read resp.Body err&#34;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">			<span class="k">continue</span>
-</span></span><span class="line"><span class="cl">		<span class="p">}</span>
-</span></span><span class="line"><span class="cl">		<span class="nx">fmt</span><span class="p">.</span><span class="nf">Println</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">data</span><span class="p">))</span>
-</span></span><span class="line"><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><h2 id="通过对象注册路由">通过对象注册路由</h2>
-<p>事实上，<code>GoFrame</code> 还有第三种路由注册方法：<a class="link" href="https://goframe.org/pages/viewpage.action?pageId=116004922"  target="_blank" rel="noopener"
-    >对象注册</a>，向 <code>(*ghttp.RouterGroup).Bind</code> 传入一个结构体变量，然后 <code>GoFrame</code> 会尝试注册这个结构体上的所有 <code>ReqResFunc</code> 类型的方法。这也是通过反射实现的，核心代码也很简短：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">ObjectHandler</span><span class="p">(</span><span class="nx">object</span> <span class="nx">any</span><span class="p">)</span> <span class="p">(</span><span class="nx">handles</span> <span class="p">[]</span><span class="nx">gin</span><span class="p">.</span><span class="nx">HandlerFunc</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">	<span class="nx">v</span> <span class="o">:=</span> <span class="nx">reflect</span><span class="p">.</span><span class="nf">ValueOf</span><span class="p">(</span><span class="nx">object</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">	<span class="c1">// 如果是结构体, 那么获取这个结构体的指针, 从而遍历到他的所有方法
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">if</span> <span class="nx">v</span><span class="p">.</span><span class="nf">Kind</span><span class="p">()</span> <span class="o">==</span> <span class="nx">reflect</span><span class="p">.</span><span class="nx">Struct</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="nx">newValue</span> <span class="o">:=</span> <span class="nx">reflect</span><span class="p">.</span><span class="nf">New</span><span class="p">(</span><span class="nx">v</span><span class="p">.</span><span class="nf">Type</span><span class="p">())</span>
-</span></span><span class="line"><span class="cl">		<span class="nx">newValue</span><span class="p">.</span><span class="nf">Elem</span><span class="p">().</span><span class="nf">Set</span><span class="p">(</span><span class="nx">v</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">		<span class="nx">v</span> <span class="p">=</span> <span class="nx">newValue</span>
-</span></span><span class="line"><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">v</span><span class="p">.</span><span class="nf">Kind</span><span class="p">()</span> <span class="o">!=</span> <span class="nx">reflect</span><span class="p">.</span><span class="nx">Pointer</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="nb">panic</span><span class="p">(</span><span class="s">&#34;v.Kind() must be reflect.Pointer&#34;</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">	<span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">v</span><span class="p">.</span><span class="nf">NumMethod</span><span class="p">();</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="nx">fn</span> <span class="o">:=</span> <span class="nx">v</span><span class="p">.</span><span class="nf">Method</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span> <span class="c1">// 所有方法都必须为 ReqResFunc 类型
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="nx">handles</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">handles</span><span class="p">,</span> <span class="nf">ReqResHandle</span><span class="p">(</span><span class="nx">fn</span><span class="p">.</span><span class="nf">Interface</span><span class="p">()))</span>
-</span></span><span class="line"><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">	<span class="k">return</span> <span class="nx">handles</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p>但是通过对象注册路由有个缺点，难以为 <strong><code>HandlerFunc</code></strong> 绑定 <code>path</code> 和 <code>method</code>。</p>
-<p>已知的解决方式：</p>
-<ol>
-<li><code>GoFrame</code> 是在 <code>Req</code>（第二个请求参数）里写 <code>go tag</code>，有兴趣的读者，可以查看<a class="link" href="https://goframe.org/pages/viewpage.action?pageId=116004922#id-%e8%a7%84%e8%8c%83%e8%b7%af%e7%94%b1%e5%a6%82%e4%bd%95%e4%bd%bf%e7%94%a8-%e8%a7%84%e8%8c%83%e5%8f%82%e6%95%b0%e7%bb%93%e6%9e%84"  target="_blank" rel="noopener"
-    >「文档：规范参数结构」</a>。</li>
-<li><code>iris</code> 要求方法名（函数名）的格式为：请求方法+请求路径，如 <code>GetHelloWorld</code> 对应 <code>GET: /hello/world</code>，示例：<a class="link" href="https://github.com/iris-contrib/examples/blob/master/mvc/hello-world/main.go"  target="_blank" rel="noopener"
-    >examples/mvc/hello-world/main.go</a></li>
-</ol>
-<p>笔者也做了简单的实现：<a class="link" href="https://github.com/niluan304/gee/blob/main/web/day10/handle/handle_test.go"  target="_blank" rel="noopener"
-    >gee/web/day10/handle/handle_test.go</a>，这里就不再赘述了。</p>
-
-</section>
-
-
-    <footer class="article-footer">
-    
-    <section class="article-tags">
-        
-            <a href="/tags/gee/">Gee</a>
-        
-            <a href="/tags/web/">Web</a>
-        
-    </section>
-
-
-    
-    <section class="article-copyright">
-        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
-  <path stroke="none" d="M0 0h24v24H0z"/>
-  <circle cx="12" cy="12" r="9" />
-  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
-</svg>
-
-
-
-        <span>Licensed under CC BY-NC-SA 4.0</span>
-    </section>
-    </footer>
-
-
-    
-        <link 
-                rel="stylesheet" 
-                href="https://fastly.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI&#43;WdtXRGWt2kTvGFasHpSy3SV"crossorigin="anonymous"
-            ><script 
-                src="https://fastly.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG&#43;vnGctmUb0ZY0l8"crossorigin="anonymous"
-                defer
-                >
-            </script><script 
-                src="https://fastly.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"integrity="sha384-&#43;VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4&#43;/RRE05"crossorigin="anonymous"
-                defer
-                >
-            </script><script>
-    window.addEventListener("DOMContentLoaded", () => {
-        renderMathInElement(document.querySelector(`.article-content`), {
-            delimiters: [
-                { left: "$$", right: "$$", display: true },
-                { left: "$", right: "$", display: false },
-                { left: "\\(", right: "\\)", display: false },
-                { left: "\\[", right: "\\]", display: true }
-            ],
-            ignoredClasses: ["gist"]
-        });})
-</script>
-    
-</article>
-
-    
-
-    
-
-<aside class="related-content--wrapper">
-    <h2 class="section-title">相关文章</h2>
-    <div class="related-content">
-        <div class="flex article-list--tile">
-            
-                
-<article class="">
-    <a href="/p/gee-web-day9-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B8%8E%E8%A7%A3%E8%80%A6/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">gee-web-day9 反序列化与解耦</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="">
-    <a href="/p/gee-web-day8-%E5%88%86%E5%B1%82%E8%AE%BE%E8%AE%A1%E7%9A%84%E5%BF%85%E8%A6%81%E6%80%A7/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">gee-web-day8 分层设计的必要性</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="">
-    <a href="/p/gee-web-day7.5-7%E5%A4%A9-web%E6%A1%86%E6%9E%B6%E8%AF%BB%E5%90%8E%E6%84%9F/">
-        
-        
-
-        <div class="article-details">
-            <h2 class="article-title">gee-web-day7.5 「7天 web框架」读后感</h2>
-        </div>
-    </a>
-</article>
-
-            
-                
-<article class="has-image">
-    <a href="/p/sort.slice-%E4%B8%8D%E9%80%82%E5%90%88%E9%83%A8%E5%88%86%E6%8E%92%E5%BA%8F/">
-        
-        
-            <div class="article-image">
-                <img src="/p/sort.slice-%E4%B8%8D%E9%80%82%E5%90%88%E9%83%A8%E5%88%86%E6%8E%92%E5%BA%8F/_huca69348bf10406e412f1d3e0ec3bf9be_11506_a2ac3eee2a10f36f6bdaa5af0adafef8.png" 
-                        width="250" 
-                        height="150" 
-                        loading="lazy"
-                        alt="Featured image of post sort.Slice 不适合部分排序"
-                        
-                        data-hash="md5-XQb5BRXbpdqa90Te&#43;fQ/8g==">
-                
-            </div>
-        
-
-        <div class="article-details">
-            <h2 class="article-title">sort.Slice 不适合部分排序</h2>
-        </div>
-    </a>
-</article>
-
-            
-        </div>
-    </div>
-</aside>
-
-     
-    
-        
-    <div class="disqus-container">
-    <div id="disqus_thread"></div>
-<script>
-    window.disqus_config = function () {
-    
-    
-    
-    };
-    (function() {
-        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
-            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
-            return;
-        }
-        var d = document, s = d.createElement('script'); s.async = true;
-        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
-        s.setAttribute('data-timestamp', +new Date());
-        (d.head || d.body).appendChild(s);
-    })();
-</script>
-<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
-<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
-</div>
-
-<style>
-    .disqus-container {
-        background-color: var(--card-background);
-        border-radius: var(--card-border-radius);
-        box-shadow: var(--shadow-l1);
-        padding: var(--card-padding);
-    }
-</style>
-
-<script>
-    window.addEventListener('onColorSchemeChange', (e) => {
-        if (typeof DISQUS == 'object') {
-            DISQUS.reset({
-                reload: true
-            });
-        }
-    })
-</script>
-
-    
-
-    
-<section class="totalcount">
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  发表了8篇文章 ·
-  总计6.82k字
-</section>
-
-
-
-
-
-<script>
-  
-  Array.from(document.getElementsByClassName("language-mermaid")).forEach(
-    (el) => {
-      el.parentElement.outerHTML = `<div class="mermaid">${el.innerText}</div>`;
-    }
-  );
-</script>
-
-    
-<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
-
-    
-    <div class="pswp__bg"></div>
-
-    
-    <div class="pswp__scroll-wrap">
-
-        
-        <div class="pswp__container">
-            <div class="pswp__item"></div>
-            <div class="pswp__item"></div>
-            <div class="pswp__item"></div>
-        </div>
-
-        
-        <div class="pswp__ui pswp__ui--hidden">
-
-            <div class="pswp__top-bar">
-
-                
-
-                <div class="pswp__counter"></div>
-
-                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
-
-                <button class="pswp__button pswp__button--share" title="Share"></button>
-
-                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
-
-                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
-
-                
-                
-                <div class="pswp__preloader">
-                    <div class="pswp__preloader__icn">
-                        <div class="pswp__preloader__cut">
-                            <div class="pswp__preloader__donut"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
-                <div class="pswp__share-tooltip"></div>
-            </div>
-
-            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
-            </button>
-
-            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
-            </button>
-
-            <div class="pswp__caption">
-                <div class="pswp__caption__center"></div>
-            </div>
-
-        </div>
-
-    </div>
-
-</div><script 
-                src="https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
-                defer
-                >
-            </script><script 
-                src="https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
-                defer
-                >
-            </script><link 
-                rel="stylesheet" 
-                href="https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
-            ><link 
-                rel="stylesheet" 
-                href="https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
-            >
-
-            </main>
-        </div>
-        <script 
-                src="https://fastly.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
-                
-                >
-            </script><script type="text/javascript" src="/ts/main.js" defer></script>
-<script>
-    (function () {
-        const customFont = document.createElement('link');
-        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
-
-        customFont.type = "text/css";
-        customFont.rel = "stylesheet";
-
-        document.head.appendChild(customFont);
-    }());
-</script>
-
-    </body>
-</html>
+<!doctype html><html lang=zh-cn dir=ltr><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><meta name=description content='第二种路由注册方法：func(context.Context, *XXXReq) (*XXXRes, error)'><title>gee-web-day10 通过反射构造规范路由</title>
+<link rel=canonical href=https://niluan304.github.io/p/gee-web-day10-%E9%80%9A%E8%BF%87%E5%8F%8D%E5%B0%84%E6%9E%84%E9%80%A0%E8%A7%84%E8%8C%83%E8%B7%AF%E7%94%B1/><link rel=stylesheet href=/scss/style.min.3847aef279a7028aef34c6efe3255226a0247c5ccbe1c150ade4d55e2b6d8516.css><meta property='og:title' content='gee-web-day10 通过反射构造规范路由'><meta property='og:description' content='第二种路由注册方法：func(context.Context, *XXXReq) (*XXXRes, error)'><meta property='og:url' content='https://niluan304.github.io/p/gee-web-day10-%E9%80%9A%E8%BF%87%E5%8F%8D%E5%B0%84%E6%9E%84%E9%80%A0%E8%A7%84%E8%8C%83%E8%B7%AF%E7%94%B1/'><meta property='og:site_name' content='雾封的笔'><meta property='og:type' content='article'><meta property='article:section' content='Post'><meta property='article:tag' content='gee'><meta property='article:tag' content='web'><meta property='article:published_time' content='2023-12-22T15:43:59+08:00'><meta property='article:modified_time' content='2023-12-22T15:43:59+08:00'><meta name=twitter:title content="gee-web-day10 通过反射构造规范路由"><meta name=twitter:description content="第二种路由注册方法：func(context.Context, *XXXReq) (*XXXRes, error)"><link rel="shortcut icon" href=/favicon.ico><script async src="https://www.googletagmanager.com/gtag/js?id=G-C0BX1J3KRG"></script><script>var doNotTrack=!1;if(!doNotTrack){window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}gtag("js",new Date),gtag("config","G-C0BX1J3KRG",{anonymize_ip:!1})}</script><style>:root{--article-font-family:'Noto Serif HK', var(--base-font-family)}</style><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Noto+Serif+HK:wght@300;400;500;600;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></head><body class=article-page><script>(function(){const e="StackColorScheme";localStorage.getItem(e)||localStorage.setItem(e,"auto")})()</script><script>(function(){const t="StackColorScheme",e=localStorage.getItem(t),n=window.matchMedia("(prefers-color-scheme: dark)").matches===!0;e=="dark"||e==="auto"&&n?document.documentElement.dataset.scheme="dark":document.documentElement.dataset.scheme="light"})()</script><div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky"><button class="hamburger hamburger--spin" type=button id=toggle-menu aria-label=切换菜单>
+<span class=hamburger-box><span class=hamburger-inner></span></span></button><header><figure class=site-avatar><a href=/><img src=/img/avatar_hueb4763c82ba1420a58a50c6eccfe357b_472983_300x0_resize_box_3.png width=300 height=300 class=site-logo loading=lazy alt=Avatar>
+</a><span class=emoji>☕</span></figure><div class=site-meta><h1 class=site-name><a href=/>雾封的笔</a></h1><h2 class=site-description>脚步不停，灿若繁星。</h2></div></header><ol class=social-menu><li><a href=mailto:zwei.elen@outlook.com target=_blank title=Email rel=me><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#2c3e50" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="icon icon-tabler icon-tabler-mail" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z"/><path d="M3 7a2 2 0 012-2h14a2 2 0 012 2v10a2 2 0 01-2 2H5a2 2 0 01-2-2V7z"/><path d="m3 7 9 6 9-6"/></svg></a></li><li><a href=https://github.com/niluan304 target=_blank title=GitHub rel=me><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z" fill="none"/><path d="M9 19c-4.3 1.4-4.3-2.5-6-3m12 5v-3.5c0-1 .1-1.4-.5-2 2.8-.3 5.5-1.4 5.5-6a4.6 4.6.0 00-1.3-3.2 4.2 4.2.0 00-.1-3.2s-1.1-.3-3.5 1.3a12.3 12.3.0 00-6.2.0C6.5 2.8 5.4 3.1 5.4 3.1a4.2 4.2.0 00-.1 3.2A4.6 4.6.0 004 9.5c0 4.6 2.7 5.7 5.5 6-.6.6-.6 1.2-.5 2V21"/></svg></a></li></ol><ol class=menu id=main-menu><li><a href=/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><polyline points="5 12 3 12 12 3 21 12 19 12"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/><path d="M9 21v-6a2 2 0 012-2h2a2 2 0 012 2v6"/></svg>
+<span>Home</span></a></li><li><a href=/solutions/><!doctype html><svg t="1710685833984" class="icon" viewBox="0 0 1024 1024" xmlns="http://www.w3.org/2000/svg" p-id="19816" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200"><path d="M624.289 816.93c-3.032.0-6.157.409-9.288 1.214-72.38 18.637-144.767 37.274-217.147 55.897-19.536 5.03-26.426 21.93-24.586 36.448 1.981 15.646 14.106 31.485 33.446 31.485h.002c3.029.0 6.15-.407 9.28-1.212a2055574.5 2055574.5.0 01217.149-55.898c19.536-5.034 26.423-21.938 24.583-36.457-1.985-15.642-14.106-31.476-33.44-31.476zM572.377 934.011c-6.321.0-12.516 2.06-18.413 6.126-14.42 9.939-28.264 15.35-41.153 16.086-.547.032-1.095.047-1.644.047-6.968.0-14.874-2.326-24.868-7.31-.743-.393-3.643-2.292-5.561-3.547-5.306-3.474-6.786-4.443-8.492-4.674-5.036-2.597-10.51-3.946-16.135-3.946-15.808.0-30.932 10.543-35.963 25.07-4.172 12.041-.206 24.313 10.609 32.827 24.347 19.168 52.743 29.3 82.12 29.3 26.81.0 53.386-8.55 76.855-24.725 13.26-9.139 18.484-24.493 13.637-40.068-4.69-15.065-17.144-25.186-30.992-25.186zM758.2 323.388c-23.674-44.276-59.272-80.43-102.949-104.556-40.902-22.593-88.289-34.536-137.036-34.536-41.49.0-83.246 8.797-120.754 25.442-39.792 17.658-73.83 43.216-101.172 75.963-51.182 61.3-72.758 149.987-57.716 237.237 14.454 83.839 60.433 154.192 126.145 193.017 5.63 3.328 11.493 5.015 17.423 5.015 15.057.0 28.606-11.094 32.946-26.978 4.146-15.17-1.767-29.61-15.431-37.682-87.857-51.928-112.807-177.156-85.54-263.399 26.457-83.656 107.442-139.862 201.52-139.862 39.74.0 78.37 10.246 111.716 29.63 45.121 26.234 77.406 69.951 90.905 123.098 14.556 57.308 5.738 118.382-24.192 167.566-11.93 19.606-27.417 37.625-42.396 55.048-9.603 11.173-19.533 22.724-28.549 34.697-15.429 20.492-20.147 42.395-24.71 63.575-.8 3.718-1.62 7.528-2.499 11.339l-198.107 52.663c-19.536 5.193-26.361 22.222-24.458 36.791 2.024 15.5 14.071 31.193 33.179 31.196h.007c3.103.0 6.304-.433 9.517-1.286 51.509-13.699 103.021-27.39 154.534-41.075 5.775-1.536 11.35-2.909 16.74-4.24 42.26-10.416 75.638-18.644 79.547-79.646 1.383-21.58 19.882-41.685 36.204-59.424 4.189-4.553 8.144-8.853 11.756-13.099 19.584-23.002 44.049-54.132 59.531-90.99 32.646-77.76 26.907-164.947-16.16-245.504zM173.191 470.702c0-19.056-15.448-34.504-34.505-34.504H71.708c-19.057.0-34.505 15.448-34.505 34.504.0 19.057 15.448 34.505 34.505 34.505h66.978c19.057.0 34.505-15.448 34.505-34.505zm781.798-34.504h-66.98c-19.056.0-34.503 15.448-34.503 34.504.0 19.057 15.448 34.505 34.504 34.505h66.979c19.056.0 34.505-15.448 34.505-34.505.0-19.056-15.449-34.504-34.505-34.504zM225.263 230.175c13.475 13.475 35.321 13.475 48.796.0s13.475-35.322.0-48.796l-47.362-47.362c-13.474-13.475-35.321-13.475-48.796.0s-13.475 35.321.0 48.796l47.362 47.362zM803.912 711.23c-13.475-13.475-35.322-13.475-48.797.0-13.474 13.475-13.474 35.322.0 48.797l47.362 47.362c13.475 13.475 35.322 13.475 48.796.0 13.475-13.475 13.475-35.321.0-48.797l-47.361-47.362zM514.587 135.988c19.056.0 34.505-15.449 34.505-34.505v-66.98C549.092 15.449 533.643.0 514.587.0c-19.057.0-34.505 15.449-34.505 34.505v66.979c0 19.056 15.448 34.505 34.505 34.505zM274.06 711.23c-13.475-13.475-35.321-13.475-48.796.0l-47.362 47.362c-13.475 13.475-13.475 35.321.0 48.797 13.475 13.475 35.322 13.475 48.796.0l47.362-47.362c13.475-13.475 13.475-35.322.0-48.797zM755.114 230.175c13.475 13.475 35.322 13.475 48.797.0l47.361-47.362c13.475-13.475 13.475-35.321.0-48.796s-35.321-13.475-48.796.0l-47.362 47.362c-13.474 13.474-13.474 35.321.0 48.796z" fill="#707070" p-id="19817" data-spm-anchor-id="a313x.search_index.0.i7.774c3a81Q659h0" class="selected"/></svg>
+<span>Solutions</span></a></li><li><a href=/archives/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><rect x="3" y="4" width="18" height="4" rx="2"/><path d="M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8"/><line x1="10" y1="12" x2="14" y2="12"/></svg>
+<span>Archives</span></a></li><li><a href=/search/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="10" cy="10" r="7"/><line x1="21" y1="21" x2="15" y2="15"/></svg>
+<span>Search</span></a></li><li><a href=/links/><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M10 14a3.5 3.5.0 005 0l4-4a3.5 3.5.0 00-5-5l-.5.5"/><path d="M14 10a3.5 3.5.0 00-5 0l-4 4a3.5 3.5.0 005 5l.5-.5"/></svg>
+<span>Links</span></a></li><li class=menu-bottom-section><ol class=menu><li id=dark-mode-toggle><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="8" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="16" cy="12" r="2"/><rect x="2" y="6" width="20" height="12" rx="6"/></svg>
+<span>暗色模式</span></li></ol></li></ol></aside><aside class="sidebar right-sidebar sticky"><section class="widget archives"><div class=widget-icon><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><line x1="5" y1="9" x2="19" y2="9"/><line x1="5" y1="15" x2="19" y2="15"/><line x1="11" y1="4" x2="7" y2="20"/><line x1="17" y1="4" x2="13" y2="20"/></svg></div><h2 class="widget-title section-title">目录</h2><div class=widget--toc><nav id=TableOfContents><ol><li><a href=#goframe-的-reqresfunc-类型><code>GoFrame</code> 的 <code>ReqResFunc</code> 类型</a></li><li><a href=#实现-reqresfunc-类型的约束>实现 <code>ReqResFunc</code> 类型的约束</a></li><li><a href=#验证-reqresfunc-类型>验证 <code>ReqResFunc</code> 类型</a></li><li><a href=#通过对象注册路由>通过对象注册路由</a></li></ol></nav></div></section></aside><main class="main full-width"><article class=main-article><header class=article-header><div class=article-details><header class=article-category><a href=/categories/go/ style=background-color:#2a9d8f;color:#fff>Go</a></header><div class=article-title-wrapper><h2 class=article-title><a href=/p/gee-web-day10-%E9%80%9A%E8%BF%87%E5%8F%8D%E5%B0%84%E6%9E%84%E9%80%A0%E8%A7%84%E8%8C%83%E8%B7%AF%E7%94%B1/>gee-web-day10 通过反射构造规范路由</a></h2><h3 class=article-subtitle>第二种路由注册方法：func(context.Context, *XXXReq) (*XXXRes, error)</h3></div><footer class=article-time><div><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><path d="M11.795 21H5a2 2 0 01-2-2V7a2 2 0 012-2h12a2 2 0 012 2v4"/><circle cx="18" cy="18" r="4"/><path d="M15 3v4"/><path d="M7 3v4"/><path d="M3 11h16"/><path d="M18 16.496V18l1 1"/></svg>
+<time class=article-time--published>2023-12-22</time></div></footer></div></header><section class=article-content><blockquote><p>源代码/数据集已上传到：<a class=link href=https://github.com/niluan304/gee target=_blank rel=noopener>GitHub - follow gee to learn go</a></p></blockquote><h2 id=goframe-的-reqresfunc-类型><code>GoFrame</code> 的 <code>ReqResFunc</code> 类型</h2><p>在 day7.5 开篇的时候，笔者提到 <code>GoFrame</code> 支持第二种路由注册方法，这里笔者称之为 <code>ReqResFunc</code> 类型（下文同）：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=cl><span class=c1>// 写法二
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kd>func</span> <span class=p>(</span><span class=nx>ctx</span> <span class=nx>context</span><span class=p>.</span><span class=nx>Context</span><span class=p>,</span> <span class=nx>req</span> <span class=o>*</span><span class=p>{</span><span class=nx>Prefix</span><span class=p>}</span><span class=nx>Req</span><span class=p>)</span> <span class=p>(</span><span class=nx>res</span> <span class=o>*</span><span class=p>{</span><span class=nx>Prefix</span><span class=p>}</span><span class=nx>Res</span><span class=p>,</span> <span class=nx>err</span> <span class=kt>error</span><span class=p>){</span>
+</span></span><span class=line><span class=cl>    <span class=c1>// 业务代码逻辑
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>}</span>
+</span></span></code></pre></div><p>但是 day9 实现的函数签名：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=cl><span class=kd>func</span> <span class=p>(</span><span class=nx>c</span> <span class=o>*</span><span class=nx>user</span><span class=p>)</span> <span class=nf>Get</span><span class=p>(</span><span class=nx>ctx</span> <span class=nx>context</span><span class=p>.</span><span class=nx>Context</span><span class=p>,</span> <span class=nx>decode</span> <span class=kd>func</span><span class=p>(</span><span class=nx>point</span> <span class=nx>any</span><span class=p>)</span> <span class=p>(</span><span class=nx>err</span> <span class=kt>error</span><span class=p>))</span> <span class=p>(</span><span class=nx>data</span> <span class=nx>any</span><span class=p>,</span> <span class=nx>err</span> <span class=kt>error</span><span class=p>)</span>
+</span></span></code></pre></div><p>对比可以发现，和 <code>ReqResFunc</code> 类型有明显不同，我们可以在 <code>GoFrame</code> 的源码里一探究竟。</p><p>从 <code>GoFrame</code> 的 <a class=link href="https://goframe.org/pages/viewpage.action?pageId=1114240" target=_blank rel=noopener>文档「路由注册-函数注册」中</a>，可以找到 <a class=link href=https://github.com/gogf/gf/blob/313d9d138f96b0ed460d47684298a7fb26d3fd75/net/ghttp/ghttp_server_service_handler.go#L21-L39 target=_blank rel=noopener>入口函数</a>：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=cl><span class=c1>// https://github.com/gogf/gf/blob/313d9d138f96b0ed460d47684298a7fb26d3fd75/net/ghttp/ghttp_server_service_handler.go#L21-L39
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=c1>// BindHandler registers a handler function to server with a given pattern.
+</span></span></span><span class=line><span class=cl><span class=c1>//
+</span></span></span><span class=line><span class=cl><span class=c1>// Note that the parameter `handler` can be type of:
+</span></span></span><span class=line><span class=cl><span class=c1>// 1. func(*ghttp.Request)
+</span></span></span><span class=line><span class=cl><span class=c1>// 2. func(context.Context, BizRequest)(BizResponse, error)
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kd>func</span> <span class=p>(</span><span class=nx>s</span> <span class=o>*</span><span class=nx>Server</span><span class=p>)</span> <span class=nf>BindHandler</span><span class=p>(</span><span class=nx>pattern</span> <span class=kt>string</span><span class=p>,</span> <span class=nx>handler</span> <span class=kd>interface</span><span class=p>{})</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=kd>var</span> <span class=nx>ctx</span> <span class=p>=</span> <span class=nx>context</span><span class=p>.</span><span class=nf>TODO</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>	<span class=nx>funcInfo</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>s</span><span class=p>.</span><span class=nf>checkAndCreateFuncInfo</span><span class=p>(</span><span class=nx>handler</span><span class=p>,</span> <span class=s>&#34;&#34;</span><span class=p>,</span> <span class=s>&#34;&#34;</span><span class=p>,</span> <span class=s>&#34;&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=nx>s</span><span class=p>.</span><span class=nf>Logger</span><span class=p>().</span><span class=nf>Fatalf</span><span class=p>(</span><span class=nx>ctx</span><span class=p>,</span> <span class=s>`%+v`</span><span class=p>,</span> <span class=nx>err</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>	<span class=nx>s</span><span class=p>.</span><span class=nf>doBindHandler</span><span class=p>(</span><span class=nx>ctx</span><span class=p>,</span> <span class=nx>doBindHandlerInput</span><span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=nx>Prefix</span><span class=p>:</span>     <span class=s>&#34;&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		<span class=nx>Pattern</span><span class=p>:</span>    <span class=nx>pattern</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		<span class=nx>FuncInfo</span><span class=p>:</span>   <span class=nx>funcInfo</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		<span class=nx>Middleware</span><span class=p>:</span> <span class=kc>nil</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>		<span class=nx>Source</span><span class=p>:</span>     <span class=s>&#34;&#34;</span><span class=p>,</span>
+</span></span><span class=line><span class=cl>	<span class=p>})</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>在源码里，可以发现关键代码在 <a class=link href=https://github.com/gogf/gf/blob/313d9d138f96b0ed460d47684298a7fb26d3fd75/net/ghttp/ghttp_server_service_handler.go#L148 target=_blank rel=noopener><code>checkAndCreateFuncInfo</code> 方法</a>，继续前行，就能够发现端倪：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=cl><span class=c1>// https://github.com/gogf/gf/blob/313d9d138f96b0ed460d47684298a7fb26d3fd75/net/ghttp/ghttp_server_service_handler.go#L148
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl><span class=kd>func</span> <span class=p>(</span><span class=nx>s</span> <span class=o>*</span><span class=nx>Server</span><span class=p>)</span> <span class=nf>checkAndCreateFuncInfo</span><span class=p>(</span><span class=nx>f</span> <span class=kd>interface</span><span class=p>{},</span> <span class=nx>pkgPath</span><span class=p>,</span> <span class=nx>structName</span><span class=p>,</span><span class=nx>methodName</span> <span class=kt>string</span><span class=p>,)</span> <span class=p>(</span><span class=nx>funcInfo</span> <span class=nx>handlerFuncInfo</span><span class=p>,</span> <span class=nx>err</span> <span class=kt>error</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=nx>funcInfo</span> <span class=p>=</span> <span class=nx>handlerFuncInfo</span><span class=p>{</span> <span class=c1>// 根据传入的 f，初始化返回值
+</span></span></span><span class=line><span class=cl><span class=c1></span>		<span class=nx>Type</span><span class=p>:</span>  <span class=nx>reflect</span><span class=p>.</span><span class=nf>TypeOf</span><span class=p>(</span><span class=nx>f</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>		<span class=nx>Value</span><span class=p>:</span> <span class=nx>reflect</span><span class=p>.</span><span class=nf>ValueOf</span><span class=p>(</span><span class=nx>f</span><span class=p>),</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p><code>GoFrame</code> 通过反射 <code>reflect</code>，获取了传入的函数的参数信息，并做了相应的校验，关键代码有 5 行：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=cl><span class=c1>// 校验请求和返回的参数数量
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>if</span> <span class=nx>reflectType</span><span class=p>.</span><span class=nf>NumIn</span><span class=p>()</span> <span class=o>!=</span> <span class=mi>2</span> <span class=o>||</span> <span class=nx>reflectType</span><span class=p>.</span><span class=nf>NumOut</span><span class=p>()</span> <span class=o>!=</span> <span class=mi>2</span> 
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 第一个请求参数必须为 context.Context 类型
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>if</span> <span class=p>!</span><span class=nx>reflectType</span><span class=p>.</span><span class=nf>In</span><span class=p>(</span><span class=mi>0</span><span class=p>).</span><span class=nf>Implements</span><span class=p>(</span><span class=nx>reflect</span><span class=p>.</span><span class=nf>TypeOf</span><span class=p>((</span><span class=o>*</span><span class=nx>context</span><span class=p>.</span><span class=nx>Context</span><span class=p>)(</span><span class=kc>nil</span><span class=p>)).</span><span class=nf>Elem</span><span class=p>())</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 第二个返回参数必须为 error 类型
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>if</span> <span class=p>!</span><span class=nx>reflectType</span><span class=p>.</span><span class=nf>Out</span><span class=p>(</span><span class=mi>1</span><span class=p>).</span><span class=nf>Implements</span><span class=p>(</span><span class=nx>reflect</span><span class=p>.</span><span class=nf>TypeOf</span><span class=p>((</span><span class=o>*</span><span class=kt>error</span><span class=p>)(</span><span class=kc>nil</span><span class=p>)).</span><span class=nf>Elem</span><span class=p>())</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 第二个请求参数必须为以 `Req` 结尾
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>if</span> <span class=p>!</span><span class=nx>strings</span><span class=p>.</span><span class=nf>HasSuffix</span><span class=p>(</span><span class=nx>reflectType</span><span class=p>.</span><span class=nf>In</span><span class=p>(</span><span class=mi>1</span><span class=p>).</span><span class=nf>String</span><span class=p>(),</span> <span class=s>`Req`</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// 第一个返回参数必须为以 `Res` 结尾
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=k>if</span> <span class=p>!</span><span class=nx>strings</span><span class=p>.</span><span class=nf>HasSuffix</span><span class=p>(</span><span class=nx>reflectType</span><span class=p>.</span><span class=nf>Out</span><span class=p>(</span><span class=mi>0</span><span class=p>).</span><span class=nf>String</span><span class=p>(),</span> <span class=s>`Res`</span><span class=p>)</span> 
+</span></span></code></pre></div><p>通过这些校验，<code>GoFrame</code> 就实现了规范路由函数必须是 <code>ResReqFunc</code> 类型的约束。校验过程中，有一些细节：</p><ol><li><code>ctx</code> 和 <code>error</code> 是接口类型，只能调用 <code>func (Type) Implements(u Type) bool</code> 确认是否实现了对应的接口，<code>(*error)(nil)</code> 和 <code>(*context.Context)(nil)</code> 则是声明了对应接口的空值 <code>nil</code>。</li><li><code>req</code> 和 <code>res</code> 的初始类型是结构体，可以直接获取结构体的类型名。</li></ol><h2 id=实现-reqresfunc-类型的约束>实现 <code>ReqResFunc</code> 类型的约束</h2><p>接下来，我们就可以仿照 <code>GoFrame</code>，实现 <code>ResReqFunc</code> 类型的约束。首先需要创建一个结构体，用于保存反射解析出来的值：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=cl><span class=kd>type</span> <span class=nx>ReqResFunc</span> <span class=kd>struct</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=nx>fn</span> <span class=nx>reflect</span><span class=p>.</span><span class=nx>Value</span> <span class=c1>// 函数调用入口
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl>	<span class=nx>ctx</span> <span class=nx>reflect</span><span class=p>.</span><span class=nx>Type</span> <span class=c1>// 第一个请求参数：context.Context
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=nx>req</span> <span class=nx>reflect</span><span class=p>.</span><span class=nx>Type</span> <span class=c1>// 第二个请求参数：XXXReq
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl>	<span class=nx>res</span> <span class=nx>reflect</span><span class=p>.</span><span class=nx>Type</span> <span class=c1>// 第一个返回参数：XXXRes
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=nx>err</span> <span class=nx>reflect</span><span class=p>.</span><span class=nx>Type</span> <span class=c1>// 第二个返回参数：error
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=p>}</span>
+</span></span></code></pre></div><p>具体的解析代码，可以全部仿照 <code>GoFrame</code> 的流程，获取入参 <code>reqRes</code> 的反射对象，然后逐个校验，最后再构造 <code>ReqResFunc</code>。</p><p>那么还剩最后一个问题， <code>ReqResFunc</code> 要注册到 <code>Gin</code>框架里呢？这里和 day9 遇到的情况一样，还是那句名言：</p><blockquote><p>All problems in computer science can be solved by another level of indirection.</p><p>计算机科学领域的任何问题都可以通过增加一个中间层来解决。</p></blockquote><p>倘若解决不了，那就再加一个中间层，因此完全可以把 <code>ReqResFunc</code> 转换为 <code>DecodeFunc</code>，实现也不复杂：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=cl><span class=kd>func</span> <span class=p>(</span><span class=nx>f</span> <span class=o>*</span><span class=nx>ReqResFunc</span><span class=p>)</span> <span class=nf>Call</span><span class=p>(</span><span class=nx>ctx</span> <span class=nx>context</span><span class=p>.</span><span class=nx>Context</span><span class=p>,</span> <span class=nx>decode</span> <span class=kd>func</span><span class=p>(</span><span class=nx>point</span> <span class=nx>any</span><span class=p>)</span> <span class=kt>error</span><span class=p>)</span> <span class=p>(</span><span class=nx>any</span><span class=p>,</span> <span class=kt>error</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=nx>req</span> <span class=o>:=</span> <span class=nx>reflect</span><span class=p>.</span><span class=nf>New</span><span class=p>(</span><span class=nx>f</span><span class=p>.</span><span class=nx>req</span><span class=p>.</span><span class=nf>Elem</span><span class=p>())</span>
+</span></span><span class=line><span class=cl>	<span class=nx>point</span> <span class=o>:=</span> <span class=nx>req</span><span class=p>.</span><span class=nf>Interface</span><span class=p>()</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=k>if</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nf>decode</span><span class=p>(</span><span class=nx>point</span><span class=p>);</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=k>return</span> <span class=kc>nil</span><span class=p>,</span> <span class=nx>err</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=nx>result</span> <span class=o>:=</span> <span class=nx>f</span><span class=p>.</span><span class=nx>fn</span><span class=p>.</span><span class=nf>Call</span><span class=p>([]</span><span class=nx>reflect</span><span class=p>.</span><span class=nx>Value</span><span class=p>{</span><span class=nx>reflect</span><span class=p>.</span><span class=nf>ValueOf</span><span class=p>(</span><span class=nx>ctx</span><span class=p>),</span> <span class=nx>req</span><span class=p>})</span>
+</span></span><span class=line><span class=cl>	<span class=k>if</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>result</span><span class=p>[</span><span class=mi>1</span><span class=p>];</span> <span class=p>!</span><span class=nx>err</span><span class=p>.</span><span class=nf>IsNil</span><span class=p>()</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=k>return</span> <span class=kc>nil</span><span class=p>,</span> <span class=nx>err</span><span class=p>.</span><span class=nf>Interface</span><span class=p>().(</span><span class=kt>error</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=nx>result</span><span class=p>[</span><span class=mi>0</span><span class=p>].</span><span class=nf>Interface</span><span class=p>(),</span> <span class=kc>nil</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=kd>func</span> <span class=p>(</span><span class=nx>f</span> <span class=o>*</span><span class=nx>ReqResFunc</span><span class=p>)</span> <span class=nf>DecodeFunc</span><span class=p>()</span> <span class=nx>DecodeFunc</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=nx>f</span><span class=p>.</span><span class=nx>Call</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>而 <code>GoFrame</code> 也是这样转化的，相关源码： <a class=link href=https://github.com/gogf/gf/blob/313d9d138f96b0ed460d47684298a7fb26d3fd75/net/ghttp/ghttp_server_service_handler.go#L264-L306 target=_blank rel=noopener><code>func createRouterFunc(funcInfo handlerFuncInfo) func(r *Request)</code></a></p><h2 id=验证-reqresfunc-类型>验证 <code>ReqResFunc</code> 类型</h2><p>增加了一个新特性，做个简单测试，通过 <code>teamId</code> 获取团队成员：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=cl><span class=c1>// internal/controller/controller.go
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kd>func</span> <span class=p>(</span><span class=nx>c</span> <span class=o>*</span><span class=nx>team</span><span class=p>)</span> <span class=nf>GetUsers</span><span class=p>(</span><span class=nx>ctx</span> <span class=nx>context</span><span class=p>.</span><span class=nx>Context</span><span class=p>,</span> <span class=nx>req</span> <span class=o>*</span><span class=nx>TeamGetUsersReq</span><span class=p>)</span> <span class=p>(</span><span class=nx>res</span> <span class=o>*</span><span class=nx>TeamGetUsersRes</span><span class=p>,</span> <span class=nx>err</span> <span class=kt>error</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=nx>out</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>service</span><span class=p>.</span><span class=nx>Team</span><span class=p>.</span><span class=nf>GetUsers</span><span class=p>(</span><span class=nx>ctx</span><span class=p>,</span> <span class=o>&amp;</span><span class=nx>service</span><span class=p>.</span><span class=nx>TeamGetUsersReq</span><span class=p>{</span><span class=nx>Id</span><span class=p>:</span> <span class=nx>req</span><span class=p>.</span><span class=nx>Id</span><span class=p>})</span>
+</span></span><span class=line><span class=cl>	<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=k>return</span> <span class=kc>nil</span><span class=p>,</span> <span class=nx>err</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=o>&amp;</span><span class=nx>TeamGetUsersRes</span><span class=p>{</span><span class=nx>TeamGetUsersRes</span><span class=p>:</span> <span class=nx>out</span><span class=p>},</span> <span class=kc>nil</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl><span class=c1>// internal/service/service.go
+</span></span></span><span class=line><span class=cl><span class=c1></span><span class=kd>func</span> <span class=p>(</span><span class=nx>s</span> <span class=o>*</span><span class=nx>team</span><span class=p>)</span> <span class=nf>GetUsers</span><span class=p>(</span><span class=nx>ctx</span> <span class=nx>context</span><span class=p>.</span><span class=nx>Context</span><span class=p>,</span> <span class=nx>req</span> <span class=o>*</span><span class=nx>TeamGetUsersReq</span><span class=p>)</span> <span class=p>(</span><span class=nx>res</span> <span class=o>*</span><span class=nx>TeamGetUsersRes</span><span class=p>,</span> <span class=nx>err</span> <span class=kt>error</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=kd>var</span> <span class=nx>users</span> <span class=p>[]</span><span class=nx>UserGetRes</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=c1>// 查询数据
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=c1>// Users 只是一个切片 []User，用于充当数据库
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=k>for</span> <span class=nx>_</span><span class=p>,</span> <span class=nx>row</span> <span class=o>:=</span> <span class=k>range</span> <span class=nx>db</span><span class=p>.</span><span class=nx>Users</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=k>if</span> <span class=nx>row</span><span class=p>.</span><span class=nx>TeamId</span> <span class=o>==</span> <span class=nx>req</span><span class=p>.</span><span class=nx>Id</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>			<span class=nx>users</span> <span class=p>=</span> <span class=nb>append</span><span class=p>(</span><span class=nx>users</span><span class=p>,</span> <span class=nx>UserGetRes</span><span class=p>{</span><span class=nx>Id</span><span class=p>:</span> <span class=nx>row</span><span class=p>.</span><span class=nx>Id</span><span class=p>,</span> <span class=nx>Name</span><span class=p>:</span> <span class=nx>row</span><span class=p>.</span><span class=nx>Name</span><span class=p>,</span> <span class=nx>TeamId</span><span class=p>:</span> <span class=nx>row</span><span class=p>.</span><span class=nx>TeamId</span><span class=p>})</span>
+</span></span><span class=line><span class=cl>		<span class=p>}</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=o>&amp;</span><span class=nx>TeamGetUsersRes</span><span class=p>{</span><span class=nx>Users</span><span class=p>:</span> <span class=nx>users</span><span class=p>},</span> <span class=kc>nil</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>测试接口：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=cl><span class=kd>func</span> <span class=nf>Test_Client</span><span class=p>(</span><span class=nx>t</span> <span class=o>*</span><span class=nx>testing</span><span class=p>.</span><span class=nx>T</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=nx>time</span><span class=p>.</span><span class=nf>Sleep</span><span class=p>(</span><span class=nx>time</span><span class=p>.</span><span class=nx>Second</span><span class=p>)</span> <span class=c1>// 等待服务端启动
+</span></span></span><span class=line><span class=cl><span class=c1></span>
+</span></span><span class=line><span class=cl>	<span class=nx>paths</span> <span class=o>:=</span> <span class=p>[]</span><span class=kt>string</span><span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=s>&#34;/user/1&#34;</span><span class=p>,</span>       <span class=c1>// {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;data&#34;:{&#34;id&#34;:1,&#34;name&#34;:&#34;Alice&#34;,&#34;teamId&#34;:1}}
+</span></span></span><span class=line><span class=cl><span class=c1></span>		<span class=s>&#34;/user/3&#34;</span><span class=p>,</span>       <span class=c1>// {&#34;code&#34;:400,&#34;msg&#34;:&#34;user not found: 3&#34;,&#34;data&#34;:null}
+</span></span></span><span class=line><span class=cl><span class=c1></span>		<span class=s>&#34;/user/1/team&#34;</span><span class=p>,</span>  <span class=c1>// {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;data&#34;:{&#34;id&#34;:1,&#34;name&#34;:&#34;Alice&#34;,&#34;team&#34;:{&#34;id&#34;:3,&#34;name&#34;:&#34;Apple&#34;}}}
+</span></span></span><span class=line><span class=cl><span class=c1></span>		<span class=s>&#34;/team/3&#34;</span><span class=p>,</span>       <span class=c1>// {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;data&#34;:{&#34;id&#34;:3,&#34;name&#34;:&#34;Apple&#34;}}
+</span></span></span><span class=line><span class=cl><span class=c1></span>		<span class=s>&#34;/team/5&#34;</span><span class=p>,</span>       <span class=c1>// {&#34;code&#34;:400,&#34;msg&#34;:&#34;team not found: 5&#34;,&#34;data&#34;:null}
+</span></span></span><span class=line><span class=cl><span class=c1></span>		<span class=s>&#34;/team/3/users&#34;</span><span class=p>,</span> <span class=c1>// {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;data&#34;:{&#34;users&#34;:[{&#34;id&#34;:1,&#34;name&#34;:&#34;Alice&#34;,&#34;teamId&#34;:3}]}}
+</span></span></span><span class=line><span class=cl><span class=c1></span>		<span class=s>&#34;/team/5/users&#34;</span><span class=p>,</span> <span class=c1>// {&#34;code&#34;:200,&#34;msg&#34;:&#34;&#34;,&#34;data&#34;:{&#34;Users&#34;:null}}
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=k>for</span> <span class=nx>_</span><span class=p>,</span> <span class=nx>path</span> <span class=o>:=</span> <span class=k>range</span> <span class=nx>paths</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=nx>resp</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>http</span><span class=p>.</span><span class=nf>Get</span><span class=p>(</span><span class=s>&#34;http://localhost:8080&#34;</span> <span class=o>+</span> <span class=nx>path</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>		<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>			<span class=nx>fmt</span><span class=p>.</span><span class=nf>Println</span><span class=p>(</span><span class=s>&#34;req err&#34;</span><span class=p>,</span> <span class=nx>err</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>			<span class=k>continue</span>
+</span></span><span class=line><span class=cl>		<span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>		<span class=nx>data</span><span class=p>,</span> <span class=nx>err</span> <span class=o>:=</span> <span class=nx>io</span><span class=p>.</span><span class=nf>ReadAll</span><span class=p>(</span><span class=nx>resp</span><span class=p>.</span><span class=nx>Body</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>		<span class=k>if</span> <span class=nx>err</span> <span class=o>!=</span> <span class=kc>nil</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>			<span class=nx>fmt</span><span class=p>.</span><span class=nf>Println</span><span class=p>(</span><span class=s>&#34;read resp.Body err&#34;</span><span class=p>,</span> <span class=nx>err</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>			<span class=k>continue</span>
+</span></span><span class=line><span class=cl>		<span class=p>}</span>
+</span></span><span class=line><span class=cl>		<span class=nx>fmt</span><span class=p>.</span><span class=nf>Println</span><span class=p>(</span><span class=nb>string</span><span class=p>(</span><span class=nx>data</span><span class=p>))</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><h2 id=通过对象注册路由>通过对象注册路由</h2><p>事实上，<code>GoFrame</code> 还有第三种路由注册方法：<a class=link href="https://goframe.org/pages/viewpage.action?pageId=116004922" target=_blank rel=noopener>对象注册</a>，向 <code>(*ghttp.RouterGroup).Bind</code> 传入一个结构体变量，然后 <code>GoFrame</code> 会尝试注册这个结构体上的所有 <code>ReqResFunc</code> 类型的方法。这也是通过反射实现的，核心代码也很简短：</p><div class=highlight><pre tabindex=0 class=chroma><code class=language-go data-lang=go><span class=line><span class=cl><span class=kd>func</span> <span class=nf>ObjectHandler</span><span class=p>(</span><span class=nx>object</span> <span class=nx>any</span><span class=p>)</span> <span class=p>(</span><span class=nx>handles</span> <span class=p>[]</span><span class=nx>gin</span><span class=p>.</span><span class=nx>HandlerFunc</span><span class=p>)</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>	<span class=nx>v</span> <span class=o>:=</span> <span class=nx>reflect</span><span class=p>.</span><span class=nf>ValueOf</span><span class=p>(</span><span class=nx>object</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=c1>// 如果是结构体, 那么获取这个结构体的指针, 从而遍历到他的所有方法
+</span></span></span><span class=line><span class=cl><span class=c1></span>	<span class=k>if</span> <span class=nx>v</span><span class=p>.</span><span class=nf>Kind</span><span class=p>()</span> <span class=o>==</span> <span class=nx>reflect</span><span class=p>.</span><span class=nx>Struct</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=nx>newValue</span> <span class=o>:=</span> <span class=nx>reflect</span><span class=p>.</span><span class=nf>New</span><span class=p>(</span><span class=nx>v</span><span class=p>.</span><span class=nf>Type</span><span class=p>())</span>
+</span></span><span class=line><span class=cl>		<span class=nx>newValue</span><span class=p>.</span><span class=nf>Elem</span><span class=p>().</span><span class=nf>Set</span><span class=p>(</span><span class=nx>v</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>		<span class=nx>v</span> <span class=p>=</span> <span class=nx>newValue</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=k>if</span> <span class=nx>v</span><span class=p>.</span><span class=nf>Kind</span><span class=p>()</span> <span class=o>!=</span> <span class=nx>reflect</span><span class=p>.</span><span class=nx>Pointer</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=nb>panic</span><span class=p>(</span><span class=s>&#34;v.Kind() must be reflect.Pointer&#34;</span><span class=p>)</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=k>for</span> <span class=nx>i</span> <span class=o>:=</span> <span class=mi>0</span><span class=p>;</span> <span class=nx>i</span> <span class=p>&lt;</span> <span class=nx>v</span><span class=p>.</span><span class=nf>NumMethod</span><span class=p>();</span> <span class=nx>i</span><span class=o>++</span> <span class=p>{</span>
+</span></span><span class=line><span class=cl>		<span class=nx>fn</span> <span class=o>:=</span> <span class=nx>v</span><span class=p>.</span><span class=nf>Method</span><span class=p>(</span><span class=nx>i</span><span class=p>)</span> <span class=c1>// 所有方法都必须为 ReqResFunc 类型
+</span></span></span><span class=line><span class=cl><span class=c1></span>		<span class=nx>handles</span> <span class=p>=</span> <span class=nb>append</span><span class=p>(</span><span class=nx>handles</span><span class=p>,</span> <span class=nf>ReqResHandle</span><span class=p>(</span><span class=nx>fn</span><span class=p>.</span><span class=nf>Interface</span><span class=p>()))</span>
+</span></span><span class=line><span class=cl>	<span class=p>}</span>
+</span></span><span class=line><span class=cl>
+</span></span><span class=line><span class=cl>	<span class=k>return</span> <span class=nx>handles</span>
+</span></span><span class=line><span class=cl><span class=p>}</span>
+</span></span></code></pre></div><p>但是通过对象注册路由有个缺点，难以为 <strong><code>HandlerFunc</code></strong> 绑定 <code>path</code> 和 <code>method</code>。</p><p>已知的解决方式：</p><ol><li><code>GoFrame</code> 是在 <code>Req</code>（第二个请求参数）里写 <code>go tag</code>，有兴趣的读者，可以查看<a class=link href="https://goframe.org/pages/viewpage.action?pageId=116004922#id-%e8%a7%84%e8%8c%83%e8%b7%af%e7%94%b1%e5%a6%82%e4%bd%95%e4%bd%bf%e7%94%a8-%e8%a7%84%e8%8c%83%e5%8f%82%e6%95%b0%e7%bb%93%e6%9e%84" target=_blank rel=noopener>「文档：规范参数结构」</a>。</li><li><code>iris</code> 要求方法名（函数名）的格式为：请求方法+请求路径，如 <code>GetHelloWorld</code> 对应 <code>GET: /hello/world</code>，示例：<a class=link href=https://github.com/iris-contrib/examples/blob/master/mvc/hello-world/main.go target=_blank rel=noopener>examples/mvc/hello-world/main.go</a></li></ol><p>笔者也做了简单的实现：<a class=link href=https://github.com/niluan304/gee/blob/main/web/day10/handle/handle_test.go target=_blank rel=noopener>gee/web/day10/handle/handle_test.go</a>，这里就不再赘述了。</p></section><footer class=article-footer><section class=article-tags><a href=/tags/gee/>Gee</a>
+<a href=/tags/web/>Web</a></section><section class=article-copyright><svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentcolor" fill="none" stroke-linecap="round" stroke-linejoin="round"><path stroke="none" d="M0 0h24v24H0z"/><circle cx="12" cy="12" r="9"/><path d="M14.5 9a3.5 4 0 100 6"/></svg>
+<span>Licensed under CC BY-NC-SA 4.0</span></section></footer><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css integrity=sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI+WdtXRGWt2kTvGFasHpSy3SV crossorigin=anonymous><script src=https://fastly.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js integrity=sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG+vnGctmUb0ZY0l8 crossorigin=anonymous defer></script><script src=https://fastly.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js integrity=sha384-+VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4+/RRE05 crossorigin=anonymous defer></script><script>window.addEventListener("DOMContentLoaded",()=>{renderMathInElement(document.querySelector(`.article-content`),{delimiters:[{left:"$$",right:"$$",display:!0},{left:"$",right:"$",display:!1},{left:"\\(",right:"\\)",display:!1},{left:"\\[",right:"\\]",display:!0}],ignoredClasses:["gist"]})})</script></article><aside class=related-content--wrapper><h2 class=section-title>相关文章</h2><div class=related-content><div class="flex article-list--tile"><article><a href=/p/gee-web-day9-%E5%8F%8D%E5%BA%8F%E5%88%97%E5%8C%96%E4%B8%8E%E8%A7%A3%E8%80%A6/><div class=article-details><h2 class=article-title>gee-web-day9 反序列化与解耦</h2></div></a></article><article><a href=/p/gee-web-day8-%E5%88%86%E5%B1%82%E8%AE%BE%E8%AE%A1%E7%9A%84%E5%BF%85%E8%A6%81%E6%80%A7/><div class=article-details><h2 class=article-title>gee-web-day8 分层设计的必要性</h2></div></a></article><article class=has-image><a href=/p/sort.slice-%E4%B8%8D%E9%80%82%E5%90%88%E9%83%A8%E5%88%86%E6%8E%92%E5%BA%8F/><div class=article-image><img src=/p/sort.slice-%E4%B8%8D%E9%80%82%E5%90%88%E9%83%A8%E5%88%86%E6%8E%92%E5%BA%8F/_huca69348bf10406e412f1d3e0ec3bf9be_11506_a2ac3eee2a10f36f6bdaa5af0adafef8.png width=250 height=150 loading=lazy alt="Featured image of post sort.Slice 不适合部分排序" data-hash="md5-XQb5BRXbpdqa90Te+fQ/8g=="></div><div class=article-details><h2 class=article-title>sort.Slice 不适合部分排序</h2></div></a></article></div></div></aside><script src=//unpkg.com/@waline/client@v2/dist/waline.js></script><link href=//unpkg.com/@waline/client@v2/dist/waline.css rel=stylesheet><div id=waline class=waline-container></div><style>.waline-container{background-color:var(--card-background);border-radius:var(--card-border-radius);box-shadow:var(--shadow-l1);padding:var(--card-padding);--waline-font-size:var(--article-font-size)}.waline-container .wl-count{color:var(--card-text-color-main)}</style><script>Waline.init({dark:'html[data-scheme="dark"]',el:"#waline",emoji:["https://cdn.jsdelivr.net/gh/walinejs/emojis@1.0.0/tw-emoji"],lang:"zh-CN",locale:{admin:"雾封",placeholder:null},placeholder:"waline 支持匿名发言，当然你也可以通过 GitHub、QQ、Weibo 快速登录",serverURL:"https://blog-talk-waline-8c2vwstb5-zweis-projects-59bcfde2.vercel.app",visitor:!1})</script><section class=totalcount>发表了7篇文章 ·
+总计6.71k字</section><script>Array.from(document.getElementsByClassName("language-mermaid")).forEach(e=>{e.parentElement.outerHTML=`<div class="mermaid">${e.innerText}</div>`})</script><div class=pswp tabindex=-1 role=dialog aria-hidden=true><div class=pswp__bg></div><div class=pswp__scroll-wrap><div class=pswp__container><div class=pswp__item></div><div class=pswp__item></div><div class=pswp__item></div></div><div class="pswp__ui pswp__ui--hidden"><div class=pswp__top-bar><div class=pswp__counter></div><button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+<button class="pswp__button pswp__button--share" title=Share></button>
+<button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+<button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button><div class=pswp__preloader><div class=pswp__preloader__icn><div class=pswp__preloader__cut><div class=pswp__preloader__donut></div></div></div></div></div><div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap"><div class=pswp__share-tooltip></div></div><button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+</button>
+<button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)"></button><div class=pswp__caption><div class=pswp__caption__center></div></div></div></div></div><script src=https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo=" crossorigin=anonymous defer></script><script src=https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU=" crossorigin=anonymous defer></script><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css crossorigin=anonymous><link rel=stylesheet href=https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css crossorigin=anonymous></main></div><script src=https://fastly.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z+KMkF24hUW8WePSA9HM=" crossorigin=anonymous></script><script type=text/javascript src=/ts/main.js defer></script><script>(function(){const e=document.createElement("link");e.href="https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap",e.type="text/css",e.rel="stylesheet",document.head.appendChild(e)})()</script></body></html>
