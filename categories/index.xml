@@ -7,13 +7,13 @@
         <generator>Hugo -- gohugo.io</generator>
         <language>zh-cn</language>
         <copyright>雾封</copyright>
-        <lastBuildDate>Sat, 10 Feb 2024 11:27:57 +0800</lastBuildDate><atom:link href="https://niluan304.github.io/categories/index.xml" rel="self" type="application/rss+xml" /><item>
-        <title>Go</title>
-        <link>https://niluan304.github.io/categories/go/</link>
-        <pubDate>Sat, 10 Feb 2024 11:27:57 +0800</pubDate>
+        <lastBuildDate>Mon, 15 Apr 2024 09:52:02 +0800</lastBuildDate><atom:link href="https://niluan304.github.io/categories/index.xml" rel="self" type="application/rss+xml" /><item>
+        <title>Distribution</title>
+        <link>https://niluan304.github.io/categories/distribution/</link>
+        <pubDate>Mon, 15 Apr 2024 09:52:02 +0800</pubDate>
         
-        <guid>https://niluan304.github.io/categories/go/</guid>
-        <description>&lt;img src="https://niluan304.github.io/categories/go/image.png" alt="Featured image of post Go" /&gt;</description>
+        <guid>https://niluan304.github.io/categories/distribution/</guid>
+        <description></description>
         </item>
         <item>
         <title>LeetCode</title>
@@ -22,6 +22,14 @@
         
         <guid>https://niluan304.github.io/categories/leetcode/</guid>
         <description>&lt;img src="https://niluan304.github.io/categories/leetcode/image.png" alt="Featured image of post LeetCode" /&gt;</description>
+        </item>
+        <item>
+        <title>Go</title>
+        <link>https://niluan304.github.io/categories/go/</link>
+        <pubDate>Fri, 22 Dec 2023 15:43:59 +0800</pubDate>
+        
+        <guid>https://niluan304.github.io/categories/go/</guid>
+        <description>&lt;img src="https://niluan304.github.io/categories/go/image.png" alt="Featured image of post Go" /&gt;</description>
         </item>
         <item>
         <title>Git</title>

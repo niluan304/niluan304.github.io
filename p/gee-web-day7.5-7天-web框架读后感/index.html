@@ -17,13 +17,13 @@
 
 <style>
    
-  :root  {
-    --article-font-family : 'Noto Serif HK', var(--base-font-family);
+  :root {
+    --article-font-family: 'Noto Serif HK', var(--base-font-family);
   }
 </style>
 
 <script>
-  ;(function () {
+  ; (function () {
     const customFont = document.createElement('link')
     customFont.href =
       'https://fonts.googleapis.com/css2?family=Noto+Serif+HK:wght@300;400;500;600;700&display=swap'
@@ -33,6 +33,7 @@
     document.head.appendChild(customFont)
   })()
 </script>
+
 
     </head>
     <body class="
@@ -280,7 +281,7 @@
         <li><a href="#动态路由">动态路由</a></li>
       </ol>
     </li>
-    <li><a href="#gin-与-goframe-的差异"><code>gin</code> 与 <code>GoFrame</code> 的差异</a></li>
+    <li><a href="#gin-与-goframe-的差异"><code>Gin</code> 与 <code>GoFrame</code> 的差异</a></li>
   </ol>
 </nav>
         </div>
@@ -351,12 +352,13 @@
     
     
     <p>跟着这篇教程 <a class="link" href="https://geektutu.com/post/gee.html"  target="_blank" rel="noopener"
-    >7天用Go从零实现Web框架Gee教程 | 极客兔兔</a>，笔者实现了一个简单的 web框架，从而明白了 web框架所需要的特性，还迸发出封装 <code>gin</code> 的想法。</p>
+    >7天用Go从零实现Web框架Gee教程 | 极客兔兔</a>，笔者实现了一个简单的 web框架，从而明白了 web框架所需要的特性，还迸发出封装 <code>Gin</code> 的想法。</p>
 <h2 id="web框架-所需要的特性">web框架 所需要的特性</h2>
 <h3 id="分组控制">分组控制</h3>
 <p>分组控制 (Group Control)是 Web 框架应当提供的基础功能，有了分组与分组嵌套，系统才可以更方便的管理不同的业务，搭配中间件，就可以处理同组下的公共逻辑。</p>
 <h3 id="中间件">中间件</h3>
-<p>中间件 (Middleware)是 web 框架的灵魂，为 web 框架提供无限的扩展能力。有了中间件，可以只对 <code>admin</code> 和 <code>api</code> 分组进行鉴权，对特定接口限流。对最顶层目录 &ldquo;/&quot;，也就是整个系统，可以配置日志，请求耗时等功能。</p>
+<p>中间件 (Middleware)是 web 框架的灵魂，为 web 框架提供无限的扩展能力。有了中间件，可以只对 <code>admin</code> 和 <code>api</code> 分组进行鉴权，对特定接口限流。</p>
+<p>对最顶层目录 &ldquo;/&quot;，也就是整个系统，可以配置日志，请求耗时等功能，也可以设置最小粒度的中间件 ———— 为业务代码绑定具体的路由（路由注册其实就是设置作用域只有路由的中间件）。</p>
 <h3 id="动态路由">动态路由</h3>
 <p>动态路由 (Dynamic Route)，本质上只是将参数给映射为路径的一部分了，比如 <code>https://github.com/niluan304</code> 和 <code>https://github.com/?user=niluan304</code> 对于后端来讲并没有什么不同。不过动态路由还是有优势的：</p>
 <ul>
@@ -364,12 +366,12 @@
 <li>可读性和可维护性：现阶段的动态路由可以有多个参数，如 <code>/user/:name/article/:articleId</code>，可读性和可维护性明显高于 <code>user/article?name=zwei&amp;?articleId=1234</code>。</li>
 <li>可拓展性：动态路由可以使用前缀进行分组，这样可以很容易添加和修改同一分组下的中间件。</li>
 </ul>
-<h2 id="gin-与-goframe-的差异"><code>gin</code> 与 <code>GoFrame</code> 的差异</h2>
-<p>实现简易web框架之后，才算理解 <code>gin</code> 的中间件与业务代码的格式为什么必须为：</p>
+<h2 id="gin-与-goframe-的差异"><code>Gin</code> 与 <code>GoFrame</code> 的差异</h2>
+<p>实现简易web框架之后，才算理解 <code>Gin</code> 的中间件与 <code>controller</code> 的格式为什么必须为：</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span><span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">gin</span> <span class="p">.</span><span class="nx">Context</span><span class="p">)</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="c1">// 中间件 或 业务代码逻辑
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
-</span></span></code></pre></div><p>但是这和笔者最熟悉的 <code>GoFrame</code> 框架有一些差异，<code>GoFrame</code> 还额外支持另一种写法：</p>
+</span></span></code></pre></div><p>这和笔者最熟悉的 <code>GoFrame</code> 框架有一些差异，<code>GoFrame</code> 的 <code>controller</code> 还额外支持另一种写法：</p>
 <div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// 中间件式写法，类似 gin  的 func(c *gin .Context)
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">ghttp</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">    <span class="c1">// 中间件 或 业务代码逻辑
@@ -379,7 +381,7 @@
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">func</span> <span class="p">(</span><span class="nx">ctx</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span> <span class="nx">req</span> <span class="o">*</span><span class="p">{</span><span class="nx">Prefix</span><span class="p">}</span><span class="nx">Req</span><span class="p">)</span> <span class="p">(</span><span class="nx">res</span> <span class="o">*</span><span class="p">{</span><span class="nx">Prefix</span><span class="p">}</span><span class="nx">Res</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">){</span>
 </span></span><span class="line"><span class="cl">    <span class="c1">// 业务代码逻辑
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
-</span></span></code></pre></div><p>带着疑问，笔者探究了两个框架之间的差异，并尝试将 <code>gin</code> 的接口改造为 <code>GoFrame</code> 格式。
+</span></span></code></pre></div><p>带着疑问，笔者探究了两个框架之间的差异，并尝试将 <code>Gin</code> 的接口改造为 <code>GoFrame</code> 格式。
 总结后可以概括为三个部分，这算是「7天教程」的读后感，笔者也仿照命名为：</p>
 <ul>
 <li>day8 分层设计的必要性</li>
@@ -568,46 +570,60 @@
 
     
 <section class="totalcount">
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    发表了7篇文章 ·
-    总计6.14k字
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  发表了8篇文章 ·
+  总计6.82k字
 </section>
 
+
+
+
+
+<script>
+  
+  Array.from(document.getElementsByClassName("language-mermaid")).forEach(
+    (el) => {
+      el.parentElement.outerHTML = `<div class="mermaid">${el.innerText}</div>`;
+    }
+  );
+</script>
 
     
 <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">

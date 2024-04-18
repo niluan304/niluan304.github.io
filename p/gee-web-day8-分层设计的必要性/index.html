@@ -17,13 +17,13 @@
 
 <style>
    
-  :root  {
-    --article-font-family : 'Noto Serif HK', var(--base-font-family);
+  :root {
+    --article-font-family: 'Noto Serif HK', var(--base-font-family);
   }
 </style>
 
 <script>
-  ;(function () {
+  ; (function () {
     const customFont = document.createElement('link')
     customFont.href =
       'https://fonts.googleapis.com/css2?family=Noto+Serif+HK:wght@300;400;500;600;700&display=swap'
@@ -33,6 +33,7 @@
     document.head.appendChild(customFont)
   })()
 </script>
+
 
     </head>
     <body class="
@@ -364,62 +365,121 @@
 		data-flex-basis="137px"
 	
 >
-分层之后，可以让每一个函数只负责一件事，这类似于设计模式里单一职责的思想，可以提高项目的可维护性，与接口的可复用性。</p>
+分层之后，可以让每一层的专注于一类事，这类似于设计模式里单一职责的思想，可以提高项目的可维护性，与接口的可复用性，从而实现低耦合高内聚。计算机网络中的「TCP/IP 四层模式」就是非常典型的分层，实现从 <code>HTTP</code> 到 <code>HTTPS</code> 的升级，只需要在 <code>HTTP</code> 协议与 <code>TCP</code> 中加了一层 <code>TLS</code>，其他层的协议与应用不需要做任何改动，这就是计算机网络模型低耦合高内聚的表现。</p>
 <h2 id="代码纠缠的困境">代码纠缠的困境</h2>
-<p>这里有一份简单的 <code>CURD</code> 代码，目前只有两个功能，<code>Add, Get</code>：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">type</span> <span class="nx">Response</span> <span class="kd">struct</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">	<span class="nx">Code</span> <span class="kt">int</span>    <span class="c1">// 业务代码，200 表示 OK，其他表示错误
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">Msg</span>  <span class="kt">string</span> <span class="c1">// 错误消息
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">database</span> <span class="nx">any</span>    <span class="c1">// 返回的数据
+<p>这里有一份简单的 <code>CURD</code> 代码，只有 <code>*user.Get</code>、<code>*team.Get</code> 两个接口，和对应的数据库表 <code>UserTable</code>、<code>TeamTable</code>，功能也很简单，根据表主键，获取对应的行数据：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// ./internal/api.go
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="kd">type</span> <span class="nx">Response</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">Code</span> <span class="kt">int</span>    <span class="s">`json:&#34;code&#34;`</span> <span class="c1">// 业务代码，200 表示 OK，其他表示错误
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">Msg</span>  <span class="kt">string</span> <span class="s">`json:&#34;msg&#34;`</span>  <span class="c1">// 错误消息
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">Data</span> <span class="nx">any</span>    <span class="s">`json:&#34;data&#34;`</span> <span class="c1">// 返回的数据
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kd">type</span> <span class="nx">Row</span> <span class="kd">struct</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">	<span class="nx">Name</span> <span class="kt">string</span>
-</span></span><span class="line"><span class="cl">	<span class="nx">Age</span>  <span class="kt">int</span>
-</span></span><span class="line"><span class="cl">	<span class="nx">Job</span>  <span class="kt">string</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="c1">// database 只是一个切片 []Row，用于充当数据库
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="kd">var</span> <span class="nx">database</span> <span class="p">=</span> <span class="p">[]</span><span class="nx">Row</span><span class="p">{</span> <span class="p">{</span><span class="s">&#34;Alice&#34;</span><span class="p">,</span> <span class="mi">32</span><span class="p">,</span> <span class="s">&#34;teacher&#34;</span><span class="p">},</span> <span class="p">{</span><span class="s">&#34;Bob&#34;</span><span class="p">,</span> <span class="mi">30</span><span class="p">,</span> <span class="s">&#34;driver&#34;</span><span class="p">}</span> <span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kd">var</span> <span class="nx">User</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">user</span><span class="p">{}</span>
+</span></span><span class="line"><span class="cl"><span class="kd">const</span> <span class="p">(</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">CodeOK</span>         <span class="p">=</span> <span class="mi">200</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">CodeBadRequest</span> <span class="p">=</span> <span class="mi">400</span>
+</span></span><span class="line"><span class="cl"><span class="p">)</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="kd">type</span> <span class="nx">user</span> <span class="kd">struct</span><span class="p">{}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">user</span><span class="p">)</span> <span class="nf">Add</span><span class="p">(</span><span class="nx">ctx</span> <span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">	<span class="kd">var</span> <span class="nx">req</span> <span class="nx">Row</span>
-</span></span><span class="line"><span class="cl">	<span class="nx">err</span> <span class="o">:=</span> <span class="nx">ctx</span><span class="p">.</span><span class="nf">ShouldBind</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">req</span><span class="p">)</span> <span class="c1">// 请求数据的反序列化
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="mi">400</span><span class="p">,</span> <span class="nx">err</span><span class="p">.</span><span class="nf">Error</span><span class="p">(),</span> <span class="kc">nil</span><span class="p">})</span>
-</span></span><span class="line"><span class="cl">		<span class="k">return</span>
-</span></span><span class="line"><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">	<span class="c1">// 插入数据，database 只是一个切片 []Row，用于充当数据库
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">database</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">database</span><span class="p">,</span> <span class="nx">req</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">	<span class="c1">// 填写响应内容
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="mi">200</span><span class="p">,</span> <span class="s">&#34;&#34;</span><span class="p">,</span> <span class="kc">nil</span><span class="p">})</span>
-</span></span><span class="line"><span class="cl">	<span class="k">return</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="kd">var</span> <span class="nx">User</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">user</span><span class="p">{}</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">user</span><span class="p">)</span> <span class="nf">Get</span><span class="p">(</span><span class="nx">ctx</span> <span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">	<span class="kd">var</span> <span class="nx">req</span> <span class="nx">Row</span>
-</span></span><span class="line"><span class="cl">	<span class="nx">err</span> <span class="o">:=</span> <span class="nx">ctx</span><span class="p">.</span><span class="nf">ShouldBind</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">req</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="kd">var</span> <span class="nx">req</span> <span class="o">*</span><span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">Id</span> <span class="kt">int</span> <span class="s">`uri:&#34;id&#34;`</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">err</span> <span class="o">:=</span> <span class="nx">ctx</span><span class="p">.</span><span class="nf">ShouldBindUri</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">req</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="mi">400</span><span class="p">,</span> <span class="nx">err</span><span class="p">.</span><span class="nf">Error</span><span class="p">(),</span> <span class="kc">nil</span><span class="p">})</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="nx">CodeBadRequest</span><span class="p">,</span> <span class="nx">err</span><span class="p">.</span><span class="nf">Error</span><span class="p">(),</span> <span class="kc">nil</span><span class="p">})</span>
 </span></span><span class="line"><span class="cl">		<span class="k">return</span>
 </span></span><span class="line"><span class="cl">	<span class="p">}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">	<span class="c1">// 查询数据，database 只是一个切片 []Row，用于充当数据库
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">i</span> <span class="o">:=</span> <span class="nx">slices</span><span class="p">.</span><span class="nf">IndexFunc</span><span class="p">(</span><span class="nx">database</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">row</span> <span class="nx">Row</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">row</span><span class="p">.</span><span class="nx">Name</span> <span class="o">==</span> <span class="nx">req</span><span class="p">.</span><span class="nx">Name</span> <span class="p">})</span>
-</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">i</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="c1">// 填写响应内容
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="mi">200</span><span class="p">,</span> <span class="s">&#34;&#34;</span><span class="p">,</span> <span class="nx">database</span><span class="p">[</span><span class="nx">i</span><span class="p">]})</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">i</span> <span class="o">:=</span> <span class="nx">slices</span><span class="p">.</span><span class="nf">IndexFunc</span><span class="p">(</span><span class="nx">db</span><span class="p">.</span><span class="nx">Users</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">row</span> <span class="nx">db</span><span class="p">.</span><span class="nx">User</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">row</span><span class="p">.</span><span class="nx">Id</span> <span class="o">==</span> <span class="nx">req</span><span class="p">.</span><span class="nx">Id</span> <span class="p">})</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">i</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="p">{</span> <span class="c1">// 数据库未找到数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="nx">CodeBadRequest</span><span class="p">,</span> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Sprintf</span><span class="p">(</span><span class="s">&#34;user not found: %d&#34;</span><span class="p">,</span> <span class="nx">req</span><span class="p">.</span><span class="nx">Id</span><span class="p">),</span> <span class="kc">nil</span><span class="p">})</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span>
 </span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="c1">// 返回数据库内容
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">row</span> <span class="o">:=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">Users</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="c1">// Users 只是一个切片 []User，用于充当数据库表
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="nx">CodeOK</span><span class="p">,</span> <span class="s">&#34;&#34;</span><span class="p">,</span> <span class="nx">row</span><span class="p">})</span>
 </span></span><span class="line"><span class="cl">	<span class="k">return</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p>看起来没什么问题，但假如随着项目的进展，导致 <code>Add</code> 部分业务代码和 <code>Get</code> 的完全一致，甚至最好的解决办法是直接调用 <code>Get</code> 方式，但这没办法真的去调用 <code>Get</code> 方式，因为 <code>Add</code> 接收到的 <code>*gin.Context</code> 与 <code>Get</code> 方法需要的 <code>*gin.Context</code> 是有差别的。</p>
-<p>这时候就可以进行分层设计，现在比较流行的纯后端 API 模块一般采用下述划分方法<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup></p>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">type</span> <span class="nx">team</span> <span class="kd">struct</span><span class="p">{}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">var</span> <span class="nx">Team</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">team</span><span class="p">{}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">team</span><span class="p">)</span> <span class="nf">Get</span><span class="p">(</span><span class="nx">ctx</span> <span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="kd">var</span> <span class="nx">req</span> <span class="o">*</span><span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">Id</span> <span class="kt">int</span> <span class="s">`uri:&#34;id&#34;`</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">err</span> <span class="o">:=</span> <span class="nx">ctx</span><span class="p">.</span><span class="nf">ShouldBindUri</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">req</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="nx">CodeBadRequest</span><span class="p">,</span> <span class="nx">err</span><span class="p">.</span><span class="nf">Error</span><span class="p">(),</span> <span class="kc">nil</span><span class="p">})</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="c1">// 查询数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">i</span> <span class="o">:=</span> <span class="nx">slices</span><span class="p">.</span><span class="nf">IndexFunc</span><span class="p">(</span><span class="nx">db</span><span class="p">.</span><span class="nx">Teams</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">row</span> <span class="nx">db</span><span class="p">.</span><span class="nx">Team</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">row</span><span class="p">.</span><span class="nx">Id</span> <span class="o">==</span> <span class="nx">req</span><span class="p">.</span><span class="nx">Id</span> <span class="p">})</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">i</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="p">{</span> <span class="c1">// 数据库未找到数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="nx">CodeBadRequest</span><span class="p">,</span> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Sprintf</span><span class="p">(</span><span class="s">&#34;team not found: %d&#34;</span><span class="p">,</span> <span class="nx">req</span><span class="p">.</span><span class="nx">Id</span><span class="p">),</span> <span class="kc">nil</span><span class="p">})</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="c1">// 返回数据库内容
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">row</span> <span class="o">:=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">Teams</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="c1">// Teams 只是一个切片 []Team，用于充当数据库表
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="nx">CodeOK</span><span class="p">,</span> <span class="s">&#34;&#34;</span><span class="p">,</span> <span class="nx">row</span><span class="p">})</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>代码很简单，没什么问题，但假如随着项目的进展，需要新增一个接口：通过 <code>userId</code> 获取用户信息和用户所在 <code>Team</code> 的信息。</p>
+<p>返回的数据格式：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">type</span> <span class="nx">UserWithTeam</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">Id</span>   <span class="kt">int</span>    <span class="s">`json:&#34;id&#34;`</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">Name</span> <span class="kt">string</span> <span class="s">`json:&#34;name&#34;`</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">Team</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">Id</span>   <span class="kt">int</span>    <span class="s">`json:&#34;id&#34;`</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">Name</span> <span class="kt">string</span> <span class="s">`json:&#34;name&#34;`</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span> <span class="s">`json:&#34;team&#34;`</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>这时候理想的处理办法：</p>
+<ol>
+<li>根据 <code>userId</code> 通过 <code>*user.Get</code> 获取到用户信息和 <code>teamId</code></li>
+<li>根据 <code>teamId</code> 通过 <code>*team.Get</code> 获取用户所在 <code>Team</code> 的信息</li>
+</ol>
+<p>流程看起来只需要复用先用的接口，就可以实现需求了，比如这样：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">user</span><span class="p">)</span> <span class="nf">GetWithTeam</span><span class="p">(</span><span class="nx">ctx</span> <span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">c</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="nx">ctx</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">Team</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="nx">ctx</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>如果仅仅是这样的执行顺序，很明显是错误的，用户端通过路由会得到&quot;粘包的 <code>json</code>&quot;：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;code&#34;</span><span class="p">:</span> <span class="mi">200</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;msg&#34;</span><span class="p">:</span> <span class="s2">&#34;&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;data&#34;</span><span class="p">:</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;Id&#34;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;Name&#34;</span><span class="p">:</span> <span class="s2">&#34;Alice&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">        <span class="nt">&#34;TeamId&#34;</span><span class="p">:</span> <span class="mi">1</span>
+</span></span><span class="line"><span class="cl">    <span class="p">}</span>
+</span></span><span class="line"><span class="cl"><span class="p">}{</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;code&#34;</span><span class="p">:</span> <span class="mi">400</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;msg&#34;</span><span class="p">:</span> <span class="s2">&#34;team not found: 1&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;data&#34;</span><span class="p">:</span> <span class="kc">null</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>分析一下原因，</p>
+<ol>
+<li>首先 <code>*gin.Context</code> 通过路由接收到的数据，只有 <code>userId</code> 这个数据，并不包含 <code>teamId</code>，而需要的 <code>teamId</code> 在 <code>*user.Get</code> 接口内部直接写到了 <code>(*gin.Context).JSON</code> 中。</li>
+<li>即便有办法获取传入 <code>(*gin.Context).JSON</code> 的数据，还需要改造 <code>*gin.Context</code>，让 <code>*team.Get</code> 也能获取到正确的 <code>teamId</code>，但是修改 <code>*gin.Context</code> 内部数据是很危险的一件事，稍有不慎，就可能跌落悬崖。</li>
+</ol>
+<p>如果 <code>*user.Get</code> 和 <code>*team.Get</code>  的设计是传入 <code>id</code>，返回对应信息，那么就可以轻松实现新接口，还能规避修改 <code>*gin.Context</code>，比如这样：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="nf">GetWithTeam</span><span class="p">(</span><span class="nx">ctx</span> <span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">user</span> <span class="o">:=</span> <span class="nx">User</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="nx">id</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">team</span> <span class="o">:=</span> <span class="nx">Team</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="nx">user</span><span class="p">.</span><span class="nx">TeamId</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="c1">// 组装数据，写入返回
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="c1">// ...
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span><span class="p">}</span>
+</span></span></code></pre></div><p>这其实就运用到计算机网络模型里经典的分层思想，将共同属性的分到同一层，通过上下层的「封包」和「解包」实现解耦。现在比较流行的纯后端 API 模块一般采用下述划分方法<sup id="fnref:2"><a href="#fn:2" class="footnote-ref" role="doc-noteref">2</a></sup></p>
 <ol>
 <li>Controller，与上述类似，服务入口，负责处理路由，参数校验，请求转发。</li>
 <li>Logic/Service，逻辑（服务）层，一般是业务逻辑的入口，可以认为从这里开始，所有的请求参数一定是合法的。业务逻辑和业务流程也都在这一层中。常见的设计中会将该层称为 Business Rules。</li>
@@ -432,75 +492,116 @@
 </span></span><span class="line"><span class="cl"><span class="p">|</span>-- go.sum
 </span></span><span class="line"><span class="cl"><span class="p">|</span>-- internal
 </span></span><span class="line"><span class="cl"><span class="p">|</span>   <span class="p">|</span>-- controller
-</span></span><span class="line"><span class="cl"><span class="p">|</span>   <span class="p">|</span>   <span class="sb">`</span>-- user.go
+</span></span><span class="line"><span class="cl"><span class="p">|</span>   <span class="p">|</span>   <span class="sb">`</span>-- controller.go
 </span></span><span class="line"><span class="cl"><span class="p">|</span>   <span class="sb">`</span>-- service
-</span></span><span class="line"><span class="cl"><span class="p">|</span>       <span class="p">|</span>-- user.go
-</span></span><span class="line"><span class="cl"><span class="p">|</span>       <span class="sb">`</span>-- user_model.go
+</span></span><span class="line"><span class="cl"><span class="p">|</span>       <span class="p">|</span>-- service.go
+</span></span><span class="line"><span class="cl"><span class="p">|</span>       <span class="sb">`</span>-- service_model.go
 </span></span><span class="line"><span class="cl"><span class="sb">`</span>-- main.go
-</span></span></code></pre></div><p>当业务代码都放到了 <code>service</code> 层时，这一层的代码互相调用是不会被 <code>controller</code> 层影响的，这也实现了 <code>gin</code> 框架与业务代码的解耦。</p>
+</span></span></code></pre></div><p>当业务代码都放到了 <code>service</code> 层时，这一层的代码互相调用是不会被 <code>controller</code> 层影响的，这也实现了 <code>Gin</code> 框架与业务代码的解耦。</p>
 <p><code>controller</code> 层的主要代码：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// ./internal/controller/user.go
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// ./internal/controller/controller.go
 </span></span></span><span class="line"><span class="cl"><span class="c1"></span>
-</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">user</span><span class="p">)</span> <span class="nf">Add</span><span class="p">(</span><span class="nx">ctx</span> <span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">	<span class="c1">// 请求数据的反序列化
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="kd">var</span> <span class="nx">req</span> <span class="o">*</span><span class="nx">service</span><span class="p">.</span><span class="nx">UserAddReq</span>
-</span></span><span class="line"><span class="cl">	<span class="nx">err</span> <span class="o">:=</span> <span class="nx">ctx</span><span class="p">.</span><span class="nf">ShouldBind</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">req</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="mi">400</span><span class="p">,</span> <span class="nx">err</span><span class="p">.</span><span class="nf">Error</span><span class="p">(),</span> <span class="kc">nil</span><span class="p">})</span>
-</span></span><span class="line"><span class="cl">		<span class="k">return</span>
-</span></span><span class="line"><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="cl">	<span class="nx">res</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">service</span><span class="p">.</span><span class="nx">User</span><span class="p">.</span><span class="nf">Add</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">req</span><span class="p">)</span>
-</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="mi">400</span><span class="p">,</span> <span class="nx">err</span><span class="p">.</span><span class="nf">Error</span><span class="p">(),</span> <span class="kc">nil</span><span class="p">})</span>
-</span></span><span class="line"><span class="cl">		<span class="k">return</span>
-</span></span><span class="line"><span class="cl">	<span class="p">}</span>
-</span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl">	<span class="c1">// 填写响应内容
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="mi">200</span><span class="p">,</span> <span class="s">&#34;&#34;</span><span class="p">,</span> <span class="nx">res</span><span class="p">})</span>
-</span></span><span class="line"><span class="cl">	<span class="k">return</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">user</span><span class="p">)</span> <span class="nf">Get</span><span class="p">(</span><span class="nx">ctx</span> <span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span> <span class="p">{</span>
 </span></span><span class="line"><span class="cl">	<span class="kd">var</span> <span class="nx">req</span> <span class="o">*</span><span class="nx">service</span><span class="p">.</span><span class="nx">UserGetReq</span>
-</span></span><span class="line"><span class="cl">	<span class="nx">err</span> <span class="o">:=</span> <span class="nx">ctx</span><span class="p">.</span><span class="nf">ShouldBind</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">req</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">err</span> <span class="o">:=</span> <span class="nx">ctx</span><span class="p">.</span><span class="nf">ShouldBindUri</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">req</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="mi">400</span><span class="p">,</span> <span class="nx">err</span><span class="p">.</span><span class="nf">Error</span><span class="p">(),</span> <span class="kc">nil</span><span class="p">})</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="nx">CodeBadRequest</span><span class="p">,</span> <span class="nx">err</span><span class="p">.</span><span class="nf">Error</span><span class="p">(),</span> <span class="kc">nil</span><span class="p">})</span>
 </span></span><span class="line"><span class="cl">		<span class="k">return</span>
 </span></span><span class="line"><span class="cl">	<span class="p">}</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">	<span class="nx">res</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">service</span><span class="p">.</span><span class="nx">User</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">req</span><span class="p">)</span>
 </span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="mi">400</span><span class="p">,</span> <span class="nx">err</span><span class="p">.</span><span class="nf">Error</span><span class="p">(),</span> <span class="kc">nil</span><span class="p">})</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="nx">CodeBadRequest</span><span class="p">,</span> <span class="nx">err</span><span class="p">.</span><span class="nf">Error</span><span class="p">(),</span> <span class="kc">nil</span><span class="p">})</span>
 </span></span><span class="line"><span class="cl">		<span class="k">return</span>
 </span></span><span class="line"><span class="cl">	<span class="p">}</span>
 </span></span><span class="line"><span class="cl">
 </span></span><span class="line"><span class="cl">	<span class="c1">// 填写响应内容
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="mi">200</span><span class="p">,</span> <span class="s">&#34;&#34;</span><span class="p">,</span> <span class="nx">res</span><span class="p">})</span>
-</span></span><span class="line"><span class="cl">	<span class="k">return</span>
-</span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p><code>service</code> 层的主要代码：</p>
-<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// ./internal/service/user.go
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
-</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">user</span><span class="p">)</span> <span class="nf">Add</span><span class="p">(</span><span class="nx">ctx</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span> <span class="nx">req</span> <span class="o">*</span><span class="nx">UserAddReq</span><span class="p">)</span> <span class="p">(</span><span class="nx">res</span> <span class="o">*</span><span class="nx">UserAddRes</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">	<span class="c1">// 插入数据
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">database</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">database</span><span class="p">,</span> <span class="nx">Row</span><span class="p">{</span><span class="nx">req</span><span class="p">.</span><span class="nx">Name</span><span class="p">,</span> <span class="nx">req</span><span class="p">.</span><span class="nx">Age</span><span class="p">,</span> <span class="nx">req</span><span class="p">.</span><span class="nx">Job</span><span class="p">})</span>
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="nx">CodeOK</span><span class="p">,</span> <span class="s">&#34;&#34;</span><span class="p">,</span> <span class="nx">res</span><span class="p">})</span>
 </span></span><span class="line"><span class="cl">	<span class="k">return</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
 </span></span><span class="line"><span class="cl">
-</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">user</span><span class="p">)</span> <span class="nf">Get</span><span class="p">(</span><span class="nx">ctx</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span> <span class="nx">req</span> <span class="o">*</span><span class="nx">UserGetReq</span><span class="p">)</span> <span class="p">(</span><span class="nx">res</span> <span class="o">*</span><span class="nx">UserGetRes</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">	<span class="c1">// 查询数据
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">i</span> <span class="o">:=</span> <span class="nx">slices</span><span class="p">.</span><span class="nf">IndexFunc</span><span class="p">(</span><span class="nx">database</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">row</span> <span class="nx">Row</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">row</span><span class="p">.</span><span class="nx">Name</span> <span class="o">==</span> <span class="nx">req</span><span class="p">.</span><span class="nx">Name</span> <span class="p">})</span>
-</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">i</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span> <span class="p">{</span>
-</span></span><span class="line"><span class="cl">		<span class="c1">// 填写响应内容
-</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="nx">row</span> <span class="o">:=</span> <span class="nx">database</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span>
-</span></span><span class="line"><span class="cl">		<span class="k">return</span> <span class="o">&amp;</span><span class="nx">UserGetRes</span><span class="p">{</span><span class="nx">Name</span><span class="p">:</span> <span class="nx">row</span><span class="p">.</span><span class="nx">Name</span><span class="p">,</span> <span class="nx">Age</span><span class="p">:</span> <span class="nx">row</span><span class="p">.</span><span class="nx">Age</span><span class="p">,</span> <span class="nx">Job</span><span class="p">:</span> <span class="nx">row</span><span class="p">.</span><span class="nx">Job</span><span class="p">},</span> <span class="kc">nil</span>
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">team</span><span class="p">)</span> <span class="nf">Get</span><span class="p">(</span><span class="nx">ctx</span> <span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="kd">var</span> <span class="nx">req</span> <span class="o">*</span><span class="nx">service</span><span class="p">.</span><span class="nx">TeamGetReq</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">err</span> <span class="o">:=</span> <span class="nx">ctx</span><span class="p">.</span><span class="nf">ShouldBindUri</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">req</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="nx">CodeBadRequest</span><span class="p">,</span> <span class="nx">err</span><span class="p">.</span><span class="nf">Error</span><span class="p">(),</span> <span class="kc">nil</span><span class="p">})</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span>
 </span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nx">res</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">service</span><span class="p">.</span><span class="nx">Team</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">req</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="nx">CodeBadRequest</span><span class="p">,</span> <span class="nx">err</span><span class="p">.</span><span class="nf">Error</span><span class="p">(),</span> <span class="kc">nil</span><span class="p">})</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="c1">// 填写响应内容
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="nx">CodeOK</span><span class="p">,</span> <span class="s">&#34;&#34;</span><span class="p">,</span> <span class="nx">res</span><span class="p">})</span>
 </span></span><span class="line"><span class="cl">	<span class="k">return</span>
 </span></span><span class="line"><span class="cl"><span class="p">}</span>
-</span></span></code></pre></div><p>分层后的总代码行数有所增加，甚至 <code>controller</code> 错误处理变得更繁琐了，但是整个项目的布局变得更清晰了，业务代码也不会受到 web框架的干扰，可以集中处理业务。</p>
-<p>更可贵的是，<code>service</code> 层的方法在调用时，就可以知道所需要的参数，以及返回的值。不过有些读者可能会有疑问，为什么 <code>service</code> 层方法的第一个参数都是 <code>ctx context.Context</code>，即便代码中未必使用，这算是 <code>go</code> 语言在 web 开发中的特色（也可能是技术债），用于并发控制和上下文信息传递的，有兴趣可以自行了解下。</p>
+</span></span></code></pre></div><p><code>service</code> 层的主要代码：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="c1">// ./internal/service/service.go
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">user</span><span class="p">)</span> <span class="nf">Get</span><span class="p">(</span><span class="nx">ctx</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span> <span class="nx">req</span> <span class="o">*</span><span class="nx">UserGetReq</span><span class="p">)</span> <span class="p">(</span><span class="nx">res</span> <span class="o">*</span><span class="nx">UserGetRes</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="c1">// 查询数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">i</span> <span class="o">:=</span> <span class="nx">slices</span><span class="p">.</span><span class="nf">IndexFunc</span><span class="p">(</span><span class="nx">db</span><span class="p">.</span><span class="nx">Users</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">row</span> <span class="nx">db</span><span class="p">.</span><span class="nx">User</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">row</span><span class="p">.</span><span class="nx">Id</span> <span class="o">==</span> <span class="nx">req</span><span class="p">.</span><span class="nx">Id</span> <span class="p">})</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">i</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="p">{</span> <span class="c1">// 数据库未找到数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Errorf</span><span class="p">(</span><span class="s">&#34;user not found: %d&#34;</span><span class="p">,</span> <span class="nx">req</span><span class="p">.</span><span class="nx">Id</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="c1">// 返回数据库内容
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">row</span> <span class="o">:=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">Users</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="c1">// Users 只是一个切片 []User，用于充当数据库表
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">UserGetRes</span><span class="p">{</span><span class="nx">Id</span><span class="p">:</span> <span class="nx">row</span><span class="p">.</span><span class="nx">Id</span><span class="p">,</span> <span class="nx">Name</span><span class="p">:</span> <span class="nx">row</span><span class="p">.</span><span class="nx">Name</span><span class="p">,</span> <span class="nx">TeamId</span><span class="p">:</span> <span class="nx">row</span><span class="p">.</span><span class="nx">TeamId</span><span class="p">},</span> <span class="kc">nil</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">team</span><span class="p">)</span> <span class="nf">Get</span><span class="p">(</span><span class="nx">ctx</span> <span class="nx">context</span><span class="p">.</span><span class="nx">Context</span><span class="p">,</span> <span class="nx">req</span> <span class="o">*</span><span class="nx">TeamGetReq</span><span class="p">)</span> <span class="p">(</span><span class="nx">res</span> <span class="o">*</span><span class="nx">TeamGetRes</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="c1">// 查询数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">i</span> <span class="o">:=</span> <span class="nx">slices</span><span class="p">.</span><span class="nf">IndexFunc</span><span class="p">(</span><span class="nx">db</span><span class="p">.</span><span class="nx">Teams</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">row</span> <span class="nx">db</span><span class="p">.</span><span class="nx">Team</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">row</span><span class="p">.</span><span class="nx">Id</span> <span class="o">==</span> <span class="nx">req</span><span class="p">.</span><span class="nx">Id</span> <span class="p">})</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">i</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="p">{</span> <span class="c1">// 数据库未找到数据
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>		<span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="nx">fmt</span><span class="p">.</span><span class="nf">Errorf</span><span class="p">(</span><span class="s">&#34;team not found: %d&#34;</span><span class="p">,</span> <span class="nx">req</span><span class="p">.</span><span class="nx">Id</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="c1">// 返回数据库内容
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">row</span> <span class="o">:=</span> <span class="nx">db</span><span class="p">.</span><span class="nx">Teams</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="c1">// Teams 只是一个切片 []Team，用于充当数据库表
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="k">return</span> <span class="o">&amp;</span><span class="nx">TeamGetRes</span><span class="p">{</span><span class="nx">Id</span><span class="p">:</span> <span class="nx">row</span><span class="p">.</span><span class="nx">Id</span><span class="p">,</span> <span class="nx">Name</span><span class="p">:</span> <span class="nx">row</span><span class="p">.</span><span class="nx">Name</span><span class="p">},</span> <span class="kc">nil</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>这时候，再来实现一下，新增一个接口：通过 <code>userId</code> 获取用户信息和用户所在 <code>Team</code> 的信息。</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-go" data-lang="go"><span class="line"><span class="cl"><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">user</span><span class="p">)</span> <span class="nf">GetWithTeam</span><span class="p">(</span><span class="nx">ctx</span> <span class="o">*</span><span class="nx">gin</span><span class="p">.</span><span class="nx">Context</span><span class="p">)</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">	<span class="kd">var</span> <span class="nx">req</span> <span class="o">*</span><span class="nx">service</span><span class="p">.</span><span class="nx">UserGetReq</span>
+</span></span><span class="line"><span class="cl">	<span class="nx">err</span> <span class="o">:=</span> <span class="nx">ctx</span><span class="p">.</span><span class="nf">ShouldBindUri</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">req</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="nx">CodeBadRequest</span><span class="p">,</span> <span class="nx">err</span><span class="p">.</span><span class="nf">Error</span><span class="p">(),</span> <span class="kc">nil</span><span class="p">})</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nx">userRes</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">service</span><span class="p">.</span><span class="nx">User</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="nx">req</span><span class="p">)</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="nx">CodeBadRequest</span><span class="p">,</span> <span class="nx">err</span><span class="p">.</span><span class="nf">Error</span><span class="p">(),</span> <span class="kc">nil</span><span class="p">})</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="nx">teamRes</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">service</span><span class="p">.</span><span class="nx">Team</span><span class="p">.</span><span class="nf">Get</span><span class="p">(</span><span class="nx">ctx</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">service</span><span class="p">.</span><span class="nx">TeamGetReq</span><span class="p">{</span><span class="nx">Id</span><span class="p">:</span> <span class="nx">userRes</span><span class="p">.</span><span class="nx">TeamId</span><span class="p">})</span>
+</span></span><span class="line"><span class="cl">	<span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="nx">CodeBadRequest</span><span class="p">,</span> <span class="nx">err</span><span class="p">.</span><span class="nf">Error</span><span class="p">(),</span> <span class="kc">nil</span><span class="p">})</span>
+</span></span><span class="line"><span class="cl">		<span class="k">return</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">
+</span></span><span class="line"><span class="cl">	<span class="kd">type</span> <span class="nx">UserWithTeam</span> <span class="kd">struct</span> <span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">Id</span>   <span class="kt">int</span>                <span class="s">`json:&#34;id&#34;`</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">Name</span> <span class="kt">string</span>             <span class="s">`json:&#34;name&#34;`</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">Team</span> <span class="nx">service</span><span class="p">.</span><span class="nx">TeamGetRes</span> <span class="s">`json:&#34;team&#34;`</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}</span>
+</span></span><span class="line"><span class="cl">	<span class="c1">// 填写响应内容
+</span></span></span><span class="line"><span class="cl"><span class="c1"></span>	<span class="nx">ctx</span><span class="p">.</span><span class="nf">JSON</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">StatusOK</span><span class="p">,</span> <span class="nx">Response</span><span class="p">{</span><span class="nx">CodeOK</span><span class="p">,</span> <span class="s">&#34;&#34;</span><span class="p">,</span> <span class="nx">UserWithTeam</span><span class="p">{</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">Id</span><span class="p">:</span>   <span class="nx">userRes</span><span class="p">.</span><span class="nx">Id</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">Name</span><span class="p">:</span> <span class="nx">userRes</span><span class="p">.</span><span class="nx">Name</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">		<span class="nx">Team</span><span class="p">:</span> <span class="o">*</span><span class="nx">teamRes</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">	<span class="p">}})</span>
+</span></span><span class="line"><span class="cl">	<span class="k">return</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>分层后的总代码行数有所增加，整个项目的布局变得更清晰了，业务代码也不会受到 web框架的干扰，可以集中处理业务。而且业务层的函数签名具有可读性了，调用 <code>service</code> 层的方法时，就可以知道所需要的参数，以及返回的值。不过有些读者可能会有疑问，为什么 <code>service</code> 层方法的第一个参数都是 <code>ctx context.Context</code>，即便代码中未必使用，这算是 <code>go</code> 语言在 web 开发中的特色（也可能是技术债），用于并发控制和上下文信息传递的，有兴趣可以自行了解下。</p>
+<p>但是在 <code>controller</code> 层有太多的 <code>(*gin.Context).JSON()</code>，也就是处理接口的响应，变得异常繁琐，为了解决这一点，笔者将在下一节阐述如何在框架中实现统一错误处理和数据返回。</p>
 <h2 id="小结">小结</h2>
-<p>本章节介绍下「分层设计」与「单一职责」的联系，并说明如何通过分层设计将业务代码与 web框架解耦。</p>
+<p>本章节介绍下如何通过「分层设计」将一个大问题，转化为若干的分工明确的小问题，实现业务代码与 web框架解耦，提高系统的拓展性和可维护性，从而实现高内聚低耦合。</p>
 <ul>
 <li>注意：分层设计也会导致一个问题：新增一个业务接口时，需要改动的文件也会变多，不过这可以通过脚本生成代码缓解。</li>
 </ul>
@@ -732,46 +833,60 @@
 
     
 <section class="totalcount">
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    发表了7篇文章 ·
-    总计6.14k字
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  发表了8篇文章 ·
+  总计6.82k字
 </section>
 
+
+
+
+
+<script>
+  
+  Array.from(document.getElementsByClassName("language-mermaid")).forEach(
+    (el) => {
+      el.parentElement.outerHTML = `<div class="mermaid">${el.innerText}</div>`;
+    }
+  );
+</script>
 
     
 <div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">

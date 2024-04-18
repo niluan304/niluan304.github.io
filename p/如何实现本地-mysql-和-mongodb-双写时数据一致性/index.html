@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="zh-cn" dir="ltr">
+    <head><meta charset='utf-8'>
+<meta name='viewport' content='width=device-width, initial-scale=1'><meta name='description' content='这段时间面试，遇到了一道和实际生产相关的面试题：
+现有一系统，积分使用 MongoDB 存储，点券存储在 MySQL。
+用户通过日常任务获取积分，点券则可以提现。
+现推出一活动 1000 积分兑换 10 点券，怎么实现？
+和缓存一致性的不同 对于这种跨数据库之间的操作，可能会误认为类似「如何实现 MySQL 和 Redis 的数据一致性？」，但两者之间其实很不同，Redis 在这种场景一般用于充当远程缓存或分布式缓存数据库，其本质上是将数据从支持持久化但慢速的磁盘中，搬到断电丢失但高速的内存中。也就是说，在实现 MySQL、Redis 数据一致性时，我们操作的仍是同一份数据，考虑得比较多的是避免用户读取到脏数据（旧数据）。
+而题目的要求其实是：如何解决分布式数据库在双写时的数据一致性？
+分布式事务 面试的时候，笔者联想到了跨行转账，跨行转账业务有三种情况：
+相同支行下的转账：同一支行内的转账（本地事务） 不同支行下的转账：相同银行，不同支行下的转账 （分布式事务） 跨行转账：和其他银行系统进行转账 （分布式事务） 假设银行以支行为最小单位，进行数据库部署
+而这道题很像场景二，比如「用户A 是工行深圳支行的用户，用户B 是工行广州支行的用户，A向B转账100元」，虽然都是 A 和 B 都是工行用户，但是 A 和 B 的数据并不在同一个数据库，那么就需要两个数据库之间的进行数据交换，这时候无法通过本地数据库的事务实现 ACID，一般通过分布式事务解决的。
+查询确认事务结果 场景二下，可以认为在工行这个大系统，内部有由深圳支行和广州支行的这样微服务组成，而微服务之间的业务流转相对简单一些：
+深圳支行扣除用户A 的100元。 深圳支行通知广州支行，用户A要转账 100元 给用户B。 深圳支行定时向广州支行查询是否收到了转账，如果失败了那就回滚。 具体流程大概是这样：
+深圳支行的用户A 发起转账请求，开启事务 深圳支行创建转账订单，记录用户A 的支出和转账前后点券，且状态设置为「支出中」 深圳支行通知广州支行，用户A 向 用户B 转账，广州支行收到通知后： 开启事务 创建转账订单，记录用户B 的收入和转账前后点券，且状态设置为「收入中」 更新订单状态，并返回转账结果给深圳支行 深圳支行收到广州支行的回复： 成功：转账订单状态更新为「成功」，提交事务 失败：转账订单状态更新为「失败」，回滚事务 %% 时序图 [Markdown 进阶技能：用代码画时序图](https://zhuanlan.zhihu.com/p/70261692) %% -&amp;gt;&amp;gt;实线箭头 代表主动发出消息；--&amp;gt;虚线代表响应；末尾带「X」代表异步消息，无需等待回应。 sequenceDiagram participant 用户A participant 深圳支行 participant 广州支行 participant 用户B 用户A -&amp;gt;&amp;gt; &#43; 深圳支行: 向用户B 转账 深圳支行 -&amp;gt;&amp;gt; 深圳支行: 创建转账订单，状态 PAYOUT 深圳支行 -&amp;gt;&amp;gt; 深圳支行: 事务 BEGIN 深圳支行 -&amp;gt;&amp;gt; &#43; 广州支行: A向B转账 广州支行 -&amp;gt;&amp;gt; 用户B: 执行转账操作 用户B --&amp;gt;&amp;gt; 广州支行: 转账结果 alt 转账成功 用户B --&amp;gt;&amp;gt; 广州支行: 订单状态 SUCC else 转账失败 用户B --&amp;gt;&amp;gt; 广州支行: 订单状态 FAIL end 广州支行 --&amp;gt;&amp;gt; - 深圳支行: 转账结果 alt 转账成功 深圳支行 --&amp;gt;&amp;gt; 深圳支行: 订单状态 SUCC 深圳支行 --&amp;gt;&amp;gt; 深圳支行: 事务 COMMIT else 转账失败 深圳支行 --&amp;gt;&amp;gt; 深圳支行: 订单状态 FAIL 深圳支行 --&amp;gt;&amp;gt; 深圳支行: 事务 ROLLBAK end 深圳支行 --&amp;gt;&amp;gt; - 用户A: 收到转账结果 在上述流程是同步的，用户需要在转账界面等待转账结果，如果转账耗时过久，会影响到用户体验。可以将转账结果改成异步事件。'>
+<title>如何实现本地 MySQL 和 MongoDB 双写时数据一致性</title>
+
+<link rel='canonical' href='https://niluan304.github.io/p/%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E6%9C%AC%E5%9C%B0-mysql-%E5%92%8C-mongodb-%E5%8F%8C%E5%86%99%E6%97%B6%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7/'>
+
+<link rel="stylesheet" href="/scss/style.min.3847aef279a7028aef34c6efe3255226a0247c5ccbe1c150ade4d55e2b6d8516.css"><meta property='og:title' content='如何实现本地 MySQL 和 MongoDB 双写时数据一致性'>
+<meta property='og:description' content='这段时间面试，遇到了一道和实际生产相关的面试题：
+现有一系统，积分使用 MongoDB 存储，点券存储在 MySQL。
+用户通过日常任务获取积分，点券则可以提现。
+现推出一活动 1000 积分兑换 10 点券，怎么实现？
+和缓存一致性的不同 对于这种跨数据库之间的操作，可能会误认为类似「如何实现 MySQL 和 Redis 的数据一致性？」，但两者之间其实很不同，Redis 在这种场景一般用于充当远程缓存或分布式缓存数据库，其本质上是将数据从支持持久化但慢速的磁盘中，搬到断电丢失但高速的内存中。也就是说，在实现 MySQL、Redis 数据一致性时，我们操作的仍是同一份数据，考虑得比较多的是避免用户读取到脏数据（旧数据）。
+而题目的要求其实是：如何解决分布式数据库在双写时的数据一致性？
+分布式事务 面试的时候，笔者联想到了跨行转账，跨行转账业务有三种情况：
+相同支行下的转账：同一支行内的转账（本地事务） 不同支行下的转账：相同银行，不同支行下的转账 （分布式事务） 跨行转账：和其他银行系统进行转账 （分布式事务） 假设银行以支行为最小单位，进行数据库部署
+而这道题很像场景二，比如「用户A 是工行深圳支行的用户，用户B 是工行广州支行的用户，A向B转账100元」，虽然都是 A 和 B 都是工行用户，但是 A 和 B 的数据并不在同一个数据库，那么就需要两个数据库之间的进行数据交换，这时候无法通过本地数据库的事务实现 ACID，一般通过分布式事务解决的。
+查询确认事务结果 场景二下，可以认为在工行这个大系统，内部有由深圳支行和广州支行的这样微服务组成，而微服务之间的业务流转相对简单一些：
+深圳支行扣除用户A 的100元。 深圳支行通知广州支行，用户A要转账 100元 给用户B。 深圳支行定时向广州支行查询是否收到了转账，如果失败了那就回滚。 具体流程大概是这样：
+深圳支行的用户A 发起转账请求，开启事务 深圳支行创建转账订单，记录用户A 的支出和转账前后点券，且状态设置为「支出中」 深圳支行通知广州支行，用户A 向 用户B 转账，广州支行收到通知后： 开启事务 创建转账订单，记录用户B 的收入和转账前后点券，且状态设置为「收入中」 更新订单状态，并返回转账结果给深圳支行 深圳支行收到广州支行的回复： 成功：转账订单状态更新为「成功」，提交事务 失败：转账订单状态更新为「失败」，回滚事务 %% 时序图 [Markdown 进阶技能：用代码画时序图](https://zhuanlan.zhihu.com/p/70261692) %% -&amp;gt;&amp;gt;实线箭头 代表主动发出消息；--&amp;gt;虚线代表响应；末尾带「X」代表异步消息，无需等待回应。 sequenceDiagram participant 用户A participant 深圳支行 participant 广州支行 participant 用户B 用户A -&amp;gt;&amp;gt; &#43; 深圳支行: 向用户B 转账 深圳支行 -&amp;gt;&amp;gt; 深圳支行: 创建转账订单，状态 PAYOUT 深圳支行 -&amp;gt;&amp;gt; 深圳支行: 事务 BEGIN 深圳支行 -&amp;gt;&amp;gt; &#43; 广州支行: A向B转账 广州支行 -&amp;gt;&amp;gt; 用户B: 执行转账操作 用户B --&amp;gt;&amp;gt; 广州支行: 转账结果 alt 转账成功 用户B --&amp;gt;&amp;gt; 广州支行: 订单状态 SUCC else 转账失败 用户B --&amp;gt;&amp;gt; 广州支行: 订单状态 FAIL end 广州支行 --&amp;gt;&amp;gt; - 深圳支行: 转账结果 alt 转账成功 深圳支行 --&amp;gt;&amp;gt; 深圳支行: 订单状态 SUCC 深圳支行 --&amp;gt;&amp;gt; 深圳支行: 事务 COMMIT else 转账失败 深圳支行 --&amp;gt;&amp;gt; 深圳支行: 订单状态 FAIL 深圳支行 --&amp;gt;&amp;gt; 深圳支行: 事务 ROLLBAK end 深圳支行 --&amp;gt;&amp;gt; - 用户A: 收到转账结果 在上述流程是同步的，用户需要在转账界面等待转账结果，如果转账耗时过久，会影响到用户体验。可以将转账结果改成异步事件。'>
+<meta property='og:url' content='https://niluan304.github.io/p/%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E6%9C%AC%E5%9C%B0-mysql-%E5%92%8C-mongodb-%E5%8F%8C%E5%86%99%E6%97%B6%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7/'>
+<meta property='og:site_name' content='雾封的笔'>
+<meta property='og:type' content='article'><meta property='article:section' content='Post' /><meta property='article:tag' content='interview' /><meta property='article:published_time' content='2024-04-15T09:52:02&#43;08:00'/><meta property='article:modified_time' content='2024-04-15T09:52:02&#43;08:00'/>
+<meta name="twitter:title" content="如何实现本地 MySQL 和 MongoDB 双写时数据一致性">
+<meta name="twitter:description" content="这段时间面试，遇到了一道和实际生产相关的面试题：
+现有一系统，积分使用 MongoDB 存储，点券存储在 MySQL。
+用户通过日常任务获取积分，点券则可以提现。
+现推出一活动 1000 积分兑换 10 点券，怎么实现？
+和缓存一致性的不同 对于这种跨数据库之间的操作，可能会误认为类似「如何实现 MySQL 和 Redis 的数据一致性？」，但两者之间其实很不同，Redis 在这种场景一般用于充当远程缓存或分布式缓存数据库，其本质上是将数据从支持持久化但慢速的磁盘中，搬到断电丢失但高速的内存中。也就是说，在实现 MySQL、Redis 数据一致性时，我们操作的仍是同一份数据，考虑得比较多的是避免用户读取到脏数据（旧数据）。
+而题目的要求其实是：如何解决分布式数据库在双写时的数据一致性？
+分布式事务 面试的时候，笔者联想到了跨行转账，跨行转账业务有三种情况：
+相同支行下的转账：同一支行内的转账（本地事务） 不同支行下的转账：相同银行，不同支行下的转账 （分布式事务） 跨行转账：和其他银行系统进行转账 （分布式事务） 假设银行以支行为最小单位，进行数据库部署
+而这道题很像场景二，比如「用户A 是工行深圳支行的用户，用户B 是工行广州支行的用户，A向B转账100元」，虽然都是 A 和 B 都是工行用户，但是 A 和 B 的数据并不在同一个数据库，那么就需要两个数据库之间的进行数据交换，这时候无法通过本地数据库的事务实现 ACID，一般通过分布式事务解决的。
+查询确认事务结果 场景二下，可以认为在工行这个大系统，内部有由深圳支行和广州支行的这样微服务组成，而微服务之间的业务流转相对简单一些：
+深圳支行扣除用户A 的100元。 深圳支行通知广州支行，用户A要转账 100元 给用户B。 深圳支行定时向广州支行查询是否收到了转账，如果失败了那就回滚。 具体流程大概是这样：
+深圳支行的用户A 发起转账请求，开启事务 深圳支行创建转账订单，记录用户A 的支出和转账前后点券，且状态设置为「支出中」 深圳支行通知广州支行，用户A 向 用户B 转账，广州支行收到通知后： 开启事务 创建转账订单，记录用户B 的收入和转账前后点券，且状态设置为「收入中」 更新订单状态，并返回转账结果给深圳支行 深圳支行收到广州支行的回复： 成功：转账订单状态更新为「成功」，提交事务 失败：转账订单状态更新为「失败」，回滚事务 %% 时序图 [Markdown 进阶技能：用代码画时序图](https://zhuanlan.zhihu.com/p/70261692) %% -&amp;gt;&amp;gt;实线箭头 代表主动发出消息；--&amp;gt;虚线代表响应；末尾带「X」代表异步消息，无需等待回应。 sequenceDiagram participant 用户A participant 深圳支行 participant 广州支行 participant 用户B 用户A -&amp;gt;&amp;gt; &#43; 深圳支行: 向用户B 转账 深圳支行 -&amp;gt;&amp;gt; 深圳支行: 创建转账订单，状态 PAYOUT 深圳支行 -&amp;gt;&amp;gt; 深圳支行: 事务 BEGIN 深圳支行 -&amp;gt;&amp;gt; &#43; 广州支行: A向B转账 广州支行 -&amp;gt;&amp;gt; 用户B: 执行转账操作 用户B --&amp;gt;&amp;gt; 广州支行: 转账结果 alt 转账成功 用户B --&amp;gt;&amp;gt; 广州支行: 订单状态 SUCC else 转账失败 用户B --&amp;gt;&amp;gt; 广州支行: 订单状态 FAIL end 广州支行 --&amp;gt;&amp;gt; - 深圳支行: 转账结果 alt 转账成功 深圳支行 --&amp;gt;&amp;gt; 深圳支行: 订单状态 SUCC 深圳支行 --&amp;gt;&amp;gt; 深圳支行: 事务 COMMIT else 转账失败 深圳支行 --&amp;gt;&amp;gt; 深圳支行: 订单状态 FAIL 深圳支行 --&amp;gt;&amp;gt; 深圳支行: 事务 ROLLBAK end 深圳支行 --&amp;gt;&amp;gt; - 用户A: 收到转账结果 在上述流程是同步的，用户需要在转账界面等待转账结果，如果转账耗时过久，会影响到用户体验。可以将转账结果改成异步事件。">
+    <link rel="shortcut icon" href="/favicon.ico" />
+
+<style>
+   
+  :root {
+    --article-font-family: 'Noto Serif HK', var(--base-font-family);
+  }
+</style>
+
+<script>
+  ; (function () {
+    const customFont = document.createElement('link')
+    customFont.href =
+      'https://fonts.googleapis.com/css2?family=Noto+Serif+HK:wght@300;400;500;600;700&display=swap'
+    customFont.type = 'text/css'
+    customFont.rel = 'stylesheet'
+
+    document.head.appendChild(customFont)
+  })()
+</script>
+
+
+<script src="https://cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
+
+    </head>
+    <body class="
+    article-page
+    ">
+    <script>
+        (function() {
+            const colorSchemeKey = 'StackColorScheme';
+            if(!localStorage.getItem(colorSchemeKey)){
+                localStorage.setItem(colorSchemeKey, "auto");
+            }
+        })();
+    </script><script>
+    (function() {
+        const colorSchemeKey = 'StackColorScheme';
+        const colorSchemeItem = localStorage.getItem(colorSchemeKey);
+        const supportDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches === true;
+
+        if (colorSchemeItem == 'dark' || colorSchemeItem === 'auto' && supportDarkMode) {
+            
+
+            document.documentElement.dataset.scheme = 'dark';
+        } else {
+            document.documentElement.dataset.scheme = 'light';
+        }
+    })();
+</script>
+<div class="container main-container flex on-phone--column extended"><aside class="sidebar left-sidebar sticky ">
+    <button class="hamburger hamburger--spin" type="button" id="toggle-menu" aria-label="切换菜单">
+        <span class="hamburger-box">
+            <span class="hamburger-inner"></span>
+        </span>
+    </button>
+
+    <header>
+        
+            
+            <figure class="site-avatar">
+                <a href="/">
+                
+                    
+                    
+                    
+                        
+                        <img src="/img/avatar_hueb4763c82ba1420a58a50c6eccfe357b_472983_300x0_resize_box_3.png" width="300"
+                            height="300" class="site-logo" loading="lazy" alt="Avatar">
+                    
+                
+                </a>
+                
+                    <span class="emoji">☕</span>
+                
+            </figure>
+            
+        
+        
+        <div class="site-meta">
+            <h1 class="site-name"><a href="/">雾封的笔</a></h1>
+            <h2 class="site-description">脚步不停，灿若繁星。</h2>
+        </div>
+    </header><ol class="social-menu">
+            
+                <li>
+                    <a 
+                        href='mailto:zwei.elen@outlook.com'
+                        target="_blank"
+                        title="Email"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="#2c3e50" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" class="icon icon-tabler icon-tabler-mail" viewBox="0 0 24 24"><path stroke="none" d="M0 0h24v24H0z"/><path d="M3 7a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/><path d="m3 7 9 6 9-6"/></svg>
+                        
+                    </a>
+                </li>
+            
+                <li>
+                    <a 
+                        href='https://github.com/niluan304'
+                        target="_blank"
+                        title="GitHub"
+                        rel="me"
+                    >
+                        
+                        
+                            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-brand-github" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z" fill="none"/>
+  <path d="M9 19c-4.3 1.4 -4.3 -2.5 -6 -3m12 5v-3.5c0 -1 .1 -1.4 -.5 -2c2.8 -.3 5.5 -1.4 5.5 -6a4.6 4.6 0 0 0 -1.3 -3.2a4.2 4.2 0 0 0 -.1 -3.2s-1.1 -.3 -3.5 1.3a12.3 12.3 0 0 0 -6.2 0c-2.4 -1.6 -3.5 -1.3 -3.5 -1.3a4.2 4.2 0 0 0 -.1 3.2a4.6 4.6 0 0 0 -1.3 3.2c0 4.6 2.7 5.7 5.5 6c-.6 .6 -.6 1.2 -.5 2v3.5" />
+</svg>
+
+
+
+                        
+                    </a>
+                </li>
+            
+        </ol><ol class="menu" id="main-menu">
+        
+        
+        
+        <li >
+            <a href='/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-home" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <polyline points="5 12 3 12 12 3 21 12 19 12" />
+  <path d="M5 12v7a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-7" />
+  <path d="M9 21v-6a2 2 0 0 1 2 -2h2a2 2 0 0 1 2 2v6" />
+</svg>
+
+
+
+                
+                <span>Home</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/solutions/' >
+                
+                
+                
+                    <?xml version="1.0" standalone="no"?><!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd"><svg t="1710685833984" class="icon" viewBox="0 0 1024 1024" version="1.1" xmlns="http://www.w3.org/2000/svg" p-id="19816" xmlns:xlink="http://www.w3.org/1999/xlink" width="200" height="200"><path d="M624.289 816.93c-3.032 0-6.157 0.409-9.288 1.214-72.38 18.637-144.767 37.274-217.147 55.897-19.536 5.03-26.426 21.93-24.586 36.448 1.981 15.646 14.106 31.485 33.446 31.485h0.002c3.029 0 6.15-0.407 9.28-1.212a2055574.5 2055574.5 0 0 1 217.149-55.898c19.536-5.034 26.423-21.938 24.583-36.457-1.985-15.642-14.106-31.476-33.44-31.476zM572.377 934.011c-6.321 0-12.516 2.06-18.413 6.126-14.42 9.939-28.264 15.35-41.153 16.086-0.547 0.032-1.095 0.047-1.644 0.047-6.968 0-14.874-2.326-24.868-7.31-0.743-0.393-3.643-2.292-5.561-3.547-5.306-3.474-6.786-4.443-8.492-4.674-5.036-2.597-10.51-3.946-16.135-3.946-15.808 0-30.932 10.543-35.963 25.07-4.172 12.041-0.206 24.313 10.609 32.827 24.347 19.168 52.743 29.3 82.12 29.3 26.81 0 53.386-8.55 76.855-24.725 13.26-9.139 18.484-24.493 13.637-40.068-4.69-15.065-17.144-25.186-30.992-25.186zM758.2 323.388c-23.674-44.276-59.272-80.43-102.949-104.556-40.902-22.593-88.289-34.536-137.036-34.536-41.49 0-83.246 8.797-120.754 25.442-39.792 17.658-73.83 43.216-101.172 75.963-51.182 61.3-72.758 149.987-57.716 237.237 14.454 83.839 60.433 154.192 126.145 193.017 5.63 3.328 11.493 5.015 17.423 5.015 15.057 0 28.606-11.094 32.946-26.978 4.146-15.17-1.767-29.61-15.431-37.682-87.857-51.928-112.807-177.156-85.54-263.399 26.457-83.656 107.442-139.862 201.52-139.862 39.74 0 78.37 10.246 111.716 29.63 45.121 26.234 77.406 69.951 90.905 123.098 14.556 57.308 5.738 118.382-24.192 167.566-11.93 19.606-27.417 37.625-42.396 55.048-9.603 11.173-19.533 22.724-28.549 34.697-15.429 20.492-20.147 42.395-24.71 63.575-0.8 3.718-1.62 7.528-2.499 11.339l-198.107 52.663c-19.536 5.193-26.361 22.222-24.458 36.791 2.024 15.5 14.071 31.193 33.179 31.196h0.007c3.103 0 6.304-0.433 9.517-1.286 51.509-13.699 103.021-27.39 154.534-41.075 5.775-1.536 11.35-2.909 16.74-4.24 42.26-10.416 75.638-18.644 79.547-79.646 1.383-21.58 19.882-41.685 36.204-59.424 4.189-4.553 8.144-8.853 11.756-13.099 19.584-23.002 44.049-54.132 59.531-90.99 32.646-77.76 26.907-164.947-16.16-245.504zM173.191 470.702c0-19.056-15.448-34.504-34.505-34.504H71.708c-19.057 0-34.505 15.448-34.505 34.504 0 19.057 15.448 34.505 34.505 34.505h66.978c19.057 0 34.505-15.448 34.505-34.505zM954.989 436.198h-66.98c-19.056 0-34.503 15.448-34.503 34.504 0 19.057 15.448 34.505 34.504 34.505h66.979c19.056 0 34.505-15.448 34.505-34.505 0-19.056-15.449-34.504-34.505-34.504zM225.263 230.175c13.475 13.475 35.321 13.475 48.796 0 13.475-13.475 13.475-35.322 0-48.796l-47.362-47.362c-13.474-13.475-35.321-13.475-48.796 0-13.475 13.475-13.475 35.321 0 48.796l47.362 47.362zM803.912 711.23c-13.475-13.475-35.322-13.475-48.797 0-13.474 13.475-13.474 35.322 0 48.797l47.362 47.362c13.475 13.475 35.322 13.475 48.796 0 13.475-13.475 13.475-35.321 0-48.797l-47.361-47.362zM514.587 135.988c19.056 0 34.505-15.449 34.505-34.505v-66.98C549.092 15.449 533.643 0 514.587 0c-19.057 0-34.505 15.449-34.505 34.505v66.979c0 19.056 15.448 34.505 34.505 34.505zM274.06 711.23c-13.475-13.475-35.321-13.475-48.796 0l-47.362 47.362c-13.475 13.475-13.475 35.321 0 48.797 13.475 13.475 35.322 13.475 48.796 0l47.362-47.362c13.475-13.475 13.475-35.322 0-48.797zM755.114 230.175c13.475 13.475 35.322 13.475 48.797 0l47.361-47.362c13.475-13.475 13.475-35.321 0-48.796-13.475-13.475-35.321-13.475-48.796 0l-47.362 47.362c-13.474 13.474-13.474 35.321 0 48.796z" fill="#707070" p-id="19817" data-spm-anchor-id="a313x.search_index.0.i7.774c3a81Q659h0" class="selected"></path></svg>
+                
+                <span>Solutions</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/archives/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-archive" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <rect x="3" y="4" width="18" height="4" rx="2" />
+  <path d="M5 8v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2 -2v-10" />
+  <line x1="10" y1="12" x2="14" y2="12" />
+</svg>
+
+
+
+                
+                <span>Archives</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/search/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-search" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="10" cy="10" r="7" />
+  <line x1="21" y1="21" x2="15" y2="15" />
+</svg>
+
+
+
+                
+                <span>Search</span>
+            </a>
+        </li>
+        
+        
+        <li >
+            <a href='/links/' >
+                
+                
+                
+                    <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-link" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M10 14a3.5 3.5 0 0 0 5 0l4 -4a3.5 3.5 0 0 0 -5 -5l-.5 .5" />
+  <path d="M14 10a3.5 3.5 0 0 0 -5 0l-4 4a3.5 3.5 0 0 0 5 5l.5 -.5" />
+</svg>
+
+
+
+                
+                <span>Links</span>
+            </a>
+        </li>
+        
+        <li class="menu-bottom-section">
+            <ol class="menu">
+
+                
+                    <li id="dark-mode-toggle">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-left" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="8" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-toggle-right" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="16" cy="12" r="2" />
+  <rect x="2" y="6" width="20" height="12" rx="6" />
+</svg>
+
+
+
+                        <span>暗色模式</span>
+                    </li>
+                
+            </ol>
+        </li>
+    </ol>
+</aside>
+
+    <aside class="sidebar right-sidebar sticky">
+        
+            
+                
+    <section class="widget archives">
+        <div class="widget-icon">
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-hash" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <line x1="5" y1="9" x2="19" y2="9" />
+  <line x1="5" y1="15" x2="19" y2="15" />
+  <line x1="11" y1="4" x2="7" y2="20" />
+  <line x1="17" y1="4" x2="13" y2="20" />
+</svg>
+
+
+
+        </div>
+        <h2 class="widget-title section-title">目录</h2>
+        
+        <div class="widget--toc">
+            <nav id="TableOfContents">
+  <ol>
+    <li><a href="#和缓存一致性的不同">和缓存一致性的不同</a></li>
+    <li><a href="#分布式事务">分布式事务</a>
+      <ol>
+        <li><a href="#查询确认事务结果">查询确认事务结果</a></li>
+        <li><a href="#二阶段提交协议">二阶段提交协议</a></li>
+      </ol>
+    </li>
+    <li><a href="#依赖关系mysql-为主">依赖关系：MySQL 为主</a></li>
+    <li><a href="#参考资料">参考资料</a></li>
+  </ol>
+</nav>
+        </div>
+    </section>
+
+            
+        
+    </aside>
+
+
+            <main class="main full-width">
+    <article class="main-article">
+    <header class="article-header">
+
+    <div class="article-details">
+    
+    <header class="article-category">
+        
+            <a href="/categories/distribution/" >
+                Distribution
+            </a>
+        
+    </header>
+    
+
+    <div class="article-title-wrapper">
+        <h2 class="article-title">
+            <a href="/p/%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E6%9C%AC%E5%9C%B0-mysql-%E5%92%8C-mongodb-%E5%8F%8C%E5%86%99%E6%97%B6%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7/">如何实现本地 MySQL 和 MongoDB 双写时数据一致性</a>
+        </h2>
+    
+        
+    </div>
+
+    
+    
+    
+    
+    <footer class="article-time">
+        
+            <div>
+                <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-calendar-time" width="56" height="56" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <path d="M11.795 21h-6.795a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2h12a2 2 0 0 1 2 2v4" />
+  <circle cx="18" cy="18" r="4" />
+  <path d="M15 3v4" />
+  <path d="M7 3v4" />
+  <path d="M3 11h16" />
+  <path d="M18 16.496v1.504l1 1" />
+</svg>
+                <time class="article-time--published">2024-04-15</time>
+            </div>
+        
+
+        
+    </footer>
+    
+
+    
+</div>
+
+</header>
+
+    <section class="article-content">
+    
+    
+    <p>这段时间面试，遇到了一道和实际生产相关的面试题：</p>
+<blockquote>
+<p>现有一系统，积分使用 <code>MongoDB</code> 存储，点券存储在 <code>MySQL</code>。</p>
+<p>用户通过日常任务获取积分，点券则可以提现。</p>
+<p>现推出一活动 1000 积分兑换 10 点券，怎么实现？</p>
+</blockquote>
+<h2 id="和缓存一致性的不同">和缓存一致性的不同</h2>
+<p>对于这种跨数据库之间的操作，可能会误认为类似「如何实现 <code>MySQL</code> 和 <code>Redis</code> 的数据一致性？」，但两者之间其实很不同，<code>Redis</code> 在这种场景一般用于充当远程缓存或分布式缓存数据库，其本质上是将数据从支持持久化但慢速的磁盘中，搬到断电丢失但高速的内存中。也就是说，在实现 <code>MySQL</code>、<code>Redis</code> 数据一致性时，我们操作的仍是同一份数据，考虑得比较多的是避免用户读取到脏数据（旧数据）。</p>
+<p>而题目的要求其实是：如何解决分布式数据库在双写时的数据一致性？</p>
+<h2 id="分布式事务">分布式事务</h2>
+<p>面试的时候，笔者联想到了跨行转账，跨行转账业务有三种情况：</p>
+<ol>
+<li>相同支行下的转账：同一支行内的转账（本地事务）</li>
+<li>不同支行下的转账：相同银行，不同支行下的转账 （分布式事务）</li>
+<li>跨行转账：和其他银行系统进行转账 （分布式事务）</li>
+</ol>
+<blockquote>
+<p>假设银行以支行为最小单位，进行数据库部署</p>
+</blockquote>
+<p>而这道题很像场景二，比如「用户A 是工行深圳支行的用户，用户B 是工行广州支行的用户，A向B转账100元」，虽然都是 A 和 B 都是工行用户，但是 A 和 B 的数据并不在同一个数据库，那么就需要两个数据库之间的进行数据交换，这时候无法通过本地数据库的事务实现 ACID，一般通过分布式事务解决的。</p>
+<h3 id="查询确认事务结果">查询确认事务结果</h3>
+<p>场景二下，可以认为在工行这个大系统，内部有由深圳支行和广州支行的这样微服务组成，而微服务之间的业务流转相对简单一些：</p>
+<ol>
+<li>深圳支行扣除用户A 的100元。</li>
+<li>深圳支行通知广州支行，用户A要转账 100元 给用户B。</li>
+<li>深圳支行定时向广州支行查询是否收到了转账，如果失败了那就回滚。</li>
+</ol>
+<p>具体流程大概是这样：</p>
+<ol>
+<li>深圳支行的用户A 发起转账请求，开启事务</li>
+<li>深圳支行创建转账订单，记录用户A 的支出和转账前后点券，且状态设置为「支出中」</li>
+<li>深圳支行通知广州支行，用户A 向 用户B 转账，广州支行收到通知后：
+<ol>
+<li>开启事务</li>
+<li>创建转账订单，记录用户B 的收入和转账前后点券，且状态设置为「收入中」</li>
+<li>更新订单状态，并返回转账结果给深圳支行</li>
+</ol>
+</li>
+<li>深圳支行收到广州支行的回复：
+<ul>
+<li>成功：转账订单状态更新为「成功」，提交事务</li>
+<li>失败：转账订单状态更新为「失败」，回滚事务</li>
+</ul>
+</li>
+</ol>
+<pre tabindex="0"><code class="language-mermaid" data-lang="mermaid">%% 时序图 [Markdown 进阶技能：用代码画时序图](https://zhuanlan.zhihu.com/p/70261692)
+%% -&gt;&gt;实线箭头 代表主动发出消息；--&gt;虚线代表响应；末尾带「X」代表异步消息，无需等待回应。
+sequenceDiagram
+    participant 用户A
+    participant 深圳支行
+    participant 广州支行
+    participant 用户B
+    用户A -&gt;&gt; + 深圳支行: 向用户B 转账
+    深圳支行 -&gt;&gt; 深圳支行: 创建转账订单，状态 PAYOUT
+    深圳支行 -&gt;&gt; 深圳支行: 事务 BEGIN
+    深圳支行 -&gt;&gt; + 广州支行: A向B转账
+    广州支行 -&gt;&gt; 用户B: 执行转账操作
+    用户B --&gt;&gt; 广州支行: 转账结果
+    alt 转账成功
+  		用户B --&gt;&gt; 广州支行: 订单状态 SUCC
+  	else 转账失败
+  		用户B --&gt;&gt; 广州支行: 订单状态 FAIL
+    end    
+    广州支行 --&gt;&gt; - 深圳支行: 转账结果
+    alt 转账成功
+  		深圳支行 --&gt;&gt; 深圳支行: 订单状态 SUCC
+  		深圳支行 --&gt;&gt; 深圳支行: 事务 COMMIT
+  	else 转账失败
+  		深圳支行 --&gt;&gt; 深圳支行: 订单状态 FAIL
+  		深圳支行 --&gt;&gt; 深圳支行: 事务 ROLLBAK
+    end
+    深圳支行 --&gt;&gt; - 用户A: 收到转账结果
+  
+</code></pre><p>在上述流程是同步的，用户需要在转账界面等待转账结果，如果转账耗时过久，会影响到用户体验。可以将转账结果改成异步事件。</p>
+<p>在用户提交转账请求后，返回提示：「转账请求已提交，请稍后查看转账结果」，用户就可以先浏览其他页面，等待转账结果的推送。</p>
+<pre tabindex="0"><code class="language-mermaid" data-lang="mermaid">%% 时序图 [Markdown 进阶技能：用代码画时序图](https://zhuanlan.zhihu.com/p/70261692)
+%% -&gt;&gt;实线箭头 代表主动发出消息；--&gt;虚线代表响应；末尾带「X」代表异步消息，无需等待回应。
+sequenceDiagram
+    participant 用户A
+    participant 深圳支行
+    participant 广州支行
+    participant 用户B
+    用户A -&gt;&gt; + 深圳支行: 向用户B转账
+    深圳支行 -&gt;&gt; 深圳支行: 创建转账订单，状态 PAYOUT
+    深圳支行 --&gt;&gt; - 用户A: 稍后查看转账结果
+    深圳支行 -&gt;&gt; + 深圳支行: 事务 BEGIN
+    深圳支行 -&gt;&gt; 广州支行: A向B转账
+    广州支行 -&gt;&gt; 用户B: 执行转账操作
+    用户B --&gt;&gt; 广州支行: 转账结果
+    
+	loop 定时查询
+        深圳支行 -&gt;&gt; 广州支行: 转账订单状态
+        广州支行 --&gt;&gt; 深圳支行: 转账订单结果
+    end
+    
+    alt 转账成功
+  		深圳支行 --&gt;&gt; 深圳支行: 订单状态 SUCC
+  		深圳支行 --&gt;&gt; 深圳支行: 事务 COMMIT
+  	else 转账失败
+  		深圳支行 --&gt;&gt; 深圳支行: 订单状态 FAIL
+  		深圳支行 --&gt;&gt; - 深圳支行: 事务 ROLLBACK
+    end
+    深圳支行 -&gt;&gt; 用户A: 转账结果  
+</code></pre><h3 id="二阶段提交协议">二阶段提交协议</h3>
+<p>2PC 与 MySQL单机中的 2PL 有相似点，都有两个阶段，但适用的目标是不一样的，不能混淆。</p>
+<blockquote>
+<ul>
+<li>二阶段加锁协议（Two-Phase Locking, 2PL）：一种用于管理数据库事务并发控制的协议，主要目的是防止多个事务同时修改同一数据项，以避免数据不一致的问题，实现可序列化的隔离等级。</li>
+<li>二阶段提交协议（Two-Phase Commit, 2PC） ：一种用于实现分布式系统中的原子性操作的协议，确保所有的事务参与者要么全部提交，要么全部回滚，从而保证分布式事务的完整性。</li>
+</ul>
+</blockquote>
+<p>2PC 的基本流程如下：
+<img src="https://vonng.github.io/ddia/img/fig9-9.png"
+	
+	
+	
+	loading="lazy"
+	
+	
+></p>
+<p>2PC的相关内容，见设计密集型应用（Designing Data-Intensive Applications, DDIA）「<a class="link" href="https://vonng.github.io/ddia/#/ch9?id=%e5%8e%9f%e5%ad%90%e6%8f%90%e4%ba%a4%e4%b8%8e%e4%b8%a4%e9%98%b6%e6%ae%b5%e6%8f%90%e4%ba%a4"  target="_blank" rel="noopener"
+    >第九章：一致性与共识</a>」，笔者就不赘述了。</p>
+<h2 id="依赖关系mysql-为主">依赖关系：MySQL 为主</h2>
+<p>面试官表示分布式事务是更通用的解决方法，如果用到 <code>MySQL</code> 和 <code>MongoDB</code> 都是本地数据库这个条件，这题可以有更好的处理方法。面试结束后，伟大的互联网告诉笔者确实如此。</p>
+<p><code>MySQL</code> 存储点券，<code>MongoDB</code> 存储积分，很明显点券是核心数据，那么需要以 <code>MySQL</code> 为主，所以<code>MySQL</code> 中应该有一个字段 <code>mongo_id</code> 用于关联 <code>MongoDB</code> 的主键 <code>_id</code>，而查询 <code>MongoDB</code> 存储的积分，只能通过 <code>MySQL</code> 里 <code>mongo_id</code> 字段。</p>
+<p>假设 <code>MySQL</code> 表结构如下：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-sql" data-lang="sql"><span class="line"><span class="cl"><span class="k">CREATE</span><span class="w"> </span><span class="k">TABLE</span><span class="w"> </span><span class="n">wallet</span><span class="w"> </span><span class="p">(</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">user_id</span><span class="w"> </span><span class="nb">INT</span><span class="w"> </span><span class="k">PRIMARY</span><span class="w"> </span><span class="k">KEY</span><span class="w"> </span><span class="k">COMMENT</span><span class="w"> </span><span class="s1">&#39;userId&#39;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">balance</span><span class="w"> </span><span class="nb">DECIMAL</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span><span class="w"> </span><span class="mi">0</span><span class="p">)</span><span class="w"> </span><span class="k">DEFAULT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">COMMENT</span><span class="w"> </span><span class="s1">&#39;点券&#39;</span><span class="p">,</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w">    </span><span class="n">mongo_id</span><span class="w"> </span><span class="nb">VARCHAR</span><span class="p">(</span><span class="mi">64</span><span class="p">)</span><span class="w"> </span><span class="k">NOT</span><span class="w"> </span><span class="k">NULL</span><span class="w"> </span><span class="k">COMMENT</span><span class="w"> </span><span class="s1">&#39;MongoDB 主键id&#39;</span><span class="w">
+</span></span></span><span class="line"><span class="cl"><span class="w"></span><span class="p">);</span><span class="w">
+</span></span></span></code></pre></div><p><code>MongoDB</code> 文档结构如下：</p>
+<div class="highlight"><pre tabindex="0" class="chroma"><code class="language-json" data-lang="json"><span class="line"><span class="cl"><span class="p">{</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;_id&#34;</span><span class="p">:</span> <span class="s2">&#34;661bcb98cd3500008c007b5c&#34;</span><span class="p">,</span>
+</span></span><span class="line"><span class="cl">    <span class="nt">&#34;score&#34;</span><span class="p">:</span> <span class="mi">200</span>
+</span></span><span class="line"><span class="cl"><span class="p">}</span>
+</span></span></code></pre></div><p>主要思想是借鉴预写日志（Write Ahead Log, WAL），实现 <code>MySQL</code> 与 <code>MongoDB</code> 的双写一致性：</p>
+<ol>
+<li>开启 <code>MySQL</code> 事务，避免并发问题</li>
+<li>先在  <code>MongoDB</code>  插入修改后的数据，而不是去更新  <code>MongoDB</code></li>
+<li>再更新 <code>MySQL</code> 的 <code>mongo_id</code>。</li>
+</ol>
+<p>具体流程如下：</p>
+<pre tabindex="0"><code class="language-mermaid" data-lang="mermaid">%% 时序图 [Markdown 进阶技能：用代码画时序图](https://zhuanlan.zhihu.com/p/70261692)
+%% -&gt;&gt;实线箭头 代表主动发出消息；--&gt;虚线代表响应；末尾带「X」代表异步消息，无需等待回应。
+sequenceDiagram
+    participant 用户
+    participant 系统
+    participant MySQL
+    participant MongoDB
+    用户 -&gt;&gt; + 系统: 积分兑换点券
+    系统 -&gt;&gt; MySQL: 事务 BEGIN
+    系统 -&gt;&gt; MySQL: 查询 user_id
+    MySQL --&gt;&gt; 系统: 返回 blance, mongo_id
+    系统 -&gt;&gt; MongoDB: 查询 mongo_id
+    MongoDB --&gt;&gt; 系统: 返回 document
+    系统 -&gt;&gt; 系统: document.score -= 100
+    系统 -&gt;&gt; MongoDB: 插入修改后的 document
+    MongoDB --&gt;&gt; 系统: 返回 mongo_id
+    系统 -&gt;&gt; MySQL: 更新 blance, mongo_id
+    MySQL --&gt;&gt; 系统: 更新成功
+    MySQL --&gt;&gt; 系统: 事务 COMMIT
+    系统 --&gt;&gt; - 用户: 兑换完成
+
+  
+</code></pre><p>在这个流程中，无论什么时候写入出错，都不会影响到数据的一致性。</p>
+<ol>
+<li>如果在 <code>MongoDB</code> 插入新数据时出错，<code>MySQL</code> 中保存的仍为老数据。</li>
+<li>如果在 <code>MySQL</code> 更新时出错，<code>MySQL</code> 中保存的仍为老数据。</li>
+</ol>
+<p>不过这种方案会带来一个问题，<code>MongoDB</code> 会新增一条无效的垃圾数据，解决方法有两种：</p>
+<ol>
+<li>异步删除。通过带有重试机制的消息队列，直到垃圾数据被删除。</li>
+<li>定时器删除。通过定时器，查询出近段时间垃圾数据，并做删除。</li>
+</ol>
+<h2 id="参考资料">参考资料</h2>
+<ul>
+<li><a class="link" href="https://zq99299.github.io/note-book/back-end-storage/01/05.html#%e5%88%b0%e5%ba%95%e4%bb%80%e4%b9%88%e6%98%af%e5%88%86%e5%b8%83%e5%bc%8f%e4%ba%8b%e5%8a%a1"  target="_blank" rel="noopener"
+    >分布式事务：如何保证多个系统间的数据是一致的？</a></li>
+<li><a class="link" href="https://juejin.cn/post/7173629924111532045"  target="_blank" rel="noopener"
+    >如何保证mongodb和数据库双写数据一致性？</a></li>
+<li><a class="link" href="https://www.diguage.com/post/overview-of-distributed-transaction/"  target="_blank" rel="noopener"
+    >分布式事务概述</a></li>
+<li><a class="link" href="https://www.fanyilun.me/2021/03/06/%e4%b8%80%e8%87%b4%e6%80%a7%e9%97%ae%e9%a2%98%e4%b8%8e%e5%88%86%e5%b8%83%e5%bc%8f%e4%ba%8b%e5%8a%a1/"  target="_blank" rel="noopener"
+    >一致性问题与分布式事务</a></li>
+<li><a class="link" href="https://www.cnblogs.com/jackion5/p/11364935.html"  target="_blank" rel="noopener"
+    >以银行转账为例分析分布式事务的解决方案</a></li>
+</ul>
+
+</section>
+
+
+    <footer class="article-footer">
+    
+    <section class="article-tags">
+        
+            <a href="/tags/interview/">Interview</a>
+        
+    </section>
+
+
+    
+    <section class="article-copyright">
+        <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-copyright" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+  <path stroke="none" d="M0 0h24v24H0z"/>
+  <circle cx="12" cy="12" r="9" />
+  <path d="M14.5 9a3.5 4 0 1 0 0 6" />
+</svg>
+
+
+
+        <span>Licensed under CC BY-NC-SA 4.0</span>
+    </section>
+    </footer>
+
+
+    
+        <link 
+                rel="stylesheet" 
+                href="https://fastly.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css"integrity="sha384-n8MVd4RsNIU0tAv4ct0nTaAbDJwPJzDEaqSD1odI&#43;WdtXRGWt2kTvGFasHpSy3SV"crossorigin="anonymous"
+            ><script 
+                src="https://fastly.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"integrity="sha384-XjKyOOlGwcjNTAIQHIpgOno0Hl1YQqzUOEleOLALmuqehneUG&#43;vnGctmUb0ZY0l8"crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://fastly.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"integrity="sha384-&#43;VBxd3r6XgURycqtZ117nYw44OOcIax56Z4dCRWbxyPt0Koah1uHoK0o4&#43;/RRE05"crossorigin="anonymous"
+                defer
+                >
+            </script><script>
+    window.addEventListener("DOMContentLoaded", () => {
+        renderMathInElement(document.querySelector(`.article-content`), {
+            delimiters: [
+                { left: "$$", right: "$$", display: true },
+                { left: "$", right: "$", display: false },
+                { left: "\\(", right: "\\)", display: false },
+                { left: "\\[", right: "\\]", display: true }
+            ],
+            ignoredClasses: ["gist"]
+        });})
+</script>
+    
+</article>
+
+    
+
+    
+
+     
+    
+        
+    <div class="disqus-container">
+    <div id="disqus_thread"></div>
+<script>
+    window.disqus_config = function () {
+    
+    
+    
+    };
+    (function() {
+        if (["localhost", "127.0.0.1"].indexOf(window.location.hostname) != -1) {
+            document.getElementById('disqus_thread').innerHTML = 'Disqus comments not available by default when the website is previewed locally.';
+            return;
+        }
+        var d = document, s = d.createElement('script'); s.async = true;
+        s.src = '//' + "hugo-theme-stack" + '.disqus.com/embed.js';
+        s.setAttribute('data-timestamp', +new Date());
+        (d.head || d.body).appendChild(s);
+    })();
+</script>
+<noscript>Please enable JavaScript to view the <a href="https://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+<a href="https://disqus.com" class="dsq-brlink">comments powered by <span class="logo-disqus">Disqus</span></a>
+</div>
+
+<style>
+    .disqus-container {
+        background-color: var(--card-background);
+        border-radius: var(--card-border-radius);
+        box-shadow: var(--shadow-l1);
+        padding: var(--card-padding);
+    }
+</style>
+
+<script>
+    window.addEventListener('onColorSchemeChange', (e) => {
+        if (typeof DISQUS == 'object') {
+            DISQUS.reset({
+                reload: true
+            });
+        }
+    })
+</script>
+
+    
+
+    
+<section class="totalcount">
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  发表了8篇文章 ·
+  总计6.82k字
+</section>
+
+
+
+
+
+<script>
+  
+  Array.from(document.getElementsByClassName("language-mermaid")).forEach(
+    (el) => {
+      el.parentElement.outerHTML = `<div class="mermaid">${el.innerText}</div>`;
+    }
+  );
+</script>
+
+    
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    
+    <div class="pswp__bg"></div>
+
+    
+    <div class="pswp__scroll-wrap">
+
+        
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                
+                
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                        <div class="pswp__preloader__cut">
+                            <div class="pswp__preloader__donut"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div>
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div><script 
+                src="https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.js"integrity="sha256-ePwmChbbvXbsO02lbM3HoHbSHTHFAeChekF1xKJdleo="crossorigin="anonymous"
+                defer
+                >
+            </script><script 
+                src="https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe-ui-default.min.js"integrity="sha256-UKkzOn/w1mBxRmLLGrSeyB4e1xbrp4xylgAWb3M42pU="crossorigin="anonymous"
+                defer
+                >
+            </script><link 
+                rel="stylesheet" 
+                href="https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/default-skin/default-skin.min.css"crossorigin="anonymous"
+            ><link 
+                rel="stylesheet" 
+                href="https://fastly.jsdelivr.net/npm/photoswipe@4.1.3/dist/photoswipe.min.css"crossorigin="anonymous"
+            >
+
+            </main>
+        </div>
+        <script 
+                src="https://fastly.jsdelivr.net/npm/node-vibrant@3.1.6/dist/vibrant.min.js"integrity="sha256-awcR2jno4kI5X0zL8ex0vi2z&#43;KMkF24hUW8WePSA9HM="crossorigin="anonymous"
+                
+                >
+            </script><script type="text/javascript" src="/ts/main.js" defer></script>
+<script>
+    (function () {
+        const customFont = document.createElement('link');
+        customFont.href = "https://fonts.googleapis.com/css2?family=Lato:wght@300;400;700&display=swap";
+
+        customFont.type = "text/css";
+        customFont.rel = "stylesheet";
+
+        document.head.appendChild(customFont);
+    }());
+</script>
+
+    </body>
+</html>
