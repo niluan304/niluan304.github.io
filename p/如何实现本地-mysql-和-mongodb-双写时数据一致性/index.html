@@ -48,6 +48,17 @@
 深圳支行的用户A 发起转账请求，开启事务 深圳支行创建转账订单，记录用户A 的支出和转账前后点券，且状态设置为「支出中」 深圳支行通知广州支行，用户A 向 用户B 转账，广州支行收到通知后： 开启事务 创建转账订单，记录用户B 的收入和转账前后点券，且状态设置为「收入中」 更新订单状态，并返回转账结果给深圳支行 深圳支行收到广州支行的回复： 成功：转账订单状态更新为「成功」，提交事务 失败：转账订单状态更新为「失败」，回滚事务 %% 时序图 [Markdown 进阶技能：用代码画时序图](https://zhuanlan.zhihu.com/p/70261692) %% -&amp;gt;&amp;gt;实线箭头 代表主动发出消息；--&amp;gt;虚线代表响应；末尾带「X」代表异步消息，无需等待回应。 sequenceDiagram participant 用户A participant 深圳支行 participant 广州支行 participant 用户B 用户A -&amp;gt;&amp;gt; &#43; 深圳支行: 向用户B 转账 深圳支行 -&amp;gt;&amp;gt; 深圳支行: 创建转账订单，状态 PAYOUT 深圳支行 -&amp;gt;&amp;gt; 深圳支行: 事务 BEGIN 深圳支行 -&amp;gt;&amp;gt; &#43; 广州支行: A向B转账 广州支行 -&amp;gt;&amp;gt; 用户B: 执行转账操作 用户B --&amp;gt;&amp;gt; 广州支行: 转账结果 alt 转账成功 用户B --&amp;gt;&amp;gt; 广州支行: 订单状态 SUCC else 转账失败 用户B --&amp;gt;&amp;gt; 广州支行: 订单状态 FAIL end 广州支行 --&amp;gt;&amp;gt; - 深圳支行: 转账结果 alt 转账成功 深圳支行 --&amp;gt;&amp;gt; 深圳支行: 订单状态 SUCC 深圳支行 --&amp;gt;&amp;gt; 深圳支行: 事务 COMMIT else 转账失败 深圳支行 --&amp;gt;&amp;gt; 深圳支行: 订单状态 FAIL 深圳支行 --&amp;gt;&amp;gt; 深圳支行: 事务 ROLLBAK end 深圳支行 --&amp;gt;&amp;gt; - 用户A: 收到转账结果 在上述流程是同步的，用户需要在转账界面等待转账结果，如果转账耗时过久，会影响到用户体验。可以将转账结果改成异步事件。">
     <link rel="shortcut icon" href="/favicon.ico" />
 
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-C0BX1J3KRG"></script>
+<script>
+var doNotTrack = false;
+if (!doNotTrack) {
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+	gtag('config', 'G-C0BX1J3KRG', { 'anonymize_ip': false });
+}
+</script>
+
 <style>
    
   :root {
