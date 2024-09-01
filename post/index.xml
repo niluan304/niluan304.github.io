@@ -1,4 +1,358 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on 雾封的笔</title><link>https://niluan304.github.io/post/</link><description>Recent content in Posts on 雾封的笔</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>雾封</copyright><lastBuildDate>Sun, 16 Jun 2024 23:53:49 +0800</lastBuildDate><atom:link href="https://niluan304.github.io/post/index.xml" rel="self" type="application/rss+xml"/><item><title>如何实现本地 MySQL 和 MongoDB 双写时数据一致性</title><link>https://niluan304.github.io/p/%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E6%9C%AC%E5%9C%B0-mysql-%E5%92%8C-mongodb-%E5%8F%8C%E5%86%99%E6%97%B6%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7/</link><pubDate>Mon, 15 Apr 2024 09:52:02 +0800</pubDate><guid>https://niluan304.github.io/p/%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E6%9C%AC%E5%9C%B0-mysql-%E5%92%8C-mongodb-%E5%8F%8C%E5%86%99%E6%97%B6%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7/</guid><description>&lt;p>这段时间面试，遇到了一道和实际生产相关的面试题：&lt;/p>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>Posts on 雾封的笔</title><link>https://niluan304.github.io/post/</link><description>Recent content in Posts on 雾封的笔</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>雾封</copyright><lastBuildDate>Sun, 16 Jun 2024 23:53:49 +0800</lastBuildDate><atom:link href="https://niluan304.github.io/post/index.xml" rel="self" type="application/rss+xml"/><item><title>折腾笔记：在小米路由器原生系统上部署自定义应用，实现远程开关机</title><link>https://niluan304.github.io/p/%E6%8A%98%E8%85%BE%E7%AC%94%E8%AE%B0%E5%9C%A8%E5%B0%8F%E7%B1%B3%E8%B7%AF%E7%94%B1%E5%99%A8%E5%8E%9F%E7%94%9F%E7%B3%BB%E7%BB%9F%E4%B8%8A%E9%83%A8%E7%BD%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E5%BA%94%E7%94%A8%E5%AE%9E%E7%8E%B0%E8%BF%9C%E7%A8%8B%E5%BC%80%E5%85%B3%E6%9C%BA/</link><pubDate>Sun, 16 Jun 2024 23:53:49 +0800</pubDate><guid>https://niluan304.github.io/p/%E6%8A%98%E8%85%BE%E7%AC%94%E8%AE%B0%E5%9C%A8%E5%B0%8F%E7%B1%B3%E8%B7%AF%E7%94%B1%E5%99%A8%E5%8E%9F%E7%94%9F%E7%B3%BB%E7%BB%9F%E4%B8%8A%E9%83%A8%E7%BD%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E5%BA%94%E7%94%A8%E5%AE%9E%E7%8E%B0%E8%BF%9C%E7%A8%8B%E5%BC%80%E5%85%B3%E6%9C%BA/</guid><description>&lt;h2 id="起因远程开关机的需求">起因：远程开关机的需求&lt;/h2>
+&lt;p>笔者6月初组了台式，并将主机置于角落，按下物理的开关键变得很麻烦，因此有了远程开关机的需求。
+经过了解后，发现远程开关机有三种方式：&lt;/p>
+&lt;ul>
+&lt;li>主板通电开机 + 智能插座物理断电关机&lt;/li>
+&lt;li>安装 PCIe 开机卡&lt;/li>
+&lt;li>Wake On Lan + SSH关机&lt;/li>
+&lt;/ul>
+&lt;h3 id="智能插座">智能插座&lt;/h3>
+&lt;ul>
+&lt;li>
+&lt;p>开机
+现代主板都有来电自启动这个功能，开启之后，搭配智能插座的远程通断电功能，如米家插座，就可以远程开机了。&lt;/p>
+&lt;ul>
+&lt;li>智能插座一般都依赖于路由器提供Wi-Fi，以接入物联网 Internet of Things(IoT) 软件&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>关机
+通过智能插座的物理断电以强制关机。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>优缺点&lt;/p>
+&lt;ul>
+&lt;li>实现简单：只需要购买智能插座和开启主板的来电自启&lt;/li>
+&lt;li>花费：¥40 智能插座&lt;/li>
+&lt;li>开机慢： 主板在通电后首次开机，自检项目很多，导致开机时间被延长&lt;/li>
+&lt;li>断电关机有风险：如果在传输数据过程中关机，操作系统可能会来不及保存数据而造成文件损坏
+&lt;ul>
+&lt;li>向日葵智能插座提供了软关机的方式，但需要后台运行向日葵监控软件&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="pcie-开机卡">PCIe 开机卡&lt;/h3>
+&lt;p>按下机箱上的开机键，会让电脑开关机，其本质就是短接下主板的 power on/off 针脚，而接入 PCIe 开机卡则是能够通过 IoT 软件中发出开关机的指令。&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>接入 PCIe 开机卡，同样需要路由器提供Wi-Fi，才能接入 IoT 软件。&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>优缺点&lt;/p>
+&lt;ul>
+&lt;li>规避了物理通断电的缺点&lt;/li>
+&lt;li>会占用主板上的 PCIe 槽，虽然不会抢带宽&lt;/li>
+&lt;li>花费：¥40 PCIe 开机卡&lt;/li>
+&lt;li>部分厂商无法接入米家&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;h3 id="wake-on-lan--ssh关机">Wake On Lan + SSH关机&lt;/h3>
+&lt;p>开机：网络唤醒 Wake on LAN (WoL)，设备通过局域网向目标主机的网卡发送指令，网卡就会通知所在主板开机。
+关机：设备通过SSH远程登录指定主机，然后执行关机指令。&lt;/p>
+&lt;p>优缺点：&lt;/p>
+&lt;ul>
+&lt;li>需要额外的且24h 运行的设备
+&lt;ul>
+&lt;li>如果能够解锁路由器的SSH，就可以用路由器充当这个设备。否则需要考虑 NAS，软路由等。&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>实现麻烦：
+&lt;ul>
+&lt;li>开启 WoL，需要调整主板，系统内的设置，SSH 远程指令，更是大坑&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>花费：¥0，现有设备，才应该考虑这个方案。&lt;/li>
+&lt;/ul>
+&lt;p>出于折腾和省钱的目的，笔者选择了第三种方案。&lt;/p>
+&lt;h2 id="警告">警告&lt;/h2>
+&lt;ol>
+&lt;li>刷机，乃至于开启 &lt;code>SSH&lt;/code>都有可能失去官方保修，请谨慎操作&lt;/li>
+&lt;li>小米路由器开启&lt;code>SSH&lt;/code> 对系统版本有要求，新版本固件很可能不支持开启&lt;code>SSH&lt;/code>&lt;/li>
+&lt;/ol>
+&lt;h2 id="前期准备">前期准备&lt;/h2>
+&lt;h3 id="注册巴法云账号">注册巴法云账号&lt;/h3>
+&lt;p>注册一个巴法云账户，并添加一个&lt;code>006&lt;/code>后缀的主题。&lt;/p>
+&lt;blockquote>
+&lt;p>可参考：&lt;a class="link" href="https://cloud.bemfa.com/docs/src/index_guild.html" target="_blank" rel="noopener"
+>平台操作教程 | 巴法文档中心&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;p>步骤如下：&lt;/p>
+&lt;ol>
+&lt;li>打开 &lt;a class="link" href="https://cloud.bemfa.com/" target="_blank" rel="noopener"
+>巴法物联网云平台&lt;/a>，使用邮箱或手机注册。&lt;/li>
+&lt;li>点击「控制台」，拷贝自己的私钥，后续会用到。&lt;/li>
+&lt;li>新建主题-命名为 &lt;code>pc006&lt;/code>，名称可以为任意英文，但必须以&lt;code>006&lt;/code>结尾，表示开关设备。&lt;/li>
+&lt;/ol>
+&lt;p>效果如图：
+&lt;img src="https://github.com/niluan304/picx-images-hosting/raw/master/pc/bemfa_init.4jo078gpsw.webp"
+loading="lazy"
+alt="bemfa init"
+>&lt;/p>
+&lt;ul>
+&lt;li>点击「昵称」，网页会弹出「修改昵称」的窗口，以供自定义。&lt;/li>
+&lt;/ul>
+&lt;h3 id="为受控电脑安装-ssh-服务">为受控电脑安装 SSH 服务&lt;/h3>
+&lt;h4 id="windows">Windows&lt;/h4>
+&lt;p>具体的安装方法请参考：&lt;a class="link" href="https://www.sysgeek.cn/openssh-windows/" target="_blank" rel="noopener"
+>Windows 上的 OpenSSH：安装、配置和使用指南 - 系统极客&lt;/a>&lt;/p>
+&lt;p>在开始安装 OpenSSH 之前，请确保你的电脑满足以下条件：&lt;/p>
+&lt;ul>
+&lt;li>&lt;strong>操作系统&lt;/strong>：Windows 11 或 Windows 10（1809 版本或更高）。&lt;/li>
+&lt;li>&lt;strong>PowerShell 版本&lt;/strong>：PowerShell 5.1 或以上。&lt;/li>
+&lt;li>&lt;strong>管理员权限&lt;/strong>：安装 OpenSSH 需要拥有管理员权限。&lt;/li>
+&lt;/ul>
+&lt;h4 id="linux">Linux&lt;/h4>
+&lt;p>Linux 电脑一般都安装 &lt;code>OpenSSH&lt;/code>，如果没有可以通过各发行版的包管理工具安装：&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>&lt;code>Debian&lt;/code> 、&lt;code>Ubuntu&lt;/code>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo apt install ssh
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>&lt;code>CentOs&lt;/code>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">sudo yum install openssh-server
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;/ul>
+&lt;h3 id="开启受控电脑的-wake-on-lan">开启受控电脑的 Wake On Lan&lt;/h3>
+&lt;h4 id="开启主板的-wol">开启主板的 WoL&lt;/h4>
+&lt;p>想要使用网络唤醒（Wake-on-LAN，WoL），也需要开启主板BIOS的 WoL 功能，各厂商的主板开启方式不一致，具体方法视厂商而定，进入 BIOS 后注意选项附加的说明即可，可以参考的关键词包括：&lt;/p>
+&lt;ul>
+&lt;li>Automatic Power On&lt;/li>
+&lt;li>Wake on LAN/WLAN&lt;/li>
+&lt;li>Power Management&lt;/li>
+&lt;li>Power On by Onboard LAN&lt;/li>
+&lt;li>Power On by PCI-E Devices&lt;/li>
+&lt;/ul>
+&lt;h4 id="关闭主板的电源节能设置">关闭主板的电源节能设置&lt;/h4>
+&lt;p>很多厂商的主板都有低功耗模式，为了节能，该模式下，电脑关机后，会彻底关闭网卡，会无法使用 WoL ，因此需要关闭此类模式。可以参考的关键词包括：&lt;/p>
+&lt;ul>
+&lt;li>ErP&lt;/li>
+&lt;li>EUP&lt;/li>
+&lt;/ul>
+&lt;h4 id="windows-系统设置">windows 系统设置&lt;/h4>
+&lt;h5 id="配置网卡">配置网卡&lt;/h5>
+&lt;ol>
+&lt;li>
+&lt;p>在 Windows 10 中，&lt;code>运行 &amp;gt; ncpa.cpl&lt;/code> 打开「网络连接」设置，然后找到当前在使用的有线网卡，右键点击「属性」：&lt;/p>
+&lt;img src="https://github.com/niluan304/picx-images-hosting/raw/master/pc/image.99tal6cv72.webp" alt="image-20240723000140265" style="zoom:50%;" />
+&lt;/li>
+&lt;li>
+&lt;p>点击「配置」：&lt;/p>
+&lt;img src="https://github.com/niluan304/picx-images-hosting/raw/master/pc/image.ic28dhbz7.webp" alt="image-20240723000220472" style="zoom:50%;" />
+&lt;/li>
+&lt;li>
+&lt;p>切换到「电源管理」，勾选「允许此设备唤醒计算机」以及「只允许幻数据包唤醒计算机」：&lt;/p>
+&lt;/li>
+&lt;/ol>
+&lt;img src="https://github.com/niluan304/picx-images-hosting/raw/master/pc/image.4cktrbzer5.webp" alt="image-20240722235715931" style="zoom:50%;" />
+&lt;h5 id="关闭快速启动">关闭快速启动&lt;/h5>
+&lt;img src="https://github.com/niluan304/picx-images-hosting/raw/master/pc/image.13lpuoc0gk.webp" alt="image-20240901234515640" style="zoom:50%;" />
+&lt;ol>
+&lt;li>先点击「更改当前不可用的设置」，以便能修改关机设置&lt;/li>
+&lt;li>关闭「启用快速启动」（快速启动（Fast Startup），属于 S4 电源状态，不支持网络唤醒）&lt;/li>
+&lt;/ol>
+&lt;h2 id="部署-pc">部署 pc&lt;/h2>
+&lt;p>笔者编写了一个小应用（下文称为 &lt;code>pc&lt;/code>），依赖于 WakeOnLan、巴法云和SSH协议，实现了远程开关机：&lt;/p>
+&lt;pre tabindex="0">&lt;code class="language-mermaid" data-lang="mermaid">sequenceDiagram
+actor user AS 用户
+participant iot AS iot(小爱同学)
+participant bemfa AS 巴法云
+participant power AS pc
+participant pc AS 电脑
+rect rgb(191, 223, 255)
+Note over user,pc: 远程关机
+user -&amp;gt;&amp;gt;+ iot: 语音：关电脑
+iot -&amp;gt;&amp;gt; bemfa: 推送消息：&amp;#34;off&amp;#34;
+bemfa -&amp;gt;&amp;gt; power: TCP(&amp;#34;off&amp;#34;)
+power -&amp;gt;&amp;gt; pc: SSH(&amp;#34;关机&amp;#34;)
+pc -&amp;gt;&amp;gt; pc: 关机
+iot --)- user: ok（异步）
+end
+rect rgb(248,240,233)
+Note over user,pc: 远程开机
+user -&amp;gt;&amp;gt;+ iot: 语音：开电脑
+iot -&amp;gt;&amp;gt; bemfa: 推送消息：&amp;#34;on&amp;#34;
+bemfa -&amp;gt;&amp;gt; power: TCP(&amp;#34;on&amp;#34;)
+power -&amp;gt;&amp;gt; pc: WoL &amp;amp; SSH(&amp;#34;取消关机&amp;#34;)
+pc -&amp;gt;&amp;gt; pc: 开机
+iot --)- user: ok（异步）
+end
+&lt;/code>&lt;/pre>&lt;h3 id="开启设备的-sshtelnet">开启设备的 &lt;code>SSH&lt;/code>/&lt;code>Telnet&lt;/code>&lt;/h3>
+&lt;p>&lt;code>pc&lt;/code> 需要运行在局域网内不停机的机器上，如路由器、NAS。&lt;/p>
+&lt;p>因此需要能登录到目标机器上，然后下载并运行&lt;code>pc&lt;/code>。最常用的远程登录协议为 &lt;code>SSH&lt;/code>，搭配 &lt;code>SCP&lt;/code> 操作文件系统也会更方便。&lt;/p>
+&lt;ul>
+&lt;li>某些设备&lt;strong>只能启用 &lt;code>Telnet&lt;/code> 协议&lt;/strong>，无法启用 &lt;code>SSH&lt;/code> ，操作会繁琐一些。&lt;/li>
+&lt;/ul>
+&lt;p>以笔者的小米路由器 AX3000T（1.0.47版本下）为例，开启&lt;code>SSH&lt;/code>的步骤：&lt;/p>
+&lt;ol>
+&lt;li>
+&lt;p>登录路由器后台，复制 &lt;code>stok&lt;/code>变量&lt;/p>
+&lt;p>&lt;img src="https://github.com/niluan304/picx-images-hosting/raw/master/pc/image.45mhiacft.png"
+loading="lazy"
+alt="image-20240727194218564"
+>&lt;/p>
+&lt;/li>
+&lt;li>
+&lt;p>将脚本内容保存到 &lt;code>stok.bat&lt;/code> 文件中，执行后并输入复制的&lt;code>stok&lt;/code>变量，&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bat" data-lang="bat">&lt;span class="line">&lt;span class="cl">&lt;span class="p">@&lt;/span>&lt;span class="c1">REM 使用 UTF8 编码，以正确显示中文&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">chcp 65001
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">@&lt;/span>&lt;span class="k">echo&lt;/span> off
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">@&lt;/span>&lt;span class="c1">REM &amp;lt;STOK&amp;gt;修改为复制的变量&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">echo&lt;/span> Input the &lt;span class="se">^&amp;lt;&lt;/span>STOK&lt;span class="se">^&amp;gt;&lt;/span> in admin page of your Xiaomi router
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">echo&lt;/span> 输入你小米路由器中后台页面中的 &lt;span class="se">^&amp;lt;&lt;/span>STOK&lt;span class="se">^&amp;gt;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">set&lt;/span> &lt;span class="k">/p&lt;/span> &lt;span class="nv">STOK&lt;/span>&lt;span class="p">=&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">@&lt;/span>&lt;span class="c1">REM echo %STOK%&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">curl -X POST http://192.168.31.1/cgi-bin/luci/;stok=&lt;span class="nv">%STOK%&lt;/span>/api/misystem/arn_switch -d &lt;span class="s2">&amp;#34;open=1&amp;amp;model=1&amp;amp;level=&lt;/span>&lt;span class="nv">%0&lt;/span>&lt;span class="s2">Anvram&lt;/span>&lt;span class="nv">%2&lt;/span>&lt;span class="s2">0set&lt;/span>&lt;span class="nv">%2&lt;/span>&lt;span class="s2">0ssh_en&lt;/span>&lt;span class="nv">%3&lt;/span>&lt;span class="s2">D1&lt;/span>&lt;span class="nv">%0&lt;/span>&lt;span class="s2">A&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">curl -X POST http://192.168.31.1/cgi-bin/luci/;stok=&lt;span class="nv">%STOK%&lt;/span>/api/misystem/arn_switch -d &lt;span class="s2">&amp;#34;open=1&amp;amp;model=1&amp;amp;level=&lt;/span>&lt;span class="nv">%0&lt;/span>&lt;span class="s2">Anvram&lt;/span>&lt;span class="nv">%2&lt;/span>&lt;span class="s2">0commit&lt;/span>&lt;span class="nv">%0&lt;/span>&lt;span class="s2">A&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">curl -X POST http://192.168.31.1/cgi-bin/luci/;stok=&lt;span class="nv">%STOK%&lt;/span>/api/misystem/arn_switch -d &lt;span class="s2">&amp;#34;open=1&amp;amp;model=1&amp;amp;level=&lt;/span>&lt;span class="nv">%0&lt;/span>&lt;span class="s2">Ased&lt;/span>&lt;span class="nv">%2&lt;/span>&lt;span class="s2">0-i&lt;/span>&lt;span class="nv">%2&lt;/span>&lt;span class="s2">0&amp;#39;s&lt;/span>&lt;span class="nv">%2&lt;/span>&lt;span class="s2">Fchannel&lt;/span>&lt;span class="nv">%3&lt;/span>&lt;span class="s2">D.*&lt;/span>&lt;span class="nv">%2&lt;/span>&lt;span class="s2">Fchannel&lt;/span>&lt;span class="nv">%3&lt;/span>&lt;span class="s2">D&lt;/span>&lt;span class="nv">%2&lt;/span>&lt;span class="s2">2debug&lt;/span>&lt;span class="nv">%2&lt;/span>&lt;span class="s2">2&lt;/span>&lt;span class="nv">%2&lt;/span>&lt;span class="s2">Fg&amp;#39;&lt;/span>&lt;span class="nv">%2&lt;/span>&lt;span class="s2">0&lt;/span>&lt;span class="nv">%2&lt;/span>&lt;span class="s2">Fetc&lt;/span>&lt;span class="nv">%2&lt;/span>&lt;span class="s2">Finit.d&lt;/span>&lt;span class="nv">%2&lt;/span>&lt;span class="s2">Fdropbear&lt;/span>&lt;span class="nv">%0&lt;/span>&lt;span class="s2">A&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">curl -X POST http://192.168.31.1/cgi-bin/luci/;stok=&lt;span class="nv">%STOK%&lt;/span>/api/misystem/arn_switch -d &lt;span class="s2">&amp;#34;open=1&amp;amp;model=1&amp;amp;level=&lt;/span>&lt;span class="nv">%0&lt;/span>&lt;span class="s2">A&lt;/span>&lt;span class="nv">%2&lt;/span>&lt;span class="s2">Fetc&lt;/span>&lt;span class="nv">%2&lt;/span>&lt;span class="s2">Finit.d&lt;/span>&lt;span class="nv">%2&lt;/span>&lt;span class="s2">Fdropbear&lt;/span>&lt;span class="nv">%2&lt;/span>&lt;span class="s2">0start&lt;/span>&lt;span class="nv">%0&lt;/span>&lt;span class="s2">A&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">pause&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>效果大概是这样的：&lt;/p>
+&lt;p>&lt;img src="https://github.com/niluan304/picx-images-hosting/raw/master/pc/image.77dhx4di50.webp"
+loading="lazy"
+alt="image-20240805002207392"
+>&lt;/p>
+&lt;ul>
+&lt;li>也可以逐行复制到 cmd 执行，可参考：&lt;a class="link" href="https://mao.fan/article/102" target="_blank" rel="noopener"
+>小米AX3000T解锁SSH ＆固化SSH&lt;/a>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol>
+&lt;h3 id="下载-pc">下载 &lt;code>pc&lt;/code>&lt;/h3>
+&lt;p>根据设备的芯片架构及安装的操作系统，找到对应的压缩包：&lt;a class="link" href="https://github.com/niluan304/pc/releases/" target="_blank" rel="noopener"
+>Release&lt;/a>&lt;/p>
+&lt;p>如果是 Linux/OpenWrt 系统，可以在命令行输入 &lt;code>cat /etc/os-release | grep ARCH&lt;/code> 以查看设备的架构，以笔者的为例：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">cat /etc/os-release &lt;span class="p">|&lt;/span> grep ARCH
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nv">LEDE_ARCH&lt;/span>&lt;span class="o">=&lt;/span>&lt;span class="s2">&amp;#34;aarch64_cortex-a53&amp;#34;&lt;/span> &lt;span class="c1"># cortex-a53 是 实现ARMv8-A 64位指令集的微架构，故 CPU 是 arm64架构的&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>在目标设备中，将解压后的二进制文件及配置文件移动到可读写的文件夹，实现方式有两种：&lt;/p>
+&lt;ul>
+&lt;li>直接通过 &lt;code>curl&lt;/code> 或 &lt;code>wget&lt;/code> 命令下载压缩包后解压&lt;/li>
+&lt;li>在其他设备上下载后，通过 &lt;code>scp&lt;/code> 等协议上传到设备&lt;/li>
+&lt;/ul>
+&lt;h3 id="修改配置文件">修改配置文件&lt;/h3>
+&lt;p>&lt;code>pc&lt;/code> 使用 &lt;code>yaml&lt;/code>文件作为配置文件，使用前，使用者应当熟悉一下 &lt;code>yaml&lt;/code> 的基本语法，以修改或补全空白配置项的值：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-yaml" data-lang="yaml">&lt;span class="line">&lt;span class="cl">&lt;span class="c"># 当前程序所在主机的局域网IP，即通过 SSH/Telnet 登录的设备，一般为路由器/NAS&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="c"># 小米路由器的局域网IP一般为：192.168.31.1&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="nt">myIP&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;&amp;#34;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="c"># 目标主机的主板网卡MAC地址，&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="c"># windows 机器可以在命令行中输入 `ipconfig /all` 查看，如：00-1B-44-11-3A-B7&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="nt">targetMac&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;&amp;#34;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="c"># ssh 配置&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="nt">ssh&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c"># 目标主机的 IP + SSH 端口号&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c"># host:port 如 192.168.31.111:11022&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">addr&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;&amp;#34;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c"># 用户名，目前支持私钥和密码登录&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">user&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;&amp;#34;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c"># 私钥路径，建议使用绝对地&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c"># 通过公私钥登录，推荐使用&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c">#&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c"># 私钥可通过其他设备上的 `ssh-keygen -t ed25519 -f ed25519` 命令生成&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c"># 然后将 ed25519 私钥上传至运行设备上&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">identity&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;&amp;#34;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c"># 使用密码登录，可选项&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c"># 密码明文，应当在局域网环境使用&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">password&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;&amp;#34;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="c"># 日志设置&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="nt">log&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c"># 日志文件位置，默认为 pc.log&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">file&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">/tmp/log/pc.log&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c"># 是否打印代码位置&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">addSource&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="kc">false&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c"># 日志级别&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c"># 定义见 log/slog/level.go:43&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c"># LevelDebug Level = -4&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c"># LevelInfo Level = 0&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c"># LevelWarn Level = 4&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c"># LevelError Level = 8&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">level&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="m">0&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">&lt;/span>&lt;span class="nt">bemfa&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c"># 巴法云的 UID，即控制台的私钥&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">uid&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="s2">&amp;#34;&amp;#34;&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c"># topic-switch&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">switch&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c"># 主题的名称&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">topic&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">XXX006&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c"># Switch 只接收 on/off 两种指令，对应的操作&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="c"># 覆盖这里的指令之前，你应该在默认的 shell，Linux(sh)/Windows(cmd) 中测试一下，以确保关机指令和取消指令是正确的。&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">on&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">cmd /c shutdown /a&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="w"> &lt;/span>&lt;span class="nt">off&lt;/span>&lt;span class="p">:&lt;/span>&lt;span class="w"> &lt;/span>&lt;span class="l">cmd /c shutdown /s /t 600&lt;/span>&lt;span class="w">
+&lt;/span>&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="调试-pc">调试 &lt;code>pc&lt;/code>&lt;/h3>
+&lt;ol>
+&lt;li>
+&lt;p>运行 &lt;code>pc&lt;/code>&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># Linux 机器上，赋予 `pc` 执行权限&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">chmod +x pc
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1"># 指定配置文件并运行&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">./pc -config config.yml
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>通过巴法云推送消息&lt;/p>
+&lt;p>在巴法云控制台，如果连接正常，&lt;code>pc&lt;/code> 订阅的主题上，会显示订阅者的在线数量：
+&lt;img src="https://github.com/niluan304/picx-images-hosting/raw/master/pc/topic.8ojljeijjj.webp"
+loading="lazy"
+>&lt;/p>
+&lt;ul>
+&lt;li>
+&lt;p>设备（Windows）处于开机状态&lt;/p>
+&lt;ul>
+&lt;li>推送 &lt;code>off&lt;/code>，弹窗显示，即将关机：&lt;br>
+&lt;img src="https://github.com/niluan304/picx-images-hosting/raw/master/pc/switch-off.7zqbzd7e3r.webp"
+loading="lazy"
+>&lt;/li>
+&lt;li>推送 &lt;code>on&lt;/code>，弹窗显示，关机被取消：&lt;br>
+&lt;img src="https://github.com/niluan304/picx-images-hosting/raw/master/pc/switch-on.3d4oyo8ug8.webp"
+loading="lazy"
+>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>设备处于关机机状态&lt;/p>
+&lt;ul>
+&lt;li>推送 &lt;code>off&lt;/code>，设备无反应&lt;/li>
+&lt;li>推送 &lt;code>on&lt;/code>，设备 &lt;strong>开机&lt;/strong>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;li>
+&lt;p>后台运行 &lt;code>pc&lt;/code>
+若调试后无问题，即可在设备上后台运行 &lt;code>pc&lt;/code>, 以捕获巴法云的消息推送&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-bash" data-lang="bash">&lt;span class="line">&lt;span class="cl">./pc -config config.yml &lt;span class="p">&amp;amp;&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;/li>
+&lt;li>
+&lt;p>巴法云接入 iot 软件&lt;/p>
+&lt;ul>
+&lt;li>米家：&lt;/li>
+&lt;li>&lt;img src="https://github.com/niluan304/picx-images-hosting/raw/master/pc/iot-mijia.lvmqmxpuf.webp"
+loading="lazy"
+>&lt;/li>
+&lt;/ul>
+&lt;/li>
+&lt;/ol></description></item><item><title>如何实现本地 MySQL 和 MongoDB 双写时数据一致性</title><link>https://niluan304.github.io/p/%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E6%9C%AC%E5%9C%B0-mysql-%E5%92%8C-mongodb-%E5%8F%8C%E5%86%99%E6%97%B6%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7/</link><pubDate>Mon, 15 Apr 2024 09:52:02 +0800</pubDate><guid>https://niluan304.github.io/p/%E5%A6%82%E4%BD%95%E5%AE%9E%E7%8E%B0%E6%9C%AC%E5%9C%B0-mysql-%E5%92%8C-mongodb-%E5%8F%8C%E5%86%99%E6%97%B6%E6%95%B0%E6%8D%AE%E4%B8%80%E8%87%B4%E6%80%A7/</guid><description>&lt;p>这段时间面试，遇到了一道和实际生产相关的面试题：&lt;/p>
 &lt;blockquote>
 &lt;p>现有一系统，积分使用 &lt;code>MongoDB&lt;/code> 存储，点券存储在 &lt;code>MySQL&lt;/code>。&lt;/p>
 &lt;p>用户通过日常任务获取积分，点券则可以提现。&lt;/p>
