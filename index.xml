@@ -1,4 +1,252 @@
-<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>雾封的笔</title><link>https://niluan304.github.io/</link><description>Recent content on 雾封的笔</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>雾封</copyright><lastBuildDate>Sun, 16 Jun 2024 23:53:49 +0800</lastBuildDate><atom:link href="https://niluan304.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>折腾笔记：在小米路由器原生系统上部署自定义应用，实现远程开关机</title><link>https://niluan304.github.io/p/%E6%8A%98%E8%85%BE%E7%AC%94%E8%AE%B0%E5%9C%A8%E5%B0%8F%E7%B1%B3%E8%B7%AF%E7%94%B1%E5%99%A8%E5%8E%9F%E7%94%9F%E7%B3%BB%E7%BB%9F%E4%B8%8A%E9%83%A8%E7%BD%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E5%BA%94%E7%94%A8%E5%AE%9E%E7%8E%B0%E8%BF%9C%E7%A8%8B%E5%BC%80%E5%85%B3%E6%9C%BA/</link><pubDate>Sun, 16 Jun 2024 23:53:49 +0800</pubDate><guid>https://niluan304.github.io/p/%E6%8A%98%E8%85%BE%E7%AC%94%E8%AE%B0%E5%9C%A8%E5%B0%8F%E7%B1%B3%E8%B7%AF%E7%94%B1%E5%99%A8%E5%8E%9F%E7%94%9F%E7%B3%BB%E7%BB%9F%E4%B8%8A%E9%83%A8%E7%BD%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E5%BA%94%E7%94%A8%E5%AE%9E%E7%8E%B0%E8%BF%9C%E7%A8%8B%E5%BC%80%E5%85%B3%E6%9C%BA/</guid><description>&lt;h2 id="起因远程开关机的需求">起因：远程开关机的需求&lt;/h2>
+<?xml version="1.0" encoding="utf-8" standalone="yes"?><rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom"><channel><title>雾封的笔</title><link>https://niluan304.github.io/</link><description>Recent content on 雾封的笔</description><generator>Hugo -- gohugo.io</generator><language>zh-cn</language><copyright>雾封</copyright><lastBuildDate>Sun, 09 Mar 2025 13:23:15 +0800</lastBuildDate><atom:link href="https://niluan304.github.io/index.xml" rel="self" type="application/rss+xml"/><item><title>JSON 标准库的使用技巧</title><link>https://niluan304.github.io/p/json-%E6%A0%87%E5%87%86%E5%BA%93%E7%9A%84%E4%BD%BF%E7%94%A8%E6%8A%80%E5%B7%A7/</link><pubDate>Sun, 09 Mar 2025 13:23:15 +0800</pubDate><guid>https://niluan304.github.io/p/json-%E6%A0%87%E5%87%86%E5%BA%93%E7%9A%84%E4%BD%BF%E7%94%A8%E6%8A%80%E5%B7%A7/</guid><description>&lt;p>&lt;code>encoding/json/v2&lt;/code> 即将在 go1.25 作为实验特性推出，真的非常让人期待。笔者回顾日常开发中，对 v1(&lt;code>encoding/json&lt;/code>) 的使用，顺势总结了一些的技巧，而经过测试，这些技巧在 &lt;code>encoding/json/v2&lt;/code> 仍然是有效的，这同样让笔者非常开心。&lt;/p>
+&lt;blockquote>
+&lt;p>关于 v2 的相关介绍，可查看：&lt;a class="link" href="https://tonybai.com/2025/05/15/go-json-v2/" target="_blank" rel="noopener"
+>手把手带你玩转GOEXPERIMENT=jsonv2：Go下一代JSON库初探 | Tony Bai&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="基本的序列化和反序列化">基本的序列化和反序列化&lt;/h2>
+&lt;p>先简单回顾下 JSON 这种数据交换格式在 go 中的使用：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="line">&lt;span class="cl">&lt;span class="kd">type&lt;/span> &lt;span class="nx">User&lt;/span> &lt;span class="kd">struct&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">UserId&lt;/span> &lt;span class="kt">int64&lt;/span> &lt;span class="s">`json:&amp;#34;userId&amp;#34;`&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">Password&lt;/span> &lt;span class="kt">string&lt;/span> &lt;span class="s">`json:&amp;#34;password&amp;#34;`&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">Birthday&lt;/span> &lt;span class="nx">time&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Time&lt;/span> &lt;span class="s">`json:&amp;#34;birthday&amp;#34;`&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kd">func&lt;/span> &lt;span class="nf">main&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">user&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">User&lt;/span>&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">UserId&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="mi">20060102150405&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">Password&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s">&amp;#34;zwei&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">Birthday&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="nx">time&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Unix&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">1136214245&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">data&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">_&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">json&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Marshal&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">user&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">fmt&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Println&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">string&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">data&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// {&amp;#34;userId&amp;#34;:20060102150405,&amp;#34;password&amp;#34;:&amp;#34;zwei&amp;#34;,&amp;#34;birthday&amp;#34;:&amp;#34;2006-01-02T15:04:05Z&amp;#34;}
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>通过 &lt;code>tag&lt;/code> 为结构体字段编写元信息，这是 go 语言的语法，并在运行时通过反射解析。&lt;/p>
+&lt;h3 id="json-tag-的编写规则">&lt;code>json tag&lt;/code> 的编写规则&lt;/h3>
+&lt;p>标准库 &lt;code>encoding/json&lt;/code> 规定了 &lt;code>json tag&lt;/code> 的编写规则：&lt;/p>
+&lt;ol>
+&lt;li>如果值为 &lt;code>-&lt;/code> ，意味着跳过该字段的解析：&lt;code>json:&amp;quot;-&amp;quot;&lt;/code>。&lt;/li>
+&lt;li>公有的结构体字段才会被解析。未导出的字段，即便有 &lt;code>json tag&lt;/code>，也无法生效。&lt;/li>
+&lt;li>tag 的语法为：&lt;code>json:&amp;quot;${name},${opt1},${opt2}&amp;quot;&lt;/code>。&lt;/li>
+&lt;/ol>
+&lt;p>其中 &lt;code>${name}&lt;/code> 用于指定 JSON 的键名，如果为空，取结构体字段名。此外，标准库还提供了可选项，用于开发者控制 JSON 编解码的结果。&lt;/p>
+&lt;ul>
+&lt;li>以 &lt;code>,&lt;/code> 分割选项，可以没有选项，也可以有多个选项。目前的选项可选值为 &lt;code>string&lt;/code>, &lt;code>omitempty&lt;/code>, &lt;code>omitzero&lt;/code> 这 3 个。&lt;/li>
+&lt;li>选项 &lt;code>string&lt;/code>，表示该字段生成的 json键值的类型是字符串，这个选项只对 整型、浮点型、布尔型、字符型有效。&lt;/li>
+&lt;li>选项 &lt;code>omitempty&lt;/code> 表示如果该字段为空值，生成的 JSON 键值对将会被忽略。&lt;/li>
+&lt;li>选项 &lt;code>omitzero&lt;/code> 表示如果该字段为零值，生成的 JSON 键值对将会被忽略。&lt;/li>
+&lt;/ul>
+&lt;p>上述的规则，都能够从标准库的源码 &lt;a class="link" href="https://github.com/golang/go/blob/d184f8dc020ac635cea02c046ab1d0b87dfd624d/src/encoding/json/encode.go#L1114-L1175" target="_blank" rel="noopener"
+>/src/encoding/json/encode.go&lt;/a> 中找到对应的解析过程：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="line">&lt;span class="cl">&lt;span class="nx">sf&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">f&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">typ&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Field&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">i&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 跳过结构体未导出的字段
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">if&lt;/span> &lt;span class="p">!&lt;/span>&lt;span class="nx">sf&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">IsExported&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">continue&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">tag&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">sf&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Tag&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Get&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;json&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">if&lt;/span> &lt;span class="nx">tag&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="s">&amp;#34;-&amp;#34;&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">continue&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 解析 json tag 的值，获取字段名和拓展选项
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nx">name&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">opts&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nf">parseTag&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">tag&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 只有 strings, floats, integers, and booleans 才可以被 &amp;#34;&amp;#34; 包裹.
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="nx">quoted&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="kc">false&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="k">if&lt;/span> &lt;span class="nx">opts&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Contains&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;string&amp;#34;&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">switch&lt;/span> &lt;span class="nx">ft&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Kind&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">case&lt;/span> &lt;span class="nx">reflect&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Bool&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">reflect&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Int&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">reflect&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">String&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="o">...&lt;/span>&lt;span class="p">:&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">quoted&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="kc">true&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="o">...&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">// 如果 json tag 的值为空, 取结构体字段名
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="k">if&lt;/span> &lt;span class="nx">name&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="s">&amp;#34;&amp;#34;&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">name&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="nx">sf&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Name&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="nx">field&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">field&lt;/span>&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">name&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="nx">name&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">omitEmpty&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="nx">opts&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Contains&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;omitempty&amp;#34;&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">omitZero&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="nx">opts&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Contains&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">&amp;#34;omitzero&amp;#34;&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">quoted&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="nx">quoted&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>&lt;code>omitempty&lt;/code> 选项是 go1.1 版本就提供的功能，用于跳过空值的字段。但由于预定义的空值判断，无法满足所有实际场景的需求，因此在 go1.24 的时候，引入 &lt;code>omitzero&lt;/code> 选项。具体的可查阅：&lt;a class="link" href="https://tonybai.com/2024/09/12/solve-the-empty-value-dilemma-in-json-encoding-with-omitzero/" target="_blank" rel="noopener"
+>JSON包新提案：用“omitzero”解决编码中的空值困局 | Tony Bai&lt;/a>&lt;/p>
+&lt;blockquote>
+&lt;p>希望 JSON 标准库能够提供一个接口，用于指定 &lt;code>json tag&lt;/code> 为空时的键名规则，而不是默认使用结构体字段值，这样可以少写很多 &lt;code>json tag&lt;/code>。&lt;/p>
+&lt;/blockquote>
+&lt;h2 id="自定义-json-的编解码实现">自定义 JSON 的编解码实现&lt;/h2>
+&lt;p>JSON 标准库提供了 Marshaler 和 Unmarshaler 这两个接口定义：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="line">&lt;span class="cl">&lt;span class="kd">type&lt;/span> &lt;span class="nx">Marshaler&lt;/span> &lt;span class="kd">interface&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">MarshalJSON&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">([]&lt;/span>&lt;span class="kt">byte&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kt">error&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kd">type&lt;/span> &lt;span class="nx">Unmarshaler&lt;/span> &lt;span class="kd">interface&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nf">UnmarshalJSON&lt;/span>&lt;span class="p">([]&lt;/span>&lt;span class="kt">byte&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="kt">error&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果在序列化和反序列化的过程中，JSON 标准库检测到类型实现了上述接口，那么就会使用接口的方法进行编解码，这也为 JSON 的编解码提供更多的功能，下面笔者将会介绍相关的应用技巧。&lt;/p>
+&lt;p>使用的例子都以 &lt;code>User&lt;/code> 结构体为原型：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="line">&lt;span class="cl">&lt;span class="kd">type&lt;/span> &lt;span class="nx">User&lt;/span> &lt;span class="kd">struct&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">UserId&lt;/span> &lt;span class="kt">int64&lt;/span> &lt;span class="s">`json:&amp;#34;userId&amp;#34;`&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">Password&lt;/span> &lt;span class="kt">string&lt;/span> &lt;span class="s">`json:&amp;#34;password&amp;#34;`&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">Birthday&lt;/span> &lt;span class="nx">time&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Time&lt;/span> &lt;span class="s">`json:&amp;#34;birthday&amp;#34;`&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;h3 id="动态添加字段">动态添加字段&lt;/h3>
+&lt;p>如果我们希望得到的 JSON 对象还包含 &lt;code>&amp;quot;age&amp;quot;: ${age}&lt;/code> 这个键值对，&lt;code>age&lt;/code> 表示当前用户的年龄，应该根据当前时间 &lt;code>time.Now&lt;/code> 减去 &lt;code>User.Birthday&lt;/code> 得到。很明显，为 &lt;code>User&lt;/code> 结构体增加 &lt;code>Age&lt;/code> 字段会增加维护成本，这时候为 &lt;code>User&lt;/code> 结构体实现标准库定义的 &lt;code>json.Marshaler&lt;/code> 接口，就可以一劳永逸：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="line">&lt;span class="cl">&lt;span class="kd">func&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nx">u&lt;/span> &lt;span class="nx">User&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="nf">MarshalJSON&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">([]&lt;/span>&lt;span class="kt">byte&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kt">error&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kd">type&lt;/span> &lt;span class="nx">Format&lt;/span> &lt;span class="kd">struct&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">UserId&lt;/span> &lt;span class="kt">int64&lt;/span> &lt;span class="s">`json:&amp;#34;userId&amp;#34;`&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">Password&lt;/span> &lt;span class="kt">string&lt;/span> &lt;span class="s">`json:&amp;#34;password&amp;#34;`&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">Age&lt;/span> &lt;span class="kt">int&lt;/span> &lt;span class="s">`json:&amp;#34;age&amp;#34;`&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">age&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">time&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Now&lt;/span>&lt;span class="p">().&lt;/span>&lt;span class="nf">Year&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="o">-&lt;/span> &lt;span class="nx">u&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Birthday&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Year&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="nx">time&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Now&lt;/span>&lt;span class="p">().&lt;/span>&lt;span class="nf">YearDay&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">&amp;lt;&lt;/span> &lt;span class="nx">u&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Birthday&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">YearDay&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">age&lt;/span>&lt;span class="o">--&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="nx">json&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Marshal&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">Format&lt;/span>&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">UserId&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="nx">u&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">UserId&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">Password&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="nx">u&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Password&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">Age&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="nx">age&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">})&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kd">func&lt;/span> &lt;span class="nf">main&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">user&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">User&lt;/span>&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">UserId&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="mi">20060102150405&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">Password&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s">&amp;#34;zwei&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">Birthday&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="nx">time&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Unix&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">1136214245&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">data&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">_&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">json&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Marshal&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">user&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">fmt&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Println&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">string&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">data&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// {&amp;#34;userId&amp;#34;:20060102150405,&amp;#34;password&amp;#34;:&amp;#34;zwei&amp;#34;,&amp;#34;age&amp;#34;:19}
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>如果字段比较多，全部重写就比较麻烦了，这时候可以通过「类型定义」和「结构体内嵌」的方式来简化：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="line">&lt;span class="cl">&lt;span class="kd">func&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nx">u&lt;/span> &lt;span class="nx">User&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="nf">MarshalJSON&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">([]&lt;/span>&lt;span class="kt">byte&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kt">error&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kd">type&lt;/span> &lt;span class="nx">NewUser&lt;/span> &lt;span class="nx">User&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kd">type&lt;/span> &lt;span class="nx">Format&lt;/span> &lt;span class="kd">struct&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">NewUser&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">Age&lt;/span> &lt;span class="kt">int&lt;/span> &lt;span class="s">`json:&amp;#34;age&amp;#34;`&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">age&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">time&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Now&lt;/span>&lt;span class="p">().&lt;/span>&lt;span class="nf">Year&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="o">-&lt;/span> &lt;span class="nx">u&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Birthday&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Year&lt;/span>&lt;span class="p">()&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="nx">time&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Now&lt;/span>&lt;span class="p">().&lt;/span>&lt;span class="nf">YearDay&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">&amp;lt;&lt;/span> &lt;span class="nx">u&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Birthday&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">YearDay&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">age&lt;/span>&lt;span class="o">--&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="nx">json&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Marshal&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">Format&lt;/span>&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">NewUser&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="nf">NewUser&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">u&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">Age&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="nx">age&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">})&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>这里之所以使用类型定义：&lt;code>type NewUser User&lt;/code>，是因为 &lt;code>Format&lt;/code> 直接内嵌 &lt;code>User&lt;/code> 结构体的话，就会继承其 &lt;code>MarshalJSON&lt;/code> 的方法，那么就会陷入无限循环中，最后导致栈溢出。而使用类型定义，只会复用原始结构体字段，而不会继承其方法。&lt;/p>
+&lt;blockquote>
+&lt;p>go 官方文档里就很明确的提到了这一点：&lt;a class="link" href="https://go.dev/ref/spec#Type_definitions" target="_blank" rel="noopener"
+>Type_definitions&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="修改字段序列化格式">修改字段序列化格式&lt;/h3>
+&lt;p>&lt;code>User.Birthday&lt;/code> 的类型为 &lt;code>time.Time&lt;/code>，JSON 标准库只会序列化为 RFC3339 格式（&lt;code>time.RFC3339 = &amp;quot;2006-01-02T15:04:05Z07:00&amp;quot;&lt;/code>），如果需要序列化为时间戳或其他格式，在实现 &lt;code>json.Marshaler&lt;/code> 接口时，效仿 &lt;a class="link" href="#%e4%bf%ae%e6%94%b9-json-%e9%94%ae%e5%80%bc%e7%9a%84%e7%b1%bb%e5%9e%8b" >修改键值类型&lt;/a> 的操作，即可实现：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="line">&lt;span class="cl">&lt;span class="kd">func&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nx">u&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="nx">User&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="nf">MarshalJSON&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">([]&lt;/span>&lt;span class="kt">byte&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kt">error&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kd">type&lt;/span> &lt;span class="nx">NewUser&lt;/span> &lt;span class="nx">User&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kd">type&lt;/span> &lt;span class="nx">Format&lt;/span> &lt;span class="kd">struct&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="o">*&lt;/span>&lt;span class="nx">NewUser&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">Birthday&lt;/span> &lt;span class="kt">int64&lt;/span> &lt;span class="s">`json:&amp;#34;birthday&amp;#34;`&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="nx">json&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Marshal&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">Format&lt;/span>&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">NewUser&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="nx">NewUser&lt;/span>&lt;span class="p">)(&lt;/span>&lt;span class="nx">u&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">Birthday&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="nx">u&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Birthday&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Unix&lt;/span>&lt;span class="p">(),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">})&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>重新运行程序：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="line">&lt;span class="cl">&lt;span class="kd">func&lt;/span> &lt;span class="nf">main&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">user&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">User&lt;/span>&lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">UserId&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="mi">20060102150405&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">Password&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="s">&amp;#34;zwei&amp;#34;&lt;/span>&lt;span class="p">,&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">Birthday&lt;/span>&lt;span class="p">:&lt;/span> &lt;span class="nx">time&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Unix&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="mi">1136214245&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="mi">0&lt;/span>&lt;span class="p">),&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">data&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">_&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">json&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Marshal&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">&amp;amp;&lt;/span>&lt;span class="nx">user&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">fmt&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Println&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">string&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">data&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// {&amp;#34;userId&amp;#34;:20060102150405,&amp;#34;password&amp;#34;:&amp;#34;zwei&amp;#34;,&amp;#34;birthday&amp;#34;:1136214245}
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>可以看到 &lt;code>Format.Birthday&lt;/code> 成功覆盖了 &lt;code>Format.NewUser.Birthday&lt;/code>，这是因为外层的字段优先级更高。具体缘由，读者可以在标准库的源码中查看：&lt;a class="link" href="https://github.com/golang/go/blob/d184f8dc020ac635cea02c046ab1d0b87dfd624d/src/encoding/json/encode.go#L1259-L1284" target="_blank" rel="noopener"
+>encoding/json/encode.go&lt;/a>&lt;/p>
+&lt;blockquote>
+&lt;p>当前部分的接口实现和 &lt;a class="link" href="#%e4%bf%ae%e6%94%b9-json-%e9%94%ae%e5%80%bc%e7%9a%84%e7%b1%bb%e5%9e%8b" >修改键值类型&lt;/a> 的略有不同，笔者将值接收者 &lt;code>func (u User)&lt;/code> 改成了指针接收者 &lt;code>func (u *User)&lt;/code>，这也导致了 &lt;code>json.Marshal(user)&lt;/code> 需要写成 &lt;code>json.Marshal(&amp;amp;user)&lt;/code>。&lt;/p>
+&lt;p>用于体现了「值接收」和「指针接收」的区别，具体的可查看 go 团队的 FAQ ：&lt;a class="link" href="https://go.dev/doc/faq#different_method_sets" target="_blank" rel="noopener"
+>Why do T and *T have different method sets?&lt;/a>&lt;/p>
+&lt;/blockquote>
+&lt;h3 id="敏感字段处理">敏感字段处理&lt;/h3>
+&lt;p>在前面的例子中，实现了字段的新增和修改，这一部分则是介绍如何隐藏 JSON 的键值对。像密码 &lt;code>Password&lt;/code> 作为敏感数据，是不应该返回到前端的，但仍然需要反序列化，因此不能使用 &lt;code>json:&amp;quot;-&amp;quot;&lt;/code>，因为这个 tag 会直接跳过 &lt;code>Password&lt;/code> 的反序列化。那么就可以在实现接口时，将 &lt;code>Password&lt;/code> 的值置空：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="line">&lt;span class="cl">&lt;span class="kd">func&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nx">u&lt;/span> &lt;span class="nx">User&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="nf">MarshalJSON&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">([]&lt;/span>&lt;span class="kt">byte&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kt">error&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kd">type&lt;/span> &lt;span class="nx">NewUser&lt;/span> &lt;span class="nx">User&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">newUser&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nf">NewUser&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">u&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">newUser&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Password&lt;/span> &lt;span class="p">=&lt;/span> &lt;span class="s">&amp;#34;&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="nx">json&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Marshal&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">newUser&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>但也有不足之处，如果有多个结构体都含有 &lt;code>Password&lt;/code> 字段，那么修改起来就变得非常繁琐了。&lt;/p>
+&lt;p>那么在介绍解决办法之前，还请读者做个题，下面代码的运行结果为：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="line">&lt;span class="cl">&lt;span class="kd">func&lt;/span> &lt;span class="nf">main&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="kd">var&lt;/span> &lt;span class="nx">password&lt;/span> &lt;span class="o">*&lt;/span>&lt;span class="kt">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">err1&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">json&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Unmarshal&lt;/span>&lt;span class="p">([]&lt;/span>&lt;span class="nb">byte&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">`&amp;#34;zwei&amp;#34;`&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="o">&amp;amp;&lt;/span>&lt;span class="nx">password&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="nx">err1&lt;/span> &lt;span class="o">!=&lt;/span> &lt;span class="kc">nil&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">panic&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">err1&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">output&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">err2&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">json&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Marshal&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="o">*&lt;/span>&lt;span class="nx">password&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="nx">err2&lt;/span> &lt;span class="o">!=&lt;/span> &lt;span class="kc">nil&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nb">panic&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">err2&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">fmt&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">Println&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nb">string&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">output&lt;/span>&lt;span class="p">))&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="c1">// 上面代码在尝试对字符串进行 json.Unmarshal 和 json.Marshal
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="c1">// 看有几种可能：
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="c1">// A. err1 != nil &amp;amp;&amp;amp; panic(err1)
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="c1">// B. *password -&amp;gt; panic: nil pointer
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="c1">// C. err2 != nil &amp;amp;&amp;amp; panic(err2)
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span> &lt;span class="c1">// D. fmt.Println(string(output))
+&lt;/span>&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="c1">&lt;/span>&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>假设程序能够正常运行，这对置空 &lt;code>Password&lt;/code> 的实现会有什么帮助呢？&lt;/p>
+&lt;p>一个简单的想法，如果能为 &lt;code>Password&lt;/code> 实现 &lt;code>json.Marshaler&lt;/code> 接口，将序列化的值设置为空字符串，就不用担心 &lt;code>Password&lt;/code> 的泄露了。&lt;/p>
+&lt;p>而事实上，上述代码是能够正常运行的，因为字符串本就是 JSON 的数据类型，所以字符串也是可以被序列化和反序列化的。上面的代码在执行：&lt;code>json.Unmarshal&lt;/code> 后，&lt;code>password&lt;/code> 的值就是 &lt;code>zwei&lt;/code> 了。再执行 &lt;code>json.Marshal&lt;/code>，就会序列化为 &lt;code>&amp;quot;zwei&amp;quot;&lt;/code>，这也就是 &lt;code>output&lt;/code> 的值。&lt;/p>
+&lt;p>为了帮助 &lt;code>Password&lt;/code> 实现 &lt;code>json.Marshaler&lt;/code> 接口，需要先定义 &lt;code>type Password string&lt;/code>，因为 &lt;code>string&lt;/code> 作为内置类型，不支持为其编写方法。&lt;/p>
+&lt;p>具体实现也极其简单：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="line">&lt;span class="cl">&lt;span class="kd">type&lt;/span> &lt;span class="nx">Password&lt;/span> &lt;span class="kt">string&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kd">func&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nx">p&lt;/span> &lt;span class="nx">Password&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="nf">MarshalJSON&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">([]&lt;/span>&lt;span class="kt">byte&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kt">error&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="p">[]&lt;/span>&lt;span class="nb">byte&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="s">`&amp;#34;&amp;#34;`&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="kc">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>通过这样实现 &lt;code>Password&lt;/code> 的隐藏，也更贴近设计模式中的单一职责。为 &lt;code>Password&lt;/code> 拓展功能也会变得更加简单，比如实现标准库的 &lt;code>sql.Scanner&lt;/code> (&lt;a class="link" href="https://github.com/golang/go/blob/d184f8dc020ac635cea02c046ab1d0b87dfd624d/src/database/sql/sql.go#L446-L467" target="_blank" rel="noopener"
+>database/sql.go&lt;/a>) 接口 和 &lt;code>driver.Valuer&lt;/code> (&lt;a class="link" href="https://github.com/golang/go/blob/d184f8dc020ac635cea02c046ab1d0b87dfd624d/src/database/sql/driver/types.go#L35-L47" target="_blank" rel="noopener"
+>database/sql/types.go&lt;/a>) 接口，实现自动加密和解密。&lt;/p>
+&lt;p>笔者以 &lt;code>driver.Valuer&lt;/code> 为例：&lt;/p>
+&lt;div class="highlight">&lt;pre tabindex="0" class="chroma">&lt;code class="language-go" data-lang="go">&lt;span class="line">&lt;span class="cl">&lt;span class="kn">import&lt;/span> &lt;span class="s">&amp;#34;golang.org/x/crypto/bcrypt&amp;#34;&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="kd">func&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nx">p&lt;/span> &lt;span class="nx">Password&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="nf">Value&lt;/span>&lt;span class="p">()&lt;/span> &lt;span class="p">(&lt;/span>&lt;span class="nx">driver&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">Value&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kt">error&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="nb">len&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">p&lt;/span>&lt;span class="p">)&lt;/span> &lt;span class="o">==&lt;/span> &lt;span class="mi">0&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="kc">nil&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="kc">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="nx">hash&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">err&lt;/span> &lt;span class="o">:=&lt;/span> &lt;span class="nx">bcrypt&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nf">GenerateFromPassword&lt;/span>&lt;span class="p">([]&lt;/span>&lt;span class="nb">byte&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">p&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="nx">bcrypt&lt;/span>&lt;span class="p">.&lt;/span>&lt;span class="nx">DefaultCost&lt;/span>&lt;span class="p">)&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">if&lt;/span> &lt;span class="nx">err&lt;/span> &lt;span class="o">!=&lt;/span> &lt;span class="kc">nil&lt;/span> &lt;span class="p">{&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="kc">nil&lt;/span>&lt;span class="p">,&lt;/span> &lt;span class="nx">err&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl"> &lt;span class="k">return&lt;/span> &lt;span class="nb">string&lt;/span>&lt;span class="p">(&lt;/span>&lt;span class="nx">hash&lt;/span>&lt;span class="p">),&lt;/span> &lt;span class="kc">nil&lt;/span>
+&lt;/span>&lt;/span>&lt;span class="line">&lt;span class="cl">&lt;span class="p">}&lt;/span>
+&lt;/span>&lt;/span>&lt;/code>&lt;/pre>&lt;/div>&lt;p>当 &lt;code>Password&lt;/code> 不为空时，就能转化为数据库所需要的加密字符串。&lt;/p></description></item><item><title>折腾笔记：在小米路由器原生系统上部署自定义应用，实现远程开关机</title><link>https://niluan304.github.io/p/%E6%8A%98%E8%85%BE%E7%AC%94%E8%AE%B0%E5%9C%A8%E5%B0%8F%E7%B1%B3%E8%B7%AF%E7%94%B1%E5%99%A8%E5%8E%9F%E7%94%9F%E7%B3%BB%E7%BB%9F%E4%B8%8A%E9%83%A8%E7%BD%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E5%BA%94%E7%94%A8%E5%AE%9E%E7%8E%B0%E8%BF%9C%E7%A8%8B%E5%BC%80%E5%85%B3%E6%9C%BA/</link><pubDate>Sun, 16 Jun 2024 23:53:49 +0800</pubDate><guid>https://niluan304.github.io/p/%E6%8A%98%E8%85%BE%E7%AC%94%E8%AE%B0%E5%9C%A8%E5%B0%8F%E7%B1%B3%E8%B7%AF%E7%94%B1%E5%99%A8%E5%8E%9F%E7%94%9F%E7%B3%BB%E7%BB%9F%E4%B8%8A%E9%83%A8%E7%BD%B2%E8%87%AA%E5%AE%9A%E4%B9%89%E5%BA%94%E7%94%A8%E5%AE%9E%E7%8E%B0%E8%BF%9C%E7%A8%8B%E5%BC%80%E5%85%B3%E6%9C%BA/</guid><description>&lt;h2 id="起因远程开关机的需求">起因：远程开关机的需求&lt;/h2>
 &lt;p>笔者6月初组了台式，并将主机置于角落，按下物理的开关键变得很麻烦，因此有了远程开关机的需求。
 经过了解后，发现远程开关机有三种方式：&lt;/p>
 &lt;ul>
